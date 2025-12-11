@@ -2,8 +2,7 @@
 
 A combat threat assessment mod that enhances your situational awareness by displaying color-coded threat indicators on enemy nameplates. Know at a glance whether you can safely block, need to parry, or should avoid direct engagement.
 
-![Mod showcase - different threat levels](gallery/screenshots/foresight_header.png)
-*Screenshot placeholder: Show multiple enemies with different colored names (white, yellow, orange, red)*
+![Mod showcase - different threat levels](gallery/screenshots/foresight_header.jpg)
 
 ## Features
 
@@ -26,8 +25,7 @@ The mod displays threat levels through color-coded enemy names:
 | **Orange** | Block Lethal | Blocking will kill you, but parrying will save you |
 | **Red** | Danger | Even a perfect parry won't save you - avoid or prepare to dodge |
 
-![Threat level examples](screenshots/threat_examples.png)
-*Screenshot placeholder: Close-up of each threat level in action*
+![Threat level examples](gallery/screenshots/threat_examples.png)
 
 ### Intelligent Difficulty Scaling
 

@@ -145,7 +145,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         if (_enemyUpdateTimer >= 1f)
         {
             _enemyUpdateTimer = 0f;
-            UpdateNearestEnemyThreat();
+            UpdateNearbyEnemiesThreat();
         }
 
         CleanupThreatCache();
@@ -163,28 +163,31 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         Log.LogDebug($"Player HP: {player.GetHealth()}");
     }
 
-    private void UpdateNearestEnemyThreat()
+    private void UpdateNearbyEnemiesThreat()
     {
         var player = Player.m_localPlayer;
         if (player == null)
             return;
 
-        if (!TryFindNearestEnemy(player, out var nearestEnemy))
-        {
-            Log.LogDebug("No enemies nearby");
-            return;
-        }
+        var allCharacters = Character.GetAllCharacters();
+        var playerPos = player.transform.position;
+        const float updateRadiusSq = 100f * 100f;
 
-        var assessment = _threatService.CalculateThreat(
-            nearestEnemy,
-            player,
-            // _config.DetailedAttackMode.Value
-            false
-        );
-
-        if (assessment != null)
+        foreach (var character in allCharacters)
         {
-            _threatCache[nearestEnemy] = assessment;
+            if (!IsValidEnemy(character))
+                continue;
+
+            var distSq = (character.transform.position - playerPos).sqrMagnitude;
+            if (distSq > updateRadiusSq)
+                continue;
+
+            var assessment = _threatService.CalculateThreat(character, player, false);
+
+            if (assessment != null)
+            {
+                _threatCache[character] = assessment;
+            }
         }
     }
 
