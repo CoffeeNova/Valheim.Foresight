@@ -153,7 +153,6 @@ jobs:
           if-no-files-found: error
 
       - name: Publish to Thunderstore
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.publish_package == 'true'
         uses: GreenTF/upload-thunderstore-package@v4.3
         with:
           community: valheim
