@@ -1,0 +1,9 @@
+{
+  "name": "Valheim_Foresight",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/CoffeeNova/Valheim.Foresight",
+  "description": "Combat threat assessment mod that displays color-coded indicators on enemy nameplates to show blocking/parrying viability based on damage calculations and player stats.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2202"
+  ]
+}
