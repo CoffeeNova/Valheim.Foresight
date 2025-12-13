@@ -17,7 +17,6 @@ on:
         type: boolean
         default: false
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -66,7 +65,7 @@ jobs:
     - name: Update project version
       shell: pwsh
       run: |
-        $csprojPath = "Valheim.Foresight/src/Valheim.Foresight/Valheim.Foresight.csproj"
+        $csprojPath = "src/Valheim.Foresight/Valheim.Foresight.csproj"
         [xml]$csproj = Get-Content $csprojPath
         $propertyGroup = $csproj.Project.PropertyGroup | Where-Object { $_.Version }
         if ($propertyGroup) {
@@ -81,12 +80,12 @@ jobs:
     - name: Restore NuGet packages
       shell: pwsh
       run: |
-        nuget restore Valheim.Foresight/src/Valheim.Foresight/src/Valheim.Foresight.csproj -PackagesDirectory src/packages
+        nuget restore src/Valheim.Foresight/Valheim.Foresight.csproj -PackagesDirectory src/packages
 
     - name: Build Release
       shell: pwsh
       run: |
-        msbuild Valheim.Foresight/src/Valheim.Foresight/Valheim.Foresight.csproj `
+        msbuild src/Valheim.Foresight/Valheim.Foresight.csproj `
           /p:Configuration=Release `
           /p:Platform=AnyCPU `
           /p:GitVersion_MajorMinorPatch=$env:GitVersion_MajorMinorPatch `
@@ -97,8 +96,8 @@ jobs:
     - name: Run unit tests
       shell: pwsh
       run: |
-        if (Test-Path "src/tests/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj") {
-          dotnet test src/tests/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj --configuration Release --no-build
+        if (Test-Path "tests/Valheim.Foresight.Unit Tests/Valheim.Foresight.Unit Tests.csproj") {
+          dotnet test tests/Valheim.Foresight.Unit Tests/Valheim.Foresight.Unit Tests.csproj --configuration Release --no-build
         } else {
           Write-Host "No test project found, skipping tests"
         }
@@ -160,7 +159,6 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          src/bin/Release/Valheim.Foresight.dll
           valheim.foresight.zip
         body: |
           Release ${{ steps.gitversion.outputs.semVer }}
