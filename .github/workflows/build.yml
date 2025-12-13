@@ -179,7 +179,7 @@ jobs:
           merge-multiple: true
 
       - name: Publish to Thunderstore
-        uses: GreenTF/upload-thunderstore-package@v4.3
+        uses: GreenTF/upload-thunderstore-package@v4.1
         with:
           community: valheim
           namespace: CoffeeNova
@@ -189,6 +189,8 @@ jobs:
           token: ${{ secrets.THUNDERSTORE_TOKEN }}
           file: valheim.foresight.zip
           wrap: false
+          dev: true
+          repo: https://thunderstore.dev
           categories: |
             mods
             tweaks
