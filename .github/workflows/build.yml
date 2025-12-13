@@ -195,6 +195,5 @@ jobs:
           dev: true
           repo: https://thunderstore.dev
           categories: |
-            mods
-            tweaks
-            client-side
+            Mods
+            Tweaks
