@@ -170,7 +170,7 @@ jobs:
 
   publish-thunderstore:
     runs-on: ubuntu-latest
-    needs: build    
+    needs: build
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -188,6 +188,7 @@ jobs:
           version: ${{ needs.build.outputs.version }}
           token: ${{ secrets.THUNDERSTORE_TOKEN }}
           file: valheim.foresight.zip
+          wrap: false
           categories: |
             mods
             tweaks
