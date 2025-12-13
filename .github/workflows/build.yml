@@ -186,7 +186,7 @@ jobs:
           name: Valheim.Foresight
           description: Mod description from manifest.json
           version: ${{ needs.build.outputs.version }}
-          token: ${{ secrets.DEV_THUNDERSTORE_TOKEN }}
+          token: ${{ secrets.THUNDERSTORE_TOKEN }}
           file: valheim.foresight.zip
           wrap: false
           repo: https://thunderstore.io
