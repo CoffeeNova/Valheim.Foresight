@@ -2,10 +2,13 @@ name: Build and Package
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - ci/cd
     tags: [ 'v*' ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       publish_package:
