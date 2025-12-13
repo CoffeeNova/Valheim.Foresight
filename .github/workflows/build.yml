@@ -85,7 +85,7 @@ jobs:
     - name: Build Release
       shell: pwsh
       run: |
-        msbuild src/Valheim.Foresight/Valheim.Foresight.csproj `
+          mono /usr/lib/mono/msbuild/Current/bin/MSBuild.dll src/Valheim.Foresight/Valheim.Foresight.csproj `
           /p:Configuration=Release `
           /p:Platform=AnyCPU `
           /p:GitVersion_MajorMinorPatch=$env:GitVersion_MajorMinorPatch `
