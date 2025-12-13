@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
+using Valheim.Foresight.Autogen;
 using Valheim.Foresight.Configuration;
 using Valheim.Foresight.Core;
 using Valheim.Foresight.Models;
@@ -18,13 +20,13 @@ namespace Valheim.Foresight;
 /// <summary>
 /// Main plugin class for ValheimForesight threat assessment mod
 /// </summary>
-[BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+[BepInPlugin(
+    PluginInfoGenerated.PluginGuid,
+    PluginInfoGenerated.PluginName,
+    PluginInfoGenerated.PluginVersion
+)]
 public sealed class ValheimForesightPlugin : BaseUnityPlugin
 {
-    internal const string PluginName = "Valheim Foresight";
-    internal const string PluginVersion = "0.1.0";
-    private const string PluginGuid = "coffeenova.valheim.foresight";
-
     internal static ILogger Log = null!;
     private static ValheimForesightPlugin? _instance;
 
@@ -58,7 +60,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         ApplyHarmonyPatches();
         LogDifficultySettings();
 
-        Log.LogInfo($"{PluginName} {PluginVersion} loaded");
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded");
     }
 
     private void InitializeServices()
@@ -110,7 +112,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private void ApplyHarmonyPatches()
     {
-        var harmony = new Harmony(PluginGuid);
+        var harmony = new Harmony(PluginInfoGenerated.PluginGuid);
         harmony.PatchAll();
 
         var target = AccessTools.Method(typeof(EnemyHud), "LateUpdate");
