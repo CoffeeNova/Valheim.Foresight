@@ -144,11 +144,6 @@ A: It displays information you could calculate manually. Think of it as a combat
 
 ## Changelog
 
-### v0.1.0 (Initial Release)
-- Four-tier threat assessment system
-- Color-coded enemy nameplates
-- Block vs. Parry damage calculation
-- World difficulty scaling support
-- Configurable logging and debug modes
+[CHANGELOG.md](gallery/thunderstore/CHANGELOG.md)
 
 ---
