@@ -4,8 +4,8 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/unit/">
-    <Project Path="unit/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj" />
   </Folder>
   <Project Path="Valheim.Foresight/Valheim.Foresight.csproj" />
 </Solution>

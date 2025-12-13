@@ -21,6 +21,10 @@
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <ValheimForesightPublishPath>$(VALHEIM_FORESIGHT_PUBLISH_PATH)</ValheimForesightPublishPath>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -359,46 +363,64 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\ILogger.cs" />
-    <Compile Include="Core\ForesightLogger.cs" />
-    <Compile Include="Configuration\ForesightConfiguration.cs" />
-    <Compile Include="Models\DamageInfo.cs" />
-    <Compile Include="Models\PlayerDefenseStats.cs" />
-    <Compile Include="Models\ThreatAssessment.cs" />
-    <Compile Include="Models\ThreatLevel.cs" />
-    <Compile Include="Services\Damage\IDamageEstimator.cs" />
-    <Compile Include="Services\Damage\DamageEstimatorBase.cs" />
-    <Compile Include="Services\Damage\BlockDamageEstimator.cs" />
-    <Compile Include="Services\Damage\ParryDamageEstimator.cs" />
-    <Compile Include="Services\Combat\Interfaces\ICreatureAttackInspector.cs" />
-    <Compile Include="Services\Combat\Interfaces\IDifficultyMultiplierCalculator.cs" />
-    <Compile Include="Services\Combat\Interfaces\IThreatCalculationService.cs" />
-    <Compile Include="Services\Combat\Interfaces\IMathfWrapper.cs" />
-    <Compile Include="Services\Combat\Interfaces\IPlayerWrapper.cs" />
-    <Compile Include="Services\Combat\Interfaces\IVector3Wrapper.cs" />
-    <Compile Include="Services\Combat\Interfaces\IZNetSceneWrapper.cs" />
-    <Compile Include="Services\Combat\Interfaces\IZoneSystemWrapper.cs" />
-    <Compile Include="Services\Combat\Wrappers\MathfWrapper.cs" />
-    <Compile Include="Services\Combat\Wrappers\PlayerWrapper.cs" />
-    <Compile Include="Services\Combat\Wrappers\Vector3Wrapper.cs" />
-    <Compile Include="Services\Combat\Wrappers\ZNetSceneWrapper.cs" />
-    <Compile Include="Services\Combat\Wrappers\ZoneSystemWrapper.cs" />
-    <Compile Include="Services\Combat\CreatureAttackInspector.cs" />
-    <Compile Include="Services\Combat\DifficultyMultiplierCalculator.cs" />
-    <Compile Include="Services\Combat\ThreatCalculationService.cs" />
-    <Compile Include="Patches\EnemyHudPatch.cs" />
-    <Compile Include="HarmonyRefs\AttackFieldRefs.cs" />
-    <Compile Include="HarmonyRefs\EnemyHudFieldRefs.cs" />
-    <Compile Include="HarmonyRefs\HumanoidFieldRefs.cs" />
-    <Compile Include="HarmonyRefs\HumanoidMethodRefs.cs" />
-    <Compile Include="HarmonyRefs\PlayerMethodRefs.cs" />
-    <Compile Include="ValheimForesightPlugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="**\*.cs" Exclude="obj\**;bin\**;Autogen\**" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <PluginVersionValue Condition="'$(GitVersion_MajorMinorPatch)' != ''"
+        >$(GitVersion_MajorMinorPatch)</PluginVersionValue
+      >
+      <PluginVersionValue Condition="'$(GitVersion_MajorMinorPatch)' == ''"
+        >$(Version)</PluginVersionValue
+      >
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <GeneratedPluginInfoPath>$(MSBuildProjectDirectory)\Autogen\PluginInfoGenerated.cs</GeneratedPluginInfoPath>
+      <PluginInfoContent>
+// This file is a placeholder for local development
+// It will be auto-generated during build with the correct version from GitVersion
+// DO NOT commit the generated version to git
+
+namespace Valheim.Foresight.Autogen%3B
+
+internal static class PluginInfoGenerated
+{
+    internal const string PluginVersion = "$(PluginVersionValue)"%3B
+    internal const string PluginName = "Valheim Foresight"%3B
+    internal const string PluginGuid = "coffeenova.valheim.foresight"%3B
+}
+      </PluginInfoContent>
+    </PropertyGroup>
+    <MakeDir
+      Directories="$(MSBuildProjectDirectory)\Autogen"
+      Condition="!Exists('$(MSBuildProjectDirectory)\Autogen')"
+    />
+    <WriteLinesToFile
+      File="$(GeneratedPluginInfoPath)"
+      Lines="$(PluginInfoContent)"
+      Overwrite="true"
+      Encoding="UTF-8"
+    />
+    <ItemGroup>
+      <Compile Include="$(GeneratedPluginInfoPath)" />
+    </ItemGroup>
+    <Message
+      Importance="high"
+      Text="Generated PluginInfoGenerated.cs with version: $(PluginVersionValue)"
+    />
+  </Target>
+  <Target Name="CleanGeneratedPluginInfo" AfterTargets="Clean">
+    <Delete
+      Files="$(MSBuildProjectDirectory)\Autogen\PluginInfoGenerated.cs"
+      Condition="Exists('$(MSBuildProjectDirectory)\Autogen\PluginInfoGenerated.cs')"
+    />
+    <Message Importance="high" Text="Cleaned generated PluginInfoGenerated.cs" />
+  </Target>
   <Target Name="ShowPublishPath" BeforeTargets="Build">
     <Message
       Text="ValheimForesightPublishPath = $(ValheimForesightPublishPath)"

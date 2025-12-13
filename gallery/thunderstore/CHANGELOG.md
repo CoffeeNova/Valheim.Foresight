@@ -18,4 +18,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance optimization**: Threat calculation caching and automatic cleanup system
 
 
-[1.0.0]: https://github.com/yourusername/Valheim.Foresight/releases/tag/v0.1.0
+[1.0.0]: https://github.com/CoffeeNova/Valheim.Foresight/releases/tag/v1.0.0
