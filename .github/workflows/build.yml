@@ -66,7 +66,7 @@ jobs:
     - name: Update project version
       shell: pwsh
       run: |
-        $csprojPath = "src/Valheim.Foresight.csproj"
+        $csprojPath = "Valheim.Foresight/src/Valheim.Foresight/Valheim.Foresight.csproj"
         [xml]$csproj = Get-Content $csprojPath
         $propertyGroup = $csproj.Project.PropertyGroup | Where-Object { $_.Version }
         if ($propertyGroup) {
@@ -81,12 +81,12 @@ jobs:
     - name: Restore NuGet packages
       shell: pwsh
       run: |
-        nuget restore src/Valheim.Foresight.csproj -PackagesDirectory src/packages
+        nuget restore Valheim.Foresight/src/Valheim.Foresight/src/Valheim.Foresight.csproj -PackagesDirectory src/packages
 
     - name: Build Release
       shell: pwsh
       run: |
-        msbuild src/Valheim.Foresight.csproj `
+        msbuild Valheim.Foresight/src/Valheim.Foresight/Valheim.Foresight.csproj `
           /p:Configuration=Release `
           /p:Platform=AnyCPU `
           /p:GitVersion_MajorMinorPatch=$env:GitVersion_MajorMinorPatch `
@@ -97,8 +97,8 @@ jobs:
     - name: Run unit tests
       shell: pwsh
       run: |
-        if (Test-Path "src/Valheim.Foresight.Tests/Valheim.Foresight.Tests.csproj") {
-          dotnet test src/Valheim.Foresight.Tests/Valheim.Foresight.Tests.csproj --configuration Release --no-build
+        if (Test-Path "src/tests/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj") {
+          dotnet test src/tests/Valheim.Foresight.UnitTests/Valheim.Foresight.UnitTests.csproj --configuration Release --no-build
         } else {
           Write-Host "No test project found, skipping tests"
         }
@@ -120,7 +120,7 @@ jobs:
       shell: pwsh
       run: |
         $thunderstoreDir = "gallery/thunderstore"
-        $releaseDir = "src/bin/Release"
+        $releaseDir = "src/Valheim.Foresight/bin/Release"
 
         if (Test-Path "$releaseDir/Valheim.Foresight.dll") {
           $pluginsDir = "$thunderstoreDir/BepInEx/plugins"
