@@ -38,7 +38,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y mono-complete
-        sudo apt-get install -y nuget
+    
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: 'latest'
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v3.1.11
