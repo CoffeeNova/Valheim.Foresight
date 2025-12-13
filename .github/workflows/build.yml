@@ -177,9 +177,6 @@ jobs:
         with:
           pattern: thunderstore-package-*
           merge-multiple: true
-      
-      - name: List files (debug)
-        run: ls -la
 
       - name: Publish to Thunderstore
         uses: GreenTF/upload-thunderstore-package@v4.1
@@ -192,7 +189,6 @@ jobs:
           token: ${{ secrets.DEV_THUNDERSTORE_TOKEN }}
           file: valheim.foresight.zip
           wrap: false
-          dev: true
           repo: https://thunderstore.io
           categories: |
             Mods
