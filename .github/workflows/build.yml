@@ -177,6 +177,9 @@ jobs:
         with:
           pattern: thunderstore-package-*
           merge-multiple: true
+      
+      - name: List files (debug)
+        run: ls -la
 
       - name: Publish to Thunderstore
         uses: GreenTF/upload-thunderstore-package@v4.1
@@ -186,7 +189,7 @@ jobs:
           name: Valheim.Foresight
           description: Mod description from manifest.json
           version: ${{ needs.build.outputs.version }}
-          token: ${{ secrets.THUNDERSTORE_TOKEN }}
+          token: ${{ secrets.DEV_THUNDERSTORE_TOKEN }}
           file: valheim.foresight.zip
           wrap: false
           dev: true
