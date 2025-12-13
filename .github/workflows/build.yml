@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout
@@ -31,13 +31,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
-
-    - name: Install Mono
-      shell: pwsh
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y mono-complete
     
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
     - name: Setup NuGet
       uses: nuget/setup-nuget@v2
       with:
@@ -85,7 +82,7 @@ jobs:
     - name: Build Release
       shell: pwsh
       run: |
-          mono /usr/lib/mono/msbuild/Current/bin/MSBuild.dll src/Valheim.Foresight/Valheim.Foresight.csproj `
+          msbuild src/Valheim.Foresight/Valheim.Foresight.csproj `
           /p:Configuration=Release `
           /p:Platform=AnyCPU `
           /p:GitVersion_MajorMinorPatch=$env:GitVersion_MajorMinorPatch `
