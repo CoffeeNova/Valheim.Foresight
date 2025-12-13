@@ -193,7 +193,7 @@ jobs:
           file: valheim.foresight.zip
           wrap: false
           dev: true
-          repo: https://thunderstore.dev
+          repo: https://thunderstore.io
           categories: |
             Mods
             Tweaks
