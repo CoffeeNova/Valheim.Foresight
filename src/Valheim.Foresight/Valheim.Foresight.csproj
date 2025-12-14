@@ -111,7 +111,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.AI.Navigation, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.24\lib\net46\Unity.AI.Navigation.dll</HintPath>

@@ -73,10 +73,10 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         var asm = typeof(ValheimForesightPlugin).Assembly;
         foreach (var n in asm.GetManifestResourceNames())
-            Log.LogInfo($"[Foresight] Embedded: {n}");
+            Log.LogInfo($"Embedded: {n}");
 
         Log.LogInfo(
-            $"[Foresight] {PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded"
+            $"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded"
         );
     }
 
@@ -145,16 +145,16 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         if (target == null)
         {
-            Log.LogError("[Foresight] Failed to find EnemyHud.LateUpdate");
+            Log.LogError("Failed to find EnemyHud.LateUpdate");
         }
         else if (postfix == null)
         {
-            Log.LogError("[Foresight] Failed to find EnemyHudPatch.LateUpdatePostfix");
+            Log.LogError("Failed to find EnemyHudPatch.LateUpdatePostfix");
         }
         else
         {
             harmony.Patch(target, postfix: new HarmonyMethod(postfix));
-            Log.LogInfo("[Foresight] Patched EnemyHud.LateUpdate");
+            Log.LogInfo("Patched EnemyHud.LateUpdate");
         }
     }
 
@@ -287,12 +287,12 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     {
         if (ZoneSystem.instance == null)
         {
-            Log.LogDebug($"[Foresight][{nameof(LogDifficultySettings)}]ZoneSystem not ready yet");
+            Log.LogDebug($"[{nameof(LogDifficultySettings)}]ZoneSystem not ready yet");
             return;
         }
 
         var allKeys = _difficultyCalculator.GetAllGlobalKeys();
-        Log.LogInfo($"[Foresight] Global Keys count: {allKeys.Count}");
+        Log.LogInfo($"Global Keys count: {allKeys.Count}");
 
         foreach (var key in allKeys)
         {
@@ -310,7 +310,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         var enemyHp = _difficultyCalculator.GetEnemyHealthFactor();
 
         Log.LogInfo(
-            $"[Foresight] Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHp:F2}x"
+            $"Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHp:F2}x"
         );
     }
 

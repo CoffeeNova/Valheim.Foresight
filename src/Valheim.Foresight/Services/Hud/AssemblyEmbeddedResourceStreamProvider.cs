@@ -47,7 +47,7 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
         using var s = _resources.Open(resourceName);
         if (s == null)
         {
-            _log.LogWarning($"[Foresight] Embedded sprite not found: {resourceName}");
+            _log.LogWarning($"Embedded sprite not found: {resourceName}");
             return null;
         }
 
@@ -64,7 +64,7 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
         
         if (!success)
         {
-            _log.LogWarning($"[Foresight] PNG decode failed: {resourceName}");
+            _log.LogWarning($"PNG decode failed: {resourceName}");
             return null;
         }
 

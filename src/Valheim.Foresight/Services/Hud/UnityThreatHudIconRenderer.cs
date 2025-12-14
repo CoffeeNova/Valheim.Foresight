@@ -28,7 +28,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
 
         var enemyName = hud.m_name.text;
         ValheimForesightPlugin.Log?.LogDebug(
-            $"[Foresight][{nameof(RenderIcon)}]: enemy='{enemyName}', hint={hint}"
+            $"[{nameof(RenderIcon)}]: enemy='{enemyName}', hint={hint}"
         );
 
         var iconObject = GetOrCreateIconObject(hud.m_name.transform);
@@ -37,7 +37,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         var sprite = _spriteProvider.GetIcon(hint);
         var shouldShow = hint is not ThreatResponseHint.None && sprite is not null;
         ValheimForesightPlugin.Log?.LogDebug(
-            $"[Foresight][{nameof(RenderIcon)}]: enemy='{enemyName}', "
+            $"[{nameof(RenderIcon)}]: enemy='{enemyName}', "
                 + $"hint={hint}, spriteNull={sprite is null}, shouldShow={shouldShow}"
         );
 
@@ -47,7 +47,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
             if (hint is not ThreatResponseHint.None && sprite is null)
             {
                 ValheimForesightPlugin.Log?.LogWarning(
-                    $"[Foresight] Sprite is null for hint={hint}, hiding icon. "
+                    $"Sprite is null for hint={hint}, hiding icon. "
                         + $"Check ThreatIconSpriteProvider paths."
                 );
             }
@@ -66,7 +66,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
             return existing.gameObject;
 
         ValheimForesightPlugin.Log?.LogDebug(
-            $"[Foresight][{nameof(GetOrCreateIconObject)}] Creating new icon object '{IconObjectName}' "
+            $"[{nameof(GetOrCreateIconObject)}] Creating new icon object '{IconObjectName}' "
                 + $"under parent '{parent.name}'."
         );
 

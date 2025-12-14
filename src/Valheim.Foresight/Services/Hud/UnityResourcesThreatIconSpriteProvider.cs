@@ -32,7 +32,7 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
         _cache[ThreatResponseHint.None] = null;
 
         _logger.LogDebug(
-            $"[Foresight][{nameof(Preload)}] Preload completed. "
+            $"[{nameof(Preload)}] Preload completed. "
                 + $"Block={_cache[ThreatResponseHint.Block] is not null}, "
                 + $"Parry={_cache[ThreatResponseHint.Parry] is not null}, "
                 + $"Dodge={_cache[ThreatResponseHint.Dodge] is not null}"
@@ -43,7 +43,7 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
     {
         var sprite = _resources.LoadSprite(path);
         if (sprite == null)
-            _logger.LogWarning($"[Foresight] Failed to load threat icon sprite at '{path}'.");
+            _logger.LogWarning($"Failed to load threat icon sprite at '{path}'.");
         return sprite;
     }
 
@@ -51,12 +51,12 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
     {
         if (!_cache.TryGetValue(hint, out var sprite))
         {
-            _logger.LogWarning($"[Foresight] No cached sprite entry for hint={hint}.");
+            _logger.LogWarning($"No cached sprite entry for hint={hint}.");
             return null;
         }
 
         _logger.LogDebug(
-            $"[Foresight][{nameof(GetIcon)}] {nameof(GetIcon)}(hint={hint}) -> spriteNull={sprite is null}"
+            $"[{nameof(GetIcon)}] {nameof(GetIcon)}(hint={hint}) -> spriteNull={sprite is null}"
         );
         return sprite;
     }
