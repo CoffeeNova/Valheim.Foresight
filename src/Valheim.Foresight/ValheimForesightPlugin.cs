@@ -13,6 +13,9 @@ using Valheim.Foresight.Services.Combat;
 using Valheim.Foresight.Services.Combat.Interfaces;
 using Valheim.Foresight.Services.Combat.Wrappers;
 using Valheim.Foresight.Services.Damage;
+using Valheim.Foresight.Services.Hud;
+using Valheim.Foresight.Services.Hud.Interfaces;
+using Valheim.Foresight.Services.Hud.Wrappers;
 using ILogger = Valheim.Foresight.Core.ILogger;
 
 namespace Valheim.Foresight;
@@ -28,6 +31,14 @@ namespace Valheim.Foresight;
 public sealed class ValheimForesightPlugin : BaseUnityPlugin
 {
     internal static ILogger Log = null!;
+    public static bool InstanceDebugHudEnabled => _instance?._config.DebugHudEnabled.Value ?? false;
+
+    internal static IThreatResponseHintService ThreatResponseHintService =>
+        _instance?._threatResponseHintService
+        ?? throw new InvalidOperationException("ThreatResponseHintService not initialized.");
+
+    internal static IThreatHudIconRenderer? HudIconRenderer => _instance?._hudIconRenderer;
+
     private static ValheimForesightPlugin? _instance;
 
     private readonly Dictionary<Character?, ThreatAssessment?> _threatCache = new();
@@ -35,11 +46,11 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     private ForesightConfiguration _config = null!;
     private IThreatCalculationService _threatService = null!;
     private IDifficultyMultiplierCalculator _difficultyCalculator = null!;
+    private IThreatResponseHintService _threatResponseHintService = null!;
+    private IThreatHudIconRenderer? _hudIconRenderer;
 
     private float _playerLogTimer;
     private float _enemyUpdateTimer;
-
-    public static bool InstanceDebugHudEnabled => _instance?._config.DebugHudEnabled.Value ?? false;
 
     public static bool TryGetThreatAssessment(
         Character? character,
@@ -60,7 +71,13 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         ApplyHarmonyPatches();
         LogDifficultySettings();
 
-        Log.LogInfo($"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded");
+        var asm = typeof(ValheimForesightPlugin).Assembly;
+        foreach (var n in asm.GetManifestResourceNames())
+            Log.LogInfo($"[Foresight] Embedded: {n}");
+
+        Log.LogInfo(
+            $"[Foresight] {PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded"
+        );
     }
 
     private void InitializeServices()
@@ -108,6 +125,14 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
             vector3Wrapper,
             mathfWrapper
         );
+
+        _threatResponseHintService = new ThreatResponseHintService();
+        //var resourcesWrapper = new ResourcesWrapper();
+        // var spriteProvider = new UnityResourcesThreatIconSpriteProvider (resourcesWrapper, Log);
+        var asm = typeof(ValheimForesightPlugin).Assembly;
+        var embedded = new AssemblyEmbeddedResourceStreamProvider(asm);
+        IThreatIconSpriteProvider spriteProvider = new EmbeddedPngSpriteProvider(embedded, Log);
+        _hudIconRenderer = new UnityThreatHudIconRenderer(spriteProvider);
     }
 
     private void ApplyHarmonyPatches()
@@ -120,16 +145,16 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         if (target == null)
         {
-            Log.LogError("Failed to find EnemyHud.LateUpdate");
+            Log.LogError("[Foresight] Failed to find EnemyHud.LateUpdate");
         }
         else if (postfix == null)
         {
-            Log.LogError("Failed to find EnemyHudPatch.LateUpdatePostfix");
+            Log.LogError("[Foresight] Failed to find EnemyHudPatch.LateUpdatePostfix");
         }
         else
         {
             harmony.Patch(target, postfix: new HarmonyMethod(postfix));
-            Log.LogInfo("Patched EnemyHud.LateUpdate");
+            Log.LogInfo("[Foresight] Patched EnemyHud.LateUpdate");
         }
     }
 
@@ -262,12 +287,12 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     {
         if (ZoneSystem.instance == null)
         {
-            Log.LogDebug("ZoneSystem not ready yet");
+            Log.LogDebug($"[Foresight][{nameof(LogDifficultySettings)}]ZoneSystem not ready yet");
             return;
         }
 
         var allKeys = _difficultyCalculator.GetAllGlobalKeys();
-        Log.LogInfo($"Global Keys count: {allKeys.Count}");
+        Log.LogInfo($"[Foresight] Global Keys count: {allKeys.Count}");
 
         foreach (var key in allKeys)
         {
@@ -282,9 +307,11 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         }
 
         var enemyDmg = _difficultyCalculator.GetIncomingDamageFactor();
-        var enemyHP = _difficultyCalculator.GetEnemyHealthFactor();
+        var enemyHp = _difficultyCalculator.GetEnemyHealthFactor();
 
-        Log.LogInfo($"Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHP:F2}x");
+        Log.LogInfo(
+            $"[Foresight] Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHp:F2}x"
+        );
     }
 
     private void OnConfigurationChanged(object? sender, EventArgs e)

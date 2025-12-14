@@ -51,6 +51,19 @@ public static class EnemyHudPatch
     {
         ColorizeByThreatLevel(hud, assessment.Level);
 
+        ThreatResponseHint hint;
+        try
+        {
+            hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
+        }
+        catch
+        {
+            hint = ThreatResponseHint.None;
+        }
+
+        var renderer = ValheimForesightPlugin.HudIconRenderer;
+        renderer?.RenderIcon(hud, hint);
+
         if (ValheimForesightPlugin.InstanceDebugHudEnabled)
         {
             AppendDebugInfo(hud, assessment);

@@ -18,7 +18,7 @@
     <AssemblyName>Valheim.Foresight</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <LangVersion>default</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ValheimForesightPublishPath>$(VALHEIM_FORESIGHT_PUBLISH_PATH)</ValheimForesightPublishPath>
     <Version>0.1.0</Version>
@@ -111,6 +111,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.AI.Navigation, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.24\lib\net46\Unity.AI.Navigation.dll</HintPath>
@@ -367,6 +368,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Icons\block_icon.png" />
+    <Content Include="Assets\Icons\parry_icon.png" />
+    <Content Include="Assets\Icons\roll_icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
