@@ -73,11 +73,9 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         var asm = typeof(ValheimForesightPlugin).Assembly;
         foreach (var n in asm.GetManifestResourceNames())
-            Log.LogInfo($"Embedded: {n}");
+            Log.LogDebug($"Embedded: {n}");
 
-        Log.LogInfo(
-            $"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded"
-        );
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded");
     }
 
     private void InitializeServices()
@@ -309,9 +307,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         var enemyDmg = _difficultyCalculator.GetIncomingDamageFactor();
         var enemyHp = _difficultyCalculator.GetEnemyHealthFactor();
 
-        Log.LogInfo(
-            $"Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHp:F2}x"
-        );
+        Log.LogInfo($"Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHp:F2}x");
     }
 
     private void OnConfigurationChanged(object? sender, EventArgs e)

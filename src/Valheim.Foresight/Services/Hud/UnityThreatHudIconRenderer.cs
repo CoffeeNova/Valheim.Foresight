@@ -12,7 +12,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
 {
     private const string IconObjectName = "Foresight_ThreatIcon";
     private const float IconOffsetX = 40f; // todo: -> config
-    private const float IconSize = 16f; // todo: -> config
+    private const float IconSize = 72f; // todo: -> config
 
     private readonly IThreatIconSpriteProvider _spriteProvider;
 

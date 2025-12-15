@@ -12,10 +12,9 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
     private readonly ILogger _logger;
     private readonly Dictionary<ThreatResponseHint, Sprite?> _cache = new();
 
-    // todo: adjust to actual Resources / AssetBundle paths.
-    private const string BlockIconPath = "Assets/Icons/block_icon.png";
-    private const string ParryIconPath = "Assets/Icons/parry_icon.png";
-    private const string DodgeIconPath = "Assets/Icons/roll_icon.png";
+    private const string BlockResource = "Valheim.Foresight.Assets.Icons.block_icon.png";
+    private const string ParryResource = "Valheim.Foresight.Assets.Icons.parry_icon.png";
+    private const string DodgeResource = "Valheim.Foresight.Assets.Icons.roll_icon.png";
 
     public UnityResourcesThreatIconSpriteProvider(IResourcesWrapper resources, ILogger logger)
     {
@@ -26,9 +25,9 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
 
     private void Preload()
     {
-        _cache[ThreatResponseHint.Block] = LoadSprite(BlockIconPath);
-        _cache[ThreatResponseHint.Parry] = LoadSprite(ParryIconPath);
-        _cache[ThreatResponseHint.Dodge] = LoadSprite(DodgeIconPath);
+        _cache[ThreatResponseHint.Block] = LoadSprite(BlockResource);
+        _cache[ThreatResponseHint.Parry] = LoadSprite(ParryResource);
+        _cache[ThreatResponseHint.Dodge] = LoadSprite(DodgeResource);
         _cache[ThreatResponseHint.None] = null;
 
         _logger.LogDebug(

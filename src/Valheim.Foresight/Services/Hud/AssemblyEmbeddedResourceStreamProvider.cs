@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Valheim.Foresight.Models;
@@ -25,9 +27,9 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
     private readonly ILogger _log;
     private readonly Dictionary<ThreatResponseHint, Sprite?> _cache = new();
 
-    private const string BlockRes = "Valheim.Foresight.Assets.Icons.block.png";
-    private const string ParryRes = "Valheim.Foresight.Assets.Icons.parry.png";
-    private const string DodgeRes = "Valheim.Foresight.Assets.Icons.dodge.png";
+    private const string BlockRes = "Valheim.Foresight.Assets.Icons.block_icon.png";
+    private const string ParryRes = "Valheim.Foresight.Assets.Icons.parry_icon.png";
+    private const string DodgeRes = "Valheim.Foresight.Assets.Icons.roll_icon.png";
 
     public EmbeddedPngSpriteProvider(IEmbeddedResourceStreamProvider resources, ILogger log)
     {
@@ -42,29 +44,37 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
     public Sprite? GetIcon(ThreatResponseHint hint) =>
         _cache.TryGetValue(hint, out var s) ? s : null;
 
+    private static Type? FindType(string fullName)
+    {
+        foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            var t = a.GetType(fullName, throwOnError: false);
+            if (t != null)
+                return t;
+        }
+        return null;
+    }
+
     private Sprite? Load(string resourceName)
     {
-        using var s = _resources.Open(resourceName);
-        if (s == null)
+        using var stream = _resources.Open(resourceName);
+        if (stream == null)
         {
             _log.LogWarning($"Embedded sprite not found: {resourceName}");
             return null;
         }
 
-        using var ms = new MemoryStream();
-        s.CopyTo(ms);
-        var bytes = ms.ToArray();
+        byte[] data;
+        using (var ms = new MemoryStream())
+        {
+            stream.CopyTo(ms);
+            data = ms.ToArray();
+        }
 
         var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-        // Use reflection to avoid Span<T> compilation issues with Unity's ImageConversion
-        var imageConvType = typeof(Texture2D).Assembly.GetType("UnityEngine.ImageConversion");
-        var loadImageMethod = imageConvType?.GetMethod("LoadImage", 
-            new[] { typeof(Texture2D), typeof(byte[]), typeof(bool) });
-        var success = (bool)(loadImageMethod?.Invoke(null, new object[] { tex, bytes, false }) ?? false);
-        
-        if (!success)
+        if (!tex.LoadImage(data))
         {
-            _log.LogWarning($"PNG decode failed: {resourceName}");
+            _log.LogWarning($"Failed to decode PNG from embedded resource: {resourceName}");
             return null;
         }
 
