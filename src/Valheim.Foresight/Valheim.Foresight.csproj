@@ -5,6 +5,10 @@
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
 >
   <Import
+    Project="..\packages\JotunnLib.2.27.0\build\JotunnLib.props"
+    Condition="Exists('..\packages\JotunnLib.2.27.0\build\JotunnLib.props')"
+  />
+  <Import
     Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
     Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"
   />
@@ -87,6 +91,10 @@
     <Reference Include="gui_framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.24\lib\net46\gui_framework.dll</HintPath>
     </Reference>
+    <Reference Include="Jotunn, Version=2.27.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JotunnLib.2.27.0\lib\net462\Jotunn.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.24\lib\net46\Mono.Security.dll</HintPath>
     </Reference>
@@ -111,7 +119,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Unity.AI.Navigation, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.24\lib\net46\Unity.AI.Navigation.dll</HintPath>
     </Reference>
@@ -366,6 +376,7 @@
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**;Autogen\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -436,6 +447,15 @@ internal static class PluginInfoGenerated
       SourceFiles="$(TargetDir)Valheim.Foresight.dll"
       DestinationFiles="$(ValheimForesightPublishPath)\Valheim.Foresight.dll"
       OverwriteReadOnlyFiles="true"
+    />
+  </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error
+      Condition="!Exists('..\packages\JotunnLib.2.27.0\build\JotunnLib.props')"
+      Text="$([System.String]::Format('$(ErrorText)', '..\packages\JotunnLib.2.27.0\build\JotunnLib.props'))"
     />
   </Target>
 </Project>

@@ -10,7 +10,7 @@ public interface IThreatCalculationService
     /// <summary>
     /// Calculates threat assessment for an enemy against the player
     /// </summary>
-    ThreatAssessment? CalculateThreat(Character enemy, Player player, bool detailedMode);
+    ThreatAssessment? CalculateThreat(Character enemy, Player player);
 
     /// <summary>
     /// Determines threat level based on damage ratios

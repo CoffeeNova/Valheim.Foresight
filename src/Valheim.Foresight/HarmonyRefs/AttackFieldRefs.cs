@@ -9,6 +9,7 @@ public static class AttackFieldRefs
     public static readonly AccessTools.FieldRef<Attack, Attack.AttackType>? AttackTypeRef;
     public static readonly AccessTools.FieldRef<Attack, GameObject>? ProjectilePrefabRef;
     public static readonly AccessTools.FieldRef<Attack, float>? DamageMultiplierRef;
+    public static readonly AccessTools.FieldRef<Attack, HitData.DamageTypes>? DamageRef;
 
     static AttackFieldRefs()
     {
@@ -67,5 +68,7 @@ public static class AttackFieldRefs
             );
             DamageMultiplierRef = null;
         }
+
+        DamageRef = AccessTools.FieldRefAccess<Attack, HitData.DamageTypes>("m_damage");
     }
 }

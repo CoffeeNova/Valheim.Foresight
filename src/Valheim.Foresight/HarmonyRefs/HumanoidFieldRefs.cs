@@ -50,7 +50,7 @@ public static class HumanoidFieldRefs
             ValheimForesightPlugin.Log?.LogError(
                 $"Failed to create FieldRef for Humanoid.{nameof(Humanoid.m_leftItem)}: {ex}"
             );
-            RightItemRef = null;
+            LeftItemRef = null;
         }
     }
 }

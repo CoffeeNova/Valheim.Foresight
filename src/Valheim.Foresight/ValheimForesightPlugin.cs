@@ -7,7 +7,9 @@ using UnityEngine;
 using Valheim.Foresight.Autogen;
 using Valheim.Foresight.Configuration;
 using Valheim.Foresight.Core;
+using Valheim.Foresight.Extensions;
 using Valheim.Foresight.Models;
+using Valheim.Foresight.Networking;
 using Valheim.Foresight.Patches;
 using Valheim.Foresight.Services.Combat;
 using Valheim.Foresight.Services.Combat.Interfaces;
@@ -25,6 +27,7 @@ namespace Valheim.Foresight;
     PluginInfoGenerated.PluginName,
     PluginInfoGenerated.PluginVersion
 )]
+[BepInDependency("com.jotunn.jotunn", BepInDependency.DependencyFlags.HardDependency)]
 public sealed class ValheimForesightPlugin : BaseUnityPlugin
 {
     internal static ILogger Log = null!;
@@ -35,6 +38,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     private ForesightConfiguration _config = null!;
     private IThreatCalculationService _threatService = null!;
     private IDifficultyMultiplierCalculator _difficultyCalculator = null!;
+    private Lazy<ICreatureAttackInspector?> _attackInspector = null!;
 
     private float _playerLogTimer;
     private float _enemyUpdateTimer;
@@ -60,6 +64,17 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         ApplyHarmonyPatches();
         LogDifficultySettings();
 
+        EnemyMaxAttackRpc.Init();
+        EnemyMaxAttackRpc.ComputeOnServer = (prefabName, level) =>
+        {
+            var insp = _attackInspector.Value;
+            if (insp == null)
+                return 0f;
+
+            // пока игнорируем level (или делаем простейший множитель по желанию)
+            return insp.GetMaxAttackByPrefabName(prefabName);
+        };
+
         Log.LogInfo($"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded");
     }
 
@@ -77,7 +92,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         var blockEstimator = new BlockDamageEstimator(Log);
         var parryEstimator = new ParryDamageEstimator(Log);
 
-        var attackInspector = new Lazy<ICreatureAttackInspector?>(() =>
+        _attackInspector = new Lazy<ICreatureAttackInspector?>(() =>
         {
             if (ZNetScene.instance == null)
             {
@@ -103,7 +118,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
             Log,
             blockEstimator,
             parryEstimator,
-            attackInspector,
+            _attackInspector,
             _difficultyCalculator,
             vector3Wrapper,
             mathfWrapper
@@ -135,6 +150,9 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private void Update()
     {
+        if (ZNet.instance != null && ZNet.instance.IsDedicated())
+            return;
+
         _playerLogTimer += Time.deltaTime;
         _enemyUpdateTimer += Time.deltaTime;
 
@@ -155,6 +173,9 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private void LogPlayerHealth()
     {
+        if (ZNet.instance != null && ZNet.instance.IsDedicated())
+            return;
+
         var player = Player.m_localPlayer;
         if (player == null)
         {
@@ -184,7 +205,16 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
             if (distSq > updateRadiusSq)
                 continue;
 
-            var assessment = _threatService.CalculateThreat(character, player, false);
+            if (character is Humanoid humanoid)
+            {
+                var prefabName = humanoid.GetPrefabName();
+                var level = humanoid.GetLevel();
+
+                EnemyMaxAttackRpc.RequestIfNeeded(prefabName, level);
+                Log.LogDebug($"Enemy {character.m_name} prefab={prefabName} lvl={level}");
+            }
+
+            var assessment = _threatService.CalculateThreat(character, player);
 
             if (assessment != null)
             {
@@ -285,6 +315,22 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         var enemyHP = _difficultyCalculator.GetEnemyHealthFactor();
 
         Log.LogInfo($"Current difficulty: EnemyDamage={enemyDmg:F2}x, EnemyHP={enemyHP:F2}x");
+    }
+
+    private static bool TryGetZdoid(Character character, out ZDOID id)
+    {
+        id = default;
+
+        var nview = character.GetComponent<ZNetView>();
+        if (nview == null)
+            return false;
+
+        var zdo = nview.GetZDO();
+        if (zdo == null)
+            return false;
+
+        id = zdo.m_uid;
+        return true;
     }
 
     private void OnConfigurationChanged(object? sender, EventArgs e)

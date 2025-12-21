@@ -1,6 +1,7 @@
 using System;
-using Valheim.Foresight.HarmonyRefs;
+using Valheim.Foresight.Extensions;
 using Valheim.Foresight.Models;
+using Valheim.Foresight.Networking;
 using Valheim.Foresight.Services.Combat.Interfaces;
 using Valheim.Foresight.Services.Damage;
 using ILogger = Valheim.Foresight.Core.ILogger;
@@ -43,7 +44,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         _mathfWrapper = mathfWrapper ?? throw new ArgumentNullException(nameof(mathfWrapper));
     }
 
-    public ThreatAssessment? CalculateThreat(Character enemy, Player player, bool detailedMode)
+    public ThreatAssessment? CalculateThreat(Character enemy, Player player)
     {
         if (enemy == null || player == null)
             return null;
@@ -58,10 +59,8 @@ public sealed class ThreatCalculationService : IThreatCalculationService
             enemy.transform.position,
             player.transform.position
         );
-        var (baseDamage, maxMelee, maxRanged, usedRanged) = detailedMode
-            ? CalculateDetailedThreat(humanoid, distance)
-            : (CalculateSimpleThreat(humanoid), 0f, 0f, false);
 
+        var baseDamage = GetMaxAttackDamage(humanoid);
         var rawDamage = ApplyDifficultyMultipliers(enemy, baseDamage);
         var damageInfo = CalculateDamageInfo(player, rawDamage);
         var ratio = CalculateDamageRatio(player, damageInfo.EffectiveDamageWithBlock);
@@ -80,14 +79,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
             threatLevel
         );
 
-        return new ThreatAssessment(
-            threatLevel,
-            damageInfo,
-            ratio,
-            maxMelee,
-            maxRanged,
-            usedRanged
-        );
+        return new ThreatAssessment(threatLevel, damageInfo, ratio);
     }
 
     public ThreatLevel DetermineThreatLevel(float blockRatio, float parryRatio)
@@ -104,128 +96,40 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         return ThreatLevel.Safe;
     }
 
-    private float CalculateSimpleThreat(Humanoid humanoid)
+    private float GetMaxAttackDamage(Humanoid humanoid)
+    {
+        // var local = GetMaxAttackLocal(humanoid);
+        // if (local > 0f)
+        //     return local;
+
+        return GetMaxAttackNetwork(humanoid);
+    }
+
+    private float GetMaxAttackLocal(Humanoid humanoid)
     {
         if (_attackInspector.Value == null)
             return 0f;
 
         var maxAttack = _attackInspector.Value.GetMaxAttackForCharacter(humanoid);
         _logger.LogDebug(
-            $"[{nameof(CalculateSimpleThreat)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
+            $"[{nameof(GetMaxAttackLocal)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
         );
 
         return maxAttack;
     }
 
-    private (
-        float baseDamage,
-        float maxMelee,
-        float maxRanged,
-        bool usedRanged
-    ) CalculateDetailedThreat(Humanoid humanoid, float distance)
+    private float GetMaxAttackNetwork(Humanoid humanoid)
     {
-        var (maxMelee, maxRanged) = GetWeaponDamages(humanoid);
-        var (currentAttackDamage, isRangedAttack) = GetCurrentAttackInfo(humanoid);
+        var prefabName = humanoid.GetPrefabName();
+        var level = humanoid.GetLevel();
 
-        var useRanged = DetermineAttackType(distance, maxMelee, maxRanged, isRangedAttack);
-        var baseDamage = SelectBaseDamage(maxMelee, maxRanged, useRanged);
-
+        EnemyMaxAttackRpc.RequestIfNeeded(prefabName, level);
+        EnemyMaxAttackRpc.TryGet(prefabName, level, out var serverMaxAttack);
         _logger.LogDebug(
-            $"[{nameof(CalculateDetailedThreat)}] {humanoid.m_name}: "
-                + $"melee={maxMelee:F1}, ranged={maxRanged:F1}, "
-                + $"currentAttack={currentAttackDamage:F1}, useRanged={useRanged}, "
-                + $"dist={distance:F1}, baseDamage={baseDamage:F1}"
+            $"[{nameof(GetMaxAttackNetwork)}] {humanoid.m_name}: maxAttack={serverMaxAttack:F1}"
         );
 
-        return (baseDamage, maxMelee, maxRanged, useRanged);
-    }
-
-    private (float maxMelee, float maxRanged) GetWeaponDamages(Humanoid humanoid)
-    {
-        if (humanoid == null)
-            return (0f, 0f);
-
-        var rightItem = HumanoidMethodRefs.GetRightItem?.Invoke(humanoid);
-        var leftItem = HumanoidMethodRefs.GetLeftItem?.Invoke(humanoid);
-
-        var rightDamage = GetItemDamage(rightItem);
-        var leftDamage = GetItemDamage(leftItem);
-        var maxMelee = _mathfWrapper.Max(rightDamage, leftDamage);
-
-        // todo: add ranged weapon detection
-        var maxRanged = 0f;
-
-        return (maxMelee, maxRanged);
-    }
-
-    private (float damage, bool isRanged) GetCurrentAttackInfo(Humanoid humanoid)
-    {
-        if (humanoid == null)
-            return (0f, false);
-
-        var currentAttack = HumanoidFieldRefs.CurrentAttackRef?.Invoke(humanoid);
-        if (currentAttack == null)
-            return (0f, false);
-
-        var weapon = AttackFieldRefs.WeaponRef?.Invoke(currentAttack);
-        var damage = weapon != null ? GetItemDamage(weapon) : 0f;
-
-        var damageMultiplier = AttackFieldRefs.DamageMultiplierRef?.Invoke(currentAttack) ?? 1f;
-        if (damageMultiplier > 0f)
-            damage *= damageMultiplier;
-
-        var attackType =
-            AttackFieldRefs.AttackTypeRef?.Invoke(currentAttack) ?? Attack.AttackType.Horizontal;
-        var projectilePrefab = AttackFieldRefs.ProjectilePrefabRef?.Invoke(currentAttack);
-        var isRanged = attackType == Attack.AttackType.Projectile || projectilePrefab != null;
-
-        return (damage, isRanged);
-    }
-
-    private float GetItemDamage(ItemDrop.ItemData? item)
-    {
-        if (item == null)
-            return 0f;
-
-        var dmg = item.m_shared.m_damages;
-        return dmg.m_damage
-            + dmg.m_blunt
-            + dmg.m_slash
-            + dmg.m_pierce
-            + dmg.m_chop
-            + dmg.m_pickaxe
-            + dmg.m_fire
-            + dmg.m_frost
-            + dmg.m_lightning
-            + dmg.m_poison
-            + dmg.m_spirit;
-    }
-
-    private bool DetermineAttackType(
-        float distance,
-        float maxMelee,
-        float maxRanged,
-        bool currentIsRanged
-    )
-    {
-        if (distance <= MeleeRangeThreshold && maxMelee > 0f)
-            return false;
-
-        if (maxRanged > 0f)
-            return true;
-
-        return currentIsRanged;
-    }
-
-    private float SelectBaseDamage(float maxMelee, float maxRanged, bool useRanged)
-    {
-        if (useRanged && maxRanged > 0f)
-            return maxRanged;
-
-        if (!useRanged && maxMelee > 0f)
-            return maxMelee;
-
-        return _mathfWrapper.Max(maxMelee, maxRanged);
+        return serverMaxAttack;
     }
 
     private float ApplyDifficultyMultipliers(Character enemy, float baseDamage)

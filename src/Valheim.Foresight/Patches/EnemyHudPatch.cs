@@ -74,11 +74,10 @@ public static class EnemyHudPatch
 
     private static void AppendDebugInfo(EnemyHud.HudData hud, ThreatAssessment assessment)
     {
-        var mode = assessment.UsedRangedAttack ? "R" : "M";
         var levelCode = GetThreatLevelCode(assessment.Level);
 
         var debugSuffix =
-            $" [{levelCode}-{mode} "
+            $" [{levelCode} "
             + $"r={assessment.DamageToHealthRatio:F2} "
             + $"raw={assessment.DamageInfo.RawDamage:F1} "
             + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
