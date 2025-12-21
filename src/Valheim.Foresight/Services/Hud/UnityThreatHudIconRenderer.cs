@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 using Valheim.Foresight.Models;
 using Valheim.Foresight.Services.Hud.Interfaces;
@@ -21,21 +22,22 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         _spriteProvider = spriteProvider;
     }
 
-    public void RenderIcon(EnemyHud.HudData hud, ThreatResponseHint hint)
+    public void RenderIcon(TextMeshProUGUI? nameLabel, ThreatResponseHint hint)
     {
-        if (hud?.m_name is null)
+        if (nameLabel is null)
             return;
 
-        var enemyName = hud.m_name.text;
+        var enemyName = nameLabel.text;
         ValheimForesightPlugin.Log?.LogDebug(
             $"[{nameof(RenderIcon)}]: enemy='{enemyName}', hint={hint}"
         );
 
-        var iconObject = GetOrCreateIconObject(hud.m_name.transform);
+        var iconObject = GetOrCreateIconObject(nameLabel.transform);
         var image = iconObject.GetComponent<Image>() ?? iconObject.AddComponent<Image>();
 
         var sprite = _spriteProvider.GetIcon(hint);
         var shouldShow = hint is not ThreatResponseHint.None && sprite is not null;
+
         ValheimForesightPlugin.Log?.LogDebug(
             $"[{nameof(RenderIcon)}]: enemy='{enemyName}', "
                 + $"hint={hint}, spriteNull={sprite is null}, shouldShow={shouldShow}"

@@ -23,7 +23,10 @@ public sealed class ParryDamageEstimator : DamageEstimatorBase
             return 0f;
 
         if (defenseStats.Shield == null)
+        {
+            Logger.LogDebug($"[{nameof(BlockDamageEstimator)}] no shield.");
             return physicalDamage;
+        }
 
         var blockPower = CalculateEffectiveParryPower(defenseStats);
         var blocked = Mathf.Min(physicalDamage, blockPower);

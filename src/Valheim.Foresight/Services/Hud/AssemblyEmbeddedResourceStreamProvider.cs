@@ -44,39 +44,21 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
     public Sprite? GetIcon(ThreatResponseHint hint) =>
         _cache.TryGetValue(hint, out var s) ? s : null;
 
-    private static Type? FindType(string fullName)
-    {
-        foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            var t = a.GetType(fullName, throwOnError: false);
-            if (t != null)
-                return t;
-        }
-        return null;
-    }
-
     private Sprite? Load(string resourceName)
     {
-        using var stream = _resources.Open(resourceName);
-        if (stream == null)
+        using var sprite = _resources.Open(resourceName);
+        if (sprite == null)
         {
             _log.LogWarning($"Embedded sprite not found: {resourceName}");
             return null;
         }
 
-        byte[] data;
-        using (var ms = new MemoryStream())
-        {
-            stream.CopyTo(ms);
-            data = ms.ToArray();
-        }
-
+        using var ms = new MemoryStream();
+        sprite.CopyTo(ms);
+        var bytes = ms.ToArray();
         var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-        if (!tex.LoadImage(data))
-        {
-            _log.LogWarning($"Failed to decode PNG from embedded resource: {resourceName}");
-            return null;
-        }
+        // var tex = new Texture2D(2, 2, TextureFormat.ARGB32, false);
+        tex.LoadImage(bytes);
 
         var rect = new Rect(0, 0, tex.width, tex.height);
         return Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 100f);

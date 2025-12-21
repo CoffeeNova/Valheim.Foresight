@@ -5,65 +5,68 @@ namespace Valheim.Foresight.HarmonyRefs;
 
 public static class AttackFieldRefs
 {
-    public static readonly AccessTools.FieldRef<Attack, ItemDrop.ItemData>? WeaponRef;
+    private const string WeaponFieldName = "m_weapon";
+    private const string AttackTypeFieldName = "m_attackType";
+    private const string ProjectilePrefabFieldName = "m_attackProjectile";
+    private const string DamageMultiplierFieldName = "m_damageMultiplier";
+
+    public static readonly AccessTools.FieldRef<Attack, ItemDrop.ItemData?>? WeaponRef;
     public static readonly AccessTools.FieldRef<Attack, Attack.AttackType>? AttackTypeRef;
-    public static readonly AccessTools.FieldRef<Attack, GameObject>? ProjectilePrefabRef;
+    public static readonly AccessTools.FieldRef<Attack, GameObject?>? ProjectilePrefabRef;
     public static readonly AccessTools.FieldRef<Attack, float>? DamageMultiplierRef;
 
     static AttackFieldRefs()
     {
-        try
+        var weaponField = AccessTools.Field(typeof(Attack), WeaponFieldName);
+        if (weaponField != null)
         {
-            WeaponRef = AccessTools.FieldRefAccess<Attack, ItemDrop.ItemData>(
-                nameof(Attack.m_weapon)
-            );
+            WeaponRef = AccessTools.FieldRefAccess<Attack, ItemDrop.ItemData?>(weaponField);
         }
-        catch (System.Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError(
-                $"Failed to create FieldRef for Attack.{nameof(Attack.m_weapon)}: {ex}"
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Field Attack.{WeaponFieldName} not found via Harmony reflection"
             );
             WeaponRef = null;
         }
 
-        try
+        var attackTypeField = AccessTools.Field(typeof(Attack), AttackTypeFieldName);
+        if (attackTypeField != null)
         {
-            AttackTypeRef = AccessTools.FieldRefAccess<Attack, Attack.AttackType>(
-                nameof(Attack.m_attackType)
-            );
+            AttackTypeRef = AccessTools.FieldRefAccess<Attack, Attack.AttackType>(attackTypeField);
         }
-        catch (System.Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError(
-                $"Failed to create FieldRef for Attack.{nameof(Attack.m_attackType)}: {ex}"
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Field Attack.{AttackTypeFieldName} not found via Harmony reflection"
             );
             AttackTypeRef = null;
         }
 
-        try
+        var projectilePrefabField = AccessTools.Field(typeof(Attack), ProjectilePrefabFieldName);
+        if (projectilePrefabField != null)
         {
-            ProjectilePrefabRef = AccessTools.FieldRefAccess<Attack, GameObject>(
-                nameof(Attack.m_attackProjectile)
+            ProjectilePrefabRef = AccessTools.FieldRefAccess<Attack, GameObject?>(
+                projectilePrefabField
             );
         }
-        catch (System.Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError(
-                $"Failed to create FieldRef for Attack.{nameof(Attack.m_attackProjectile)}: {ex}"
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Field Attack.{ProjectilePrefabFieldName} not found via Harmony reflection"
             );
             ProjectilePrefabRef = null;
         }
 
-        try
+        var damageMultiplierField = AccessTools.Field(typeof(Attack), DamageMultiplierFieldName);
+        if (damageMultiplierField != null)
         {
-            DamageMultiplierRef = AccessTools.FieldRefAccess<Attack, float>(
-                nameof(Attack.m_damageMultiplier)
-            );
+            DamageMultiplierRef = AccessTools.FieldRefAccess<Attack, float>(damageMultiplierField);
         }
-        catch (System.Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError(
-                $"Failed to create FieldRef for Attack.{nameof(Attack.m_damageMultiplier)}: {ex}"
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Field Attack.{DamageMultiplierFieldName} not found via Harmony reflection"
             );
             DamageMultiplierRef = null;
         }

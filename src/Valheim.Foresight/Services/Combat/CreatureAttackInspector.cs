@@ -106,9 +106,11 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
             return;
 
         var baseTotal = 0f;
-        if (attack.m_weapon != null)
+
+        var weapon = AttackFieldRefs.WeaponRef?.Invoke(attack);
+        if (weapon != null)
         {
-            baseTotal = CalculateTotalDamage(attack.m_weapon.m_shared.m_damages, "Attack.Weapon");
+            baseTotal = CalculateTotalDamage(weapon.m_shared.m_damages, "Attack.Weapon");
         }
 
         var multiplier = attack.m_damageMultiplier > 0f ? attack.m_damageMultiplier : 1f;

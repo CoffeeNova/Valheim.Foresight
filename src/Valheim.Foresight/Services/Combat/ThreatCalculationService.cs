@@ -268,10 +268,14 @@ public sealed class ThreatCalculationService : IThreatCalculationService
 
         _logger.LogDebug(
             $"Threat: {enemy.m_name} lvl{enemy.GetLevel()} dist={distance:F1}m, "
-                + $"base={baseDamage:F1}, worldDiff={worldDiff:F2}x, "
-                + $"players={playerCount} ({playerMult:F2}x), totalMult={totalMult:F2}x, "
-                + $"raw={rawDamage:F1}, effBlock={damageInfo.EffectiveDamageWithBlock:F1}, "
-                + $"effParry={damageInfo.EffectiveDamageWithParry:F1}, ratio={ratio:F2}, "
+                + $"base={baseDamage:F1}, "
+                + $"worldDiff={worldDiff:F2}x, "
+                + $"players={playerCount} ({playerMult:F2}x), "
+                + $"totalMult={totalMult:F2}x, "
+                + $"raw={rawDamage:F1},"
+                + $"effBlock={damageInfo.EffectiveDamageWithBlock:F1}, "
+                + $"effParry={damageInfo.EffectiveDamageWithParry:F1}, "
+                + $"ratio={ratio:F2}, "
                 + $"threat={threatLevel}"
         );
     }

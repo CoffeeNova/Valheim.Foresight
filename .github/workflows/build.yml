@@ -19,7 +19,7 @@ on:
 
 permissions:
   contents: write
-  
+
 jobs:
   build:
     runs-on: windows-latest
@@ -75,7 +75,7 @@ jobs:
               $propertyGroup.AssemblyVersion = "$env:GitVersion_AssemblySemVer"
               $propertyGroup.FileVersion = "$env:GitVersion_AssemblySemFileVer"
               $propertyGroup.InformationalVersion = "$env:GitVersion_InformationalVersion"
-              
+
               $csproj.Save($csprojPath)
               Write-Host "Updated version to $env:GitVersion_MajorMinorPatch"
           }
@@ -130,7 +130,7 @@ jobs:
               Copy-Item -Path "$releaseDir/Valheim.Foresight.dll" -Destination $pluginsDir -Force
               Write-Host "Copied DLL to Thunderstore directory"
           }
-          
+
           $manifestPath = "$thunderstoreDir/manifest.json"
           if (Test-Path $manifestPath) {
               $manifest = Get-Content $manifestPath | ConvertFrom-Json
@@ -144,7 +144,7 @@ jobs:
         run: |
           $thunderstoreDir = "gallery/thunderstore"
           $zipName = "valheim.foresight.zip"
-          
+
           if (Test-Path $thunderstoreDir) {
               Compress-Archive -Path "$thunderstoreDir/*" -DestinationPath $zipName -Force
               Write-Host "Created $zipName"
@@ -165,7 +165,7 @@ jobs:
             valheim.foresight.zip
           body: |
             Release ${{ steps.gitversion.outputs.semVer }}
-            
+
             ## Changes
             See CHANGELOG.md for details.
         env:

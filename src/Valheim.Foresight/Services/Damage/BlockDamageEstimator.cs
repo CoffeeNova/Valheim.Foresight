@@ -1,3 +1,4 @@
+using PlayFab.Internal;
 using UnityEngine;
 using Valheim.Foresight.Models;
 using ILogger = Valheim.Foresight.Core.ILogger;
@@ -23,7 +24,10 @@ public sealed class BlockDamageEstimator : DamageEstimatorBase
             return 0f;
 
         if (defenseStats.Shield == null)
+        {
+            Logger.LogDebug($"[{nameof(BlockDamageEstimator)}] no shield.");
             return physicalDamage;
+        }
 
         var blockPower = CalculateEffectiveBlockPower(defenseStats);
         var blocked = Mathf.Min(physicalDamage, blockPower);

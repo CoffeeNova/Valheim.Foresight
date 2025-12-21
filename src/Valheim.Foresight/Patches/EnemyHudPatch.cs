@@ -1,12 +1,11 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using Valheim.Foresight.HarmonyRefs;
 using Valheim.Foresight.Models;
 
 namespace Valheim.Foresight.Patches;
 
-/// <summary>
-/// Harmony patch for colorizing and annotating enemy HUD elements
-/// </summary>
 public static class EnemyHudPatch
 {
     private static readonly Color SafeColor = Color.white;
@@ -20,16 +19,20 @@ public static class EnemyHudPatch
         if (player == null)
             return;
 
-        var huds = EnemyHudFieldRefs.HudsRef?.Invoke(__instance);
+        var huds = EnemyHudPrivateAccess.GetHudsAsDictionary(__instance);
         if (huds == null || huds.Count == 0)
             return;
 
-        foreach (var kvp in huds)
+        foreach (DictionaryEntry entry in huds)
         {
-            var character = kvp.Key;
-            var hud = kvp.Value;
+            var character = entry.Key as Character;
+            var hudObj = entry.Value;
 
-            if (!IsValidHud(character, hud))
+            if (character == null || hudObj == null)
+                continue;
+
+            var nameLabel = EnemyHudPrivateAccess.TryGetNameLabel(hudObj);
+            if (nameLabel == null)
                 continue;
 
             if (
@@ -38,44 +41,28 @@ public static class EnemyHudPatch
             )
                 continue;
 
-            ApplyThreatVisualization(hud, assessment);
+            ColorizeByThreatLevel(nameLabel, assessment.Level);
+
+            //ThreatResponseHint hint;
+            // try
+            // {
+            //     hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
+            // }
+            // catch
+            // {
+            //     hint = ThreatResponseHint.None;
+            // }
+
+            // ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
+
+            if (ValheimForesightPlugin.InstanceDebugHudEnabled)
+                AppendDebugInfo(nameLabel, assessment);
         }
     }
 
-    private static bool IsValidHud(Character? character, EnemyHud.HudData? hud)
+    private static void ColorizeByThreatLevel(TextMeshProUGUI nameLabel, ThreatLevel level)
     {
-        return character != null && hud != null && hud.m_name != null;
-    }
-
-    private static void ApplyThreatVisualization(EnemyHud.HudData hud, ThreatAssessment assessment)
-    {
-        ColorizeByThreatLevel(hud, assessment.Level);
-
-        ThreatResponseHint hint;
-        try
-        {
-            hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
-        }
-        catch
-        {
-            hint = ThreatResponseHint.None;
-        }
-
-        var renderer = ValheimForesightPlugin.HudIconRenderer;
-        renderer?.RenderIcon(hud, hint);
-
-        if (ValheimForesightPlugin.InstanceDebugHudEnabled)
-        {
-            AppendDebugInfo(hud, assessment);
-        }
-    }
-
-    private static void ColorizeByThreatLevel(EnemyHud.HudData hud, ThreatLevel level)
-    {
-        if (hud?.m_name == null)
-            return;
-
-        hud.m_name.color = level switch
+        nameLabel.color = level switch
         {
             ThreatLevel.Safe => SafeColor,
             ThreatLevel.Caution => CautionColor,
@@ -85,22 +72,10 @@ public static class EnemyHudPatch
         };
     }
 
-    private static void AppendDebugInfo(EnemyHud.HudData hud, ThreatAssessment assessment)
+    private static void AppendDebugInfo(TextMeshProUGUI nameLabel, ThreatAssessment assessment)
     {
         var mode = assessment.UsedRangedAttack ? "R" : "M";
-        var levelCode = GetThreatLevelCode(assessment.Level);
-
-        var debugSuffix =
-            $" [{levelCode}-{mode} "
-            + $"r={assessment.DamageToHealthRatio:F2} "
-            + $"raw={assessment.DamageInfo.RawDamage:F1} "
-            + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
-
-        hud.m_name.text += debugSuffix;
-    }
-
-    private static string GetThreatLevelCode(ThreatLevel level) =>
-        level switch
+        var levelCode = assessment.Level switch
         {
             ThreatLevel.Safe => "SAFE",
             ThreatLevel.Caution => "CAUT",
@@ -108,4 +83,11 @@ public static class EnemyHudPatch
             ThreatLevel.Danger => "DNG",
             _ => "UNK",
         };
+
+        nameLabel.text +=
+            $" [{levelCode}-{mode} "
+            + $"r={assessment.DamageToHealthRatio:F2} "
+            + $"raw={assessment.DamageInfo.RawDamage:F1} "
+            + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
+    }
 }

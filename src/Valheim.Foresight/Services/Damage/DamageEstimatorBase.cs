@@ -66,7 +66,7 @@ public abstract class DamageEstimatorBase : IDamageEstimator
         result = Mathf.Max(MinimumDamage, result);
 
         Logger.LogDebug(
-            $"[{GetType().Name}] Armor: in={physicalDamage:F1}, armor={armor:F1}, out={result:F1}"
+            $"[{nameof(ApplyArmor)}] Armor: in={physicalDamage:F1}, armor={armor:F1}, out={result:F1}"
         );
 
         return result;
@@ -78,7 +78,7 @@ public abstract class DamageEstimatorBase : IDamageEstimator
         float total = physicalAfterArmor + elementalDamage;
 
         Logger.LogDebug(
-            $"[{GetType().Name}] Resists: phys={physicalAfterArmor:F1}, elem={elementalDamage:F1}, total={total:F1}"
+            $"[{nameof(ApplyResistances)}] Resists: phys={physicalAfterArmor:F1}, elem={elementalDamage:F1}, total={total:F1}"
         );
 
         return total;

@@ -5,40 +5,47 @@ namespace Valheim.Foresight.HarmonyRefs;
 
 public static class HumanoidMethodRefs
 {
+    private const string GetRightItemMethodName = "GetRightItem";
+    private const string GetLeftItemMethodName = "GetLeftItem";
+
     public static readonly Func<Humanoid, ItemDrop.ItemData?>? GetRightItem;
     public static readonly Func<Humanoid, ItemDrop.ItemData?>? GetLeftItem;
 
     static HumanoidMethodRefs()
     {
-        try
+        var rightItemMethod = AccessTools.Method(typeof(Humanoid), GetRightItemMethodName);
+        if (rightItemMethod != null)
         {
-            var mi = AccessTools.Method(typeof(Humanoid), nameof(Humanoid.GetRightItem));
-            if (mi != null)
-            {
-                GetRightItem =
-                    (Func<Humanoid, ItemDrop.ItemData?>)
-                        Delegate.CreateDelegate(typeof(Func<Humanoid, ItemDrop.ItemData?>), mi);
-            }
+            GetRightItem =
+                (Func<Humanoid, ItemDrop.ItemData?>)
+                    Delegate.CreateDelegate(
+                        typeof(Func<Humanoid, ItemDrop.ItemData?>),
+                        rightItemMethod
+                    );
         }
-        catch (Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError($"Failed to bind Humanoid.GetRightItem: {ex}");
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Method Humanoid.{GetRightItemMethodName} not found via Harmony reflection"
+            );
             GetRightItem = null;
         }
 
-        try
+        var leftItemMethod = AccessTools.Method(typeof(Humanoid), GetLeftItemMethodName);
+        if (leftItemMethod != null)
         {
-            var mi = AccessTools.Method(typeof(Humanoid), nameof(Humanoid.GetLeftItem));
-            if (mi != null)
-            {
-                GetLeftItem =
-                    (Func<Humanoid, ItemDrop.ItemData?>)
-                        Delegate.CreateDelegate(typeof(Func<Humanoid, ItemDrop.ItemData?>), mi);
-            }
+            GetLeftItem =
+                (Func<Humanoid, ItemDrop.ItemData?>)
+                    Delegate.CreateDelegate(
+                        typeof(Func<Humanoid, ItemDrop.ItemData?>),
+                        leftItemMethod
+                    );
         }
-        catch (Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError($"Failed to bind Humanoid.GetLeftItem: {ex}");
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Method Humanoid.{GetLeftItemMethodName} not found via Harmony reflection"
+            );
             GetLeftItem = null;
         }
     }
