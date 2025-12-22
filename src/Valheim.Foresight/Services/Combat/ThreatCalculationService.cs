@@ -60,8 +60,8 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         );
 
         var (baseDamage, maxMelee, maxRanged, usedRanged) = detailedMode
-            ? CalculateDetailedThreat(humanoid, distance)
-            : (CalculateSimpleThreat(humanoid), 0f, 0f, false);
+            ? CalculateMaxAttackDetailed(humanoid, distance)
+            : (CalculateMaxAttackSimple(humanoid), 0f, 0f, false);
 
         var rawDamage = ApplyDifficultyMultipliers(enemy, baseDamage);
         var damageInfo = CalculateDamageInfo(player, rawDamage);
@@ -105,14 +105,14 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         return ThreatLevel.Safe;
     }
 
-    private float CalculateSimpleThreat(Humanoid humanoid)
+    private float CalculateMaxAttackSimple(Humanoid humanoid)
     {
         if (_attackInspector.Value == null)
             return 0f;
 
         var maxAttack = _attackInspector.Value.GetMaxAttackForCharacter(humanoid);
         _logger.LogDebug(
-            $"[{nameof(CalculateSimpleThreat)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
+            $"[{nameof(CalculateMaxAttackSimple)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
         );
 
         return maxAttack;
@@ -123,7 +123,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         float maxMelee,
         float maxRanged,
         bool usedRanged
-    ) CalculateDetailedThreat(Humanoid humanoid, float distance)
+    ) CalculateMaxAttackDetailed(Humanoid humanoid, float distance)
     {
         var (maxMelee, maxRanged) = GetWeaponDamages(humanoid);
         var (currentAttackDamage, isRangedAttack) = GetCurrentAttackInfo(humanoid);
@@ -132,7 +132,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         var baseDamage = SelectBaseDamage(maxMelee, maxRanged, useRanged);
 
         _logger.LogDebug(
-            $"[{nameof(CalculateDetailedThreat)}] {humanoid.m_name}: "
+            $"[{nameof(CalculateMaxAttackDetailed)}] {humanoid.m_name}: "
                 + $"melee={maxMelee:F1}, ranged={maxRanged:F1}, "
                 + $"currentAttack={currentAttackDamage:F1}, useRanged={useRanged}, "
                 + $"dist={distance:F1}, baseDamage={baseDamage:F1}"

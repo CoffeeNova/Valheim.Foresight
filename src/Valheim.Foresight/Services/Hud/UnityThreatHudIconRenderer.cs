@@ -12,8 +12,6 @@ namespace Valheim.Foresight.Services.Hud;
 public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
 {
     private const string IconObjectName = "Foresight_ThreatIcon";
-    private const float IconOffsetX = 40f; // todo: -> config
-    private const float IconSize = 72f; // todo: -> config
 
     private readonly IThreatIconSpriteProvider _spriteProvider;
 
@@ -27,14 +25,19 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         if (nameLabel is null)
             return;
 
-        var enemyName = nameLabel.text;
-        ValheimForesightPlugin.Log?.LogDebug(
-            $"[{nameof(RenderIcon)}]: enemy='{enemyName}', hint={hint}"
-        );
+        var config = ValheimForesightPlugin.ForesightConfig;
+        if (config == null || !config.ThreatIconEnabled.Value)
+        {
+            // Hide icon if disabled
+            var existingIcon = GetExistingIconObject(nameLabel.transform);
+            if (existingIcon != null)
+                existingIcon.SetActive(false);
+            return;
+        }
 
+        var enemyName = nameLabel.text;
         var iconObject = GetOrCreateIconObject(nameLabel.transform);
         var image = iconObject.GetComponent<Image>() ?? iconObject.AddComponent<Image>();
-
         var sprite = _spriteProvider.GetIcon(hint);
         var shouldShow = hint is not ThreatResponseHint.None && sprite is not null;
 
@@ -53,19 +56,37 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
                         + $"Check ThreatIconSpriteProvider paths."
                 );
             }
+            return;
         }
 
         image.sprite = sprite;
         image.preserveAspect = true;
+
+        var rect = iconObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchoredPosition = new Vector2(
+                config.ThreatIconOffsetX.Value,
+                config.ThreatIconOffsetY.Value
+            );
+            rect.sizeDelta = new Vector2(config.ThreatIconSize.Value, config.ThreatIconSize.Value);
+        }
+    }
+
+    private GameObject? GetExistingIconObject(Transform nameTransform)
+    {
+        var parent = nameTransform.parent ?? nameTransform;
+        var existing = parent.Find(IconObjectName);
+        return existing?.gameObject;
     }
 
     private GameObject GetOrCreateIconObject(Transform nameTransform)
     {
-        var parent = nameTransform.parent ?? nameTransform;
-
-        var existing = parent.Find(IconObjectName);
+        var existing = GetExistingIconObject(nameTransform);
         if (existing != null)
-            return existing.gameObject;
+            return existing;
+
+        var parent = nameTransform.parent ?? nameTransform;
 
         ValheimForesightPlugin.Log?.LogDebug(
             $"[{nameof(GetOrCreateIconObject)}] Creating new icon object '{IconObjectName}' "
@@ -79,8 +100,16 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         rect.anchorMin = new Vector2(0f, 0.5f);
         rect.anchorMax = new Vector2(0f, 0.5f);
         rect.pivot = new Vector2(0f, 0.5f);
-        rect.anchoredPosition = new Vector2(IconOffsetX, 0f);
-        rect.sizeDelta = new Vector2(IconSize, IconSize);
+
+        var config = ValheimForesightPlugin.ForesightConfig;
+        if (config != null)
+        {
+            rect.anchoredPosition = new Vector2(
+                config.ThreatIconOffsetX.Value,
+                config.ThreatIconOffsetY.Value
+            );
+            rect.sizeDelta = new Vector2(config.ThreatIconSize.Value, config.ThreatIconSize.Value);
+        }
 
         return go;
     }

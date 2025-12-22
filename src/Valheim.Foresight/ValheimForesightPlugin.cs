@@ -14,7 +14,6 @@ using Valheim.Foresight.Services.Combat.Wrappers;
 using Valheim.Foresight.Services.Damage;
 using Valheim.Foresight.Services.Hud;
 using Valheim.Foresight.Services.Hud.Interfaces;
-using Valheim.Foresight.Services.Hud.Wrappers;
 using ILogger = Valheim.Foresight.Core.ILogger;
 
 namespace Valheim.Foresight;
@@ -31,6 +30,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 {
     internal static ILogger Log = null!;
     public static bool InstanceDebugHudEnabled => _instance?._config.DebugHudEnabled.Value ?? false;
+    public static ForesightConfiguration? ForesightConfig => _instance?._config;
 
     internal static IThreatResponseHintService ThreatResponseHintService =>
         _instance?._threatResponseHintService

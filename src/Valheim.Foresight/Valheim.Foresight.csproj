@@ -51,9 +51,9 @@
     <Compile Include="**\*.cs" Exclude="obj\**;bin\**;Autogen\**" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Icons\block_icon.png" />
-    <Content Include="Assets\Icons\parry_icon.png" />
-    <Content Include="Assets\Icons\roll_icon.png" />
+    <EmbeddedResource Include="Assets\Icons\block_icon.png" />
+    <EmbeddedResource Include="Assets\Icons\parry_icon.png" />
+    <EmbeddedResource Include="Assets\Icons\roll_icon.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

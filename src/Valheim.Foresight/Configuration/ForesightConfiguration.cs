@@ -13,7 +13,10 @@ public sealed class ForesightConfiguration
     public ConfigEntry<bool> IsLogsEnabled { get; }
     public ConfigEntry<bool> DebugHudEnabled { get; }
 
-    // public ConfigEntry<bool> DetailedAttackMode { get; }
+    public ConfigEntry<bool> ThreatIconEnabled { get; }
+    public ConfigEntry<float> ThreatIconSize { get; }
+    public ConfigEntry<float> ThreatIconOffsetX { get; }
+    public ConfigEntry<float> ThreatIconOffsetY { get; }
 
     public event EventHandler? SettingsChanged;
 
@@ -35,12 +38,42 @@ public sealed class ForesightConfiguration
             "Show debug threat info near enemy name."
         );
 
-        // DetailedAttackMode = _configFile.Bind(
-        //     "Threat",
-        //     "DetailedAttackMode",
-        //     false,
-        //     "Use detailed melee/ranged threat calculation instead of simple global indicator."
-        // );
+        ThreatIconEnabled = _configFile.Bind(
+            "HUD",
+            "ThreatIconEnabled",
+            true,
+            "Show threat response hint icon next to enemy name."
+        );
+
+        ThreatIconSize = _configFile.Bind(
+            "HUD",
+            "ThreatIconSize",
+            36f,
+            new ConfigDescription(
+                "Size of the threat icon in pixels.",
+                new AcceptableValueRange<float>(16f, 128f)
+            )
+        );
+
+        ThreatIconOffsetX = _configFile.Bind(
+            "HUD",
+            "ThreatIconOffsetX",
+            180f,
+            new ConfigDescription(
+                "Horizontal offset of the threat icon from enemy name (positive = right, negative = left).",
+                new AcceptableValueRange<float>(-200f, 200f)
+            )
+        );
+
+        ThreatIconOffsetY = _configFile.Bind(
+            "HUD",
+            "ThreatIconOffsetY",
+            54f,
+            new ConfigDescription(
+                "Vertical offset of the threat icon from enemy name (positive = up, negative = down).",
+                new AcceptableValueRange<float>(-100f, 100f)
+            )
+        );
 
         BindConfigChangeHandlers();
     }
@@ -49,7 +82,10 @@ public sealed class ForesightConfiguration
     {
         IsLogsEnabled.SettingChanged += OnSettingChanged;
         DebugHudEnabled.SettingChanged += OnSettingChanged;
-        // DetailedAttackMode.SettingChanged += OnSettingChanged;
+        ThreatIconEnabled.SettingChanged += OnSettingChanged;
+        ThreatIconSize.SettingChanged += OnSettingChanged;
+        ThreatIconOffsetX.SettingChanged += OnSettingChanged;
+        ThreatIconOffsetY.SettingChanged += OnSettingChanged;
     }
 
     private void OnSettingChanged(object? sender, EventArgs e)

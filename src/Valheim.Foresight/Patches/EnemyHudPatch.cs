@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Valheim.Foresight.HarmonyRefs;
 using Valheim.Foresight.Models;
 
@@ -35,6 +36,13 @@ public static class EnemyHudPatch
             if (nameLabel == null)
                 continue;
 
+            var holder = nameLabel.GetComponent<OriginalNameHolder>();
+            if (holder is null)
+            {
+                holder = nameLabel.gameObject.AddComponent<OriginalNameHolder>();
+                holder.originalName = nameLabel.text;
+            }
+
             if (
                 !ValheimForesightPlugin.TryGetThreatAssessment(character, out var assessment)
                 || assessment == null
@@ -56,7 +64,9 @@ public static class EnemyHudPatch
             ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
 
             if (ValheimForesightPlugin.InstanceDebugHudEnabled)
-                AppendDebugInfo(nameLabel, assessment);
+                AppendDebugInfo(nameLabel, holder.originalName, assessment);
+            else
+                nameLabel.text = holder.originalName;
         }
     }
 
@@ -72,7 +82,11 @@ public static class EnemyHudPatch
         };
     }
 
-    private static void AppendDebugInfo(TextMeshProUGUI nameLabel, ThreatAssessment assessment)
+    private static void AppendDebugInfo(
+        TextMeshProUGUI nameLabel,
+        string originalName,
+        ThreatAssessment assessment
+    )
     {
         var mode = assessment.UsedRangedAttack ? "R" : "M";
         var levelCode = assessment.Level switch
@@ -84,10 +98,16 @@ public static class EnemyHudPatch
             _ => "UNK",
         };
 
-        nameLabel.text +=
-            $" [{levelCode}-{mode} "
+        nameLabel.text =
+            originalName
+            + $" [{levelCode}-{mode} "
             + $"r={assessment.DamageToHealthRatio:F2} "
             + $"raw={assessment.DamageInfo.RawDamage:F1} "
             + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
+    }
+
+    private sealed class OriginalNameHolder : MonoBehaviour
+    {
+        public string originalName = string.Empty;
     }
 }
