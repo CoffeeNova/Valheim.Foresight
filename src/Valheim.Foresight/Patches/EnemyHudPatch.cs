@@ -43,17 +43,17 @@ public static class EnemyHudPatch
 
             ColorizeByThreatLevel(nameLabel, assessment.Level);
 
-            //ThreatResponseHint hint;
-            // try
-            // {
-            //     hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
-            // }
-            // catch
-            // {
-            //     hint = ThreatResponseHint.None;
-            // }
+            ThreatResponseHint hint;
+            try
+            {
+                hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
+            }
+            catch
+            {
+                hint = ThreatResponseHint.None;
+            }
 
-            // ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
+            ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
 
             if (ValheimForesightPlugin.InstanceDebugHudEnabled)
                 AppendDebugInfo(nameLabel, assessment);
