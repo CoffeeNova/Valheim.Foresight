@@ -234,7 +234,10 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         var position = enemy.transform.position;
         var multiplier = _difficultyCalculator.GetDamageMultiplier(position);
 
-        return baseDamage * multiplier;
+        var level = enemy.GetLevel();
+        var levelMultiplier = 1f + 0.4f * (level - 1);
+
+        return baseDamage * multiplier * levelMultiplier;
     }
 
     private DamageInfo CalculateDamageInfo(Player player, float rawDamage)
