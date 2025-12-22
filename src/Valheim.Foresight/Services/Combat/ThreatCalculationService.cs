@@ -58,6 +58,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
             enemy.transform.position,
             player.transform.position
         );
+
         var (baseDamage, maxMelee, maxRanged, usedRanged) = detailedMode
             ? CalculateDetailedThreat(humanoid, distance)
             : (CalculateSimpleThreat(humanoid), 0f, 0f, false);
