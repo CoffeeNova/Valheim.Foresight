@@ -5,6 +5,12 @@ All notable changes to Valheim Foresight will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-12-22
+
+### Fixed
+- Fixed multiplayer bug where threat was calculated incorrectly
+- Fixed mob level not being applied for threat calculation
+
 ## [1.0.0] - 2025-12-12
 
 ### Added
@@ -18,4 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance optimization**: Threat calculation caching and automatic cleanup system
 
 
+[1.0.1]: https://github.com/CoffeeNova/Valheim.Foresight/releases/tag/v1.0.1
 [1.0.0]: https://github.com/CoffeeNova/Valheim.Foresight/releases/tag/v1.0.0

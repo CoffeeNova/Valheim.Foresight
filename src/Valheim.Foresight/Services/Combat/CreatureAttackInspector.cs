@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using Valheim.Foresight.HarmonyRefs;
 using Valheim.Foresight.Services.Combat.Interfaces;
@@ -48,6 +49,7 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
         InspectHumanoidEquipment(prefabRoot, ref maxDamage);
         InspectItemDrops(prefabRoot, ref maxDamage);
         InspectAttackComponents(prefabRoot, ref maxDamage);
+        InspectItemSets(prefabRoot, ref maxDamage);
 
         _logger.LogDebug($"[{nameof(InspectPrefabForMaxDamage)}] Max damage: {maxDamage}");
 
@@ -87,6 +89,24 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
         foreach (var attack in attacks)
         {
             UpdateMaxFromAttack(attack, ref maxDamage);
+        }
+    }
+
+    private void InspectItemSets(GameObject prefabRoot, ref float maxDamage)
+    {
+        var humanoid = prefabRoot.GetComponentInChildren<Humanoid>(includeInactive: true);
+        if (humanoid?.m_randomSets == null || humanoid.m_randomSets.Length == 0)
+            return;
+
+        var itemDropsQuery = humanoid
+            .m_randomSets.Where(s => s.m_items != null)
+            .SelectMany(s => s.m_items)
+            .Where(i => i is not null)
+            .SelectMany(i => i.GetComponentsInChildren<ItemDrop>(includeInactive: true));
+
+        foreach (var itemDrop in itemDropsQuery)
+        {
+            UpdateMaxFromItem(itemDrop.m_itemData, itemDrop.name, ref maxDamage);
         }
     }
 

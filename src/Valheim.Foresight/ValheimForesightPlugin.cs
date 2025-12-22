@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
@@ -208,35 +207,11 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
                 continue;
 
             var assessment = _threatService.CalculateThreat(character, player, false);
-
             if (assessment != null)
             {
                 _threatCache[character] = assessment;
             }
         }
-    }
-
-    private bool TryFindNearestEnemy(Player player, out Character nearestEnemy)
-    {
-        nearestEnemy = null!;
-        var allCharacters = Character.GetAllCharacters();
-        var nearestDistSq = float.MaxValue;
-        var playerPos = player.transform.position;
-
-        foreach (var character in allCharacters)
-        {
-            if (!IsValidEnemy(character))
-                continue;
-
-            var distSq = (character.transform.position - playerPos).sqrMagnitude;
-            if (distSq < nearestDistSq)
-            {
-                nearestDistSq = distSq;
-                nearestEnemy = character;
-            }
-        }
-
-        return nearestEnemy != null;
     }
 
     private bool IsValidEnemy(Character character)
