@@ -179,7 +179,8 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         _hudIconRenderer = new UnityThreatHudIconRenderer(_spriteProvider);
 
         ActiveAttackTracker = new ActiveAttackTracker();
-        CastbarRenderer = new UnityCastbarRenderer(Log, _config);
+        var parryWindowService = new ParryWindowService(_config);
+        CastbarRenderer = new UnityCastbarRenderer(Log, _config, parryWindowService);
 
         // Create AttackTimingService - no UI config needed
         AttackTimingService = new AttackTimingService(Log, _config, _attackConfig);

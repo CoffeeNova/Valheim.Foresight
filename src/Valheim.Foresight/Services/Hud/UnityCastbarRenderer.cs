@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Valheim.Foresight.Configuration;
 using Valheim.Foresight.Models;
+using Valheim.Foresight.Services.Castbar.Interfaces;
 using Valheim.Foresight.Services.Hud.Interfaces;
 using ILogger = Valheim.Foresight.Core.ILogger;
 using Object = UnityEngine.Object;
@@ -36,14 +37,21 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
     private readonly ILogger _logger;
     private readonly IForesightConfiguration _config;
+    private readonly IParryWindowService _parryWindowService;
 
     /// <summary>
     /// Creates a new castbar renderer
     /// </summary>
-    public UnityCastbarRenderer(ILogger logger, IForesightConfiguration config)
+    public UnityCastbarRenderer(
+        ILogger logger,
+        IForesightConfiguration config,
+        IParryWindowService parryWindowService
+    )
     {
         _logger = logger;
         _config = config;
+        _parryWindowService =
+            parryWindowService ?? throw new ArgumentNullException(nameof(parryWindowService));
     }
 
     /// <inheritdoc/>
@@ -222,22 +230,22 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
     private void CreateParryIndicator(Transform parent)
     {
-        // Thin vertical line on the right to indicate parry window
+        // Visual indicator showing the parry window on the castbar
         var indicator = new GameObject(ParryIndicatorName);
         indicator.transform.SetParent(parent, false);
 
         var indicatorRect = indicator.AddComponent<RectTransform>();
-        indicatorRect.anchorMin = new Vector2(_config.ParryIndicatorStartPosition.Value, 0f);
-        indicatorRect.anchorMax = new Vector2(_config.ParryIndicatorStartPosition.Value, 1f);
-        indicatorRect.pivot = new Vector2(0.5f, 0.5f);
-        indicatorRect.anchoredPosition = Vector2.zero;
-        indicatorRect.sizeDelta = new Vector2(2f, -BorderThickness * 2); // Thin line
+        indicatorRect.anchorMin = Vector2.zero;
+        indicatorRect.anchorMax = Vector2.one;
+        indicatorRect.offsetMin = Vector2.zero;
+        indicatorRect.offsetMax = Vector2.zero;
+        indicatorRect.sizeDelta = Vector2.zero;
 
         var indicatorImage = indicator.AddComponent<Image>();
-        indicatorImage.color = new Color(0.3f, 0.3f, 0.3f, 0.9f);
+        indicatorImage.color = new Color(0.3f, 1f, 0.3f, 0.4f);
         indicatorImage.raycastTarget = false;
 
-        indicator.SetActive(true);
+        indicator.SetActive(false);
     }
 
     private void CreateAttackNameText(Transform parent)
@@ -458,13 +466,12 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         if (timerText != null)
             timerText.text = $"{attackInfo.TimeRemaining:F1}s";
 
-        // *** FIX: Check GetParryIndicatorPosition BEFORE updating position ***
-        var config = ValheimForesightPlugin.ForesightConfig;
-        var parryWindowSeconds = config?.AttackCastbarParryWindow.Value ?? 0.25f;
-        var indicatorPosition = attackInfo.GetParryIndicatorPosition(parryWindowSeconds);
+        var parryWindowInfo = _parryWindowService.GetParryWindowInfo(
+            attackInfo,
+            attackInfo.Duration
+        );
 
-        // If GetParryIndicatorPosition returned null - HIDE indicator
-        if (!indicatorPosition.HasValue)
+        if (!parryWindowInfo.HasValue)
         {
             if (parryIndicator != null)
             {
@@ -482,16 +489,18 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             return;
         }
 
-        // If position exists - update and show indicator
+        // If parry window info exists - update indicator size and position
         if (parryIndicatorRect != null)
         {
-            var x = indicatorPosition.Value;
-            parryIndicatorRect.anchorMin = new Vector2(x, 0f);
-            parryIndicatorRect.anchorMax = new Vector2(x, 1f);
+            var (startPos, windowWidth) = parryWindowInfo.Value;
+            parryIndicatorRect.anchorMin = new Vector2(startPos, 0f);
+            parryIndicatorRect.anchorMax = new Vector2(startPos + windowWidth, 1f);
+            parryIndicatorRect.offsetMin = Vector2.zero;
+            parryIndicatorRect.offsetMax = Vector2.zero;
         }
 
         // Visual effects for parry window
-        if (attackInfo.IsInParryWindow)
+        if (_parryWindowService.IsInParryWindow(attackInfo))
         {
             float pulse = Mathf.PingPong(Time.time * 6f, 1f);
             fillImage.color = Color.Lerp(
@@ -505,13 +514,13 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             if (timerText != null)
                 timerText.color = Color.Lerp(Color.white, Color.green, pulse);
 
-            // During parry window hide indicator (it has been reached)
+            // During parry window show indicator with highlight
             if (parryIndicator != null)
-                parryIndicator.SetActive(false);
+                parryIndicator.SetActive(true);
         }
         else
         {
-            // Show and animate parry indicator
+            // Show parry indicator
             if (parryIndicator != null)
             {
                 parryIndicator.SetActive(true);
