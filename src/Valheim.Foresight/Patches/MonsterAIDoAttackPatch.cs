@@ -236,8 +236,12 @@ internal class MonsterAIDoAttackPatch
 
         if (!string.IsNullOrEmpty(mappedName))
         {
-            var normalizedMapped = mappedName!.Replace("_", string.Empty);
-            var normalizedState = stateInfoAnimationName!.Replace("_", string.Empty);
+            var normalizedMapped = mappedName!
+                .Replace("_", string.Empty)
+                .Replace(" ", string.Empty);
+            var normalizedState = stateInfoAnimationName!
+                .Replace("_", string.Empty)
+                .Replace(" ", string.Empty);
 
             return string.Equals(
                 normalizedMapped,
@@ -246,8 +250,14 @@ internal class MonsterAIDoAttackPatch
             );
         }
 
-        var normalizedAttack = attackAnimationName!.Replace("_", string.Empty);
-        var normalizedCurrent = stateInfoAnimationName!.Replace("_", string.Empty);
+        var normalizedAttack = attackAnimationName!
+            .Replace("_", string.Empty)
+            .Replace(" ", string.Empty);
+        ;
+        var normalizedCurrent = stateInfoAnimationName!
+            .Replace("_", string.Empty)
+            .Replace(" ", string.Empty);
+        ;
 
         var namesAreEqual = string.Equals(
             normalizedAttack,
@@ -276,6 +286,16 @@ internal class MonsterAIDoAttackPatch
             namesAreEqual = attackAnimationName.Contains(
                 stateInfoAnimationName,
                 StringComparison.CurrentCultureIgnoreCase
+            );
+        }
+
+        // Final attempt: similarity comparison using Levenshtein distance
+        if (!namesAreEqual)
+        {
+            namesAreEqual = StringSimilarity.AreSimilar(normalizedAttack, normalizedCurrent);
+            ValheimForesightPlugin.Log.LogDebug(
+                $"[StringSimilarity.AreSimilar]: {namesAreEqual}. "
+                    + $"Comparing '{normalizedAttack}' and '{normalizedCurrent}'"
             );
         }
 

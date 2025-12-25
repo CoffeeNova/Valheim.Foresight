@@ -1,158 +1,200 @@
 ﻿timings:
   Charred_Melee::attack_thrustfeint:
     meanHitOffsetSeconds: 1.33166
-    variance: 0.002568873
+    variance: 0
     sampleCount: 15
-    lastUpdatedUtc: 1766588384
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Charred_Melee::attack_swingfeint:
     meanHitOffsetSeconds: 1.497965
-    variance: 0.003927606
+    variance: 0
     sampleCount: 9
-    lastUpdatedUtc: 1766588381
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Charred_Melee::attack_thrust:
     meanHitOffsetSeconds: 0.7161543
-    variance: 0.00658654
+    variance: 0
     sampleCount: 9
-    lastUpdatedUtc: 1766588378
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Charred_Melee::attack_swing:
     meanHitOffsetSeconds: 0.9411191
-    variance: 0.006056895
+    variance: 0
     sampleCount: 14
-    lastUpdatedUtc: 1766588387
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Troll::punch:
     meanHitOffsetSeconds: 1.152725
-    variance: 0.001122302
+    variance: 0
     sampleCount: 26
-    lastUpdatedUtc: 1766608202
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Troll::attack:
     meanHitOffsetSeconds: 1.336778
-    variance: 0.004015991
+    variance: 0
     sampleCount: 18
-    lastUpdatedUtc: 1766608193
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Troll::throw:
     meanHitOffsetSeconds: 1.380005
     variance: 0
     sampleCount: 1
-    lastUpdatedUtc: 1766588523
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Skeleton::attack:
     meanHitOffsetSeconds: 0.8080788
-    variance: 0.0003352157
+    variance: 0
     sampleCount: 31
-    lastUpdatedUtc: 1766607351
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Eikthyr::attack2:
     meanHitOffsetSeconds: 1.580002
-    variance: 3.492232E-09
+    variance: 0
     sampleCount: 8
-    lastUpdatedUtc: 1766593028
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Eikthyr::attack_stomp:
     meanHitOffsetSeconds: 2.900004
-    variance: 2.069688E-09
+    variance: 0
     sampleCount: 6
-    lastUpdatedUtc: 1766593037
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Eikthyr::attack1:
     meanHitOffsetSeconds: 0.6000027
-    variance: 2.575489E-09
+    variance: 0
     sampleCount: 18
-    lastUpdatedUtc: 1766593012
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   gd_king::shoot:
     meanHitOffsetSeconds: 2.524519
-    variance: 0.4021528
+    variance: 0
     sampleCount: 62
-    lastUpdatedUtc: 1766603697
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   gd_king::stomp:
     meanHitOffsetSeconds: 2.023547
-    variance: 0.002884397
+    variance: 0
     sampleCount: 24
-    lastUpdatedUtc: 1766603710
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   TentaRoot::attack:
     meanHitOffsetSeconds: 1.382282
-    variance: 0.001660654
+    variance: 0
     sampleCount: 38
-    lastUpdatedUtc: 1766603709
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Bonemass::aoe:
     meanHitOffsetSeconds: 4.124606
-    variance: 0.6648867
+    variance: 0
     sampleCount: 13
-    lastUpdatedUtc: 1766607845
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Bonemass::punch:
     meanHitOffsetSeconds: 1.161882
-    variance: 0.1450107
+    variance: 0
     sampleCount: 32
-    lastUpdatedUtc: 1766607851
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Bonemass::spawn:
     meanHitOffsetSeconds: 2.009478
-    variance: 1.400803
+    variance: 0
     sampleCount: 19
-    lastUpdatedUtc: 1766607849
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Dragon::attack_iceball:
     meanHitOffsetSeconds: 2.162012
-    variance: 0.1458185
+    variance: 0
     sampleCount: 10
-    lastUpdatedUtc: 1766609370
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Dragon::attack_claw_right:
     meanHitOffsetSeconds: 1.613094
-    variance: 4.107049E-05
+    variance: 0
     sampleCount: 8
-    lastUpdatedUtc: 1766662947
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Dragon::attack_claw_left:
     meanHitOffsetSeconds: 1.584033
-    variance: 1.985923E-05
+    variance: 0
     sampleCount: 8
-    lastUpdatedUtc: 1766662770
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Dragon::attack_bite:
     meanHitOffsetSeconds: 0.9958125
-    variance: 0.0001179623
+    variance: 0
     sampleCount: 7
-    lastUpdatedUtc: 1766662775
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   Dragon::attack_breath:
     meanHitOffsetSeconds: 1.378828
-    variance: 4.695295E-05
+    variance: 0
     sampleCount: 7
-    lastUpdatedUtc: 1766663137
+    lastUpdatedUtc: 1766676499
     learningEnabled: true
   GoblinKing::nova:
-    meanHitOffsetSeconds: 3.296853
-    variance: 2.333223
-    sampleCount: 50
-    lastUpdatedUtc: 1766663672
+    meanHitOffsetSeconds: 2.686
+    variance: 0
+    sampleCount: 58
+    lastUpdatedUtc: 1766676711
     learningEnabled: true
   GoblinKing::taunt:
     meanHitOffsetSeconds: 2.373337
-    variance: 2.82286
+    variance: 0
     sampleCount: 6
-    lastUpdatedUtc: 1766663627
-    learningEnabled: true
+    lastUpdatedUtc: 1766676617
+    learningEnabled: false
   GoblinKing::cast1:
-    meanHitOffsetSeconds: 4
-    variance: 1.945775
-    sampleCount: 64
-    lastUpdatedUtc: 1766663718
-    learningEnabled: true
+    meanHitOffsetSeconds: 4.040294
+    variance: 0
+    sampleCount: 68
+    lastUpdatedUtc: 1766676567
+    learningEnabled: false
   GoblinKing::beam:
     meanHitOffsetSeconds: 2.056542
-    variance: 0.8382978
+    variance: 0
     sampleCount: 107
-    lastUpdatedUtc: 1766663851
+    lastUpdatedUtc: 1766676592
     learningEnabled: false
-lastSavedUtc: 1766663881
+  SeekerQueen::attack_pierce:
+    meanHitOffsetSeconds: 0.9199924
+    variance: 0.003599936
+    sampleCount: 64
+    lastUpdatedUtc: 1766679702
+    learningEnabled: true
+  SeekerQueen::attack_slash:
+    meanHitOffsetSeconds: 1.060948
+    variance: 0.00039953
+    sampleCount: 21
+    lastUpdatedUtc: 1766679705
+    learningEnabled: true
+  Fader::attack_ClawR:
+    meanHitOffsetSeconds: 1.186517
+    variance: 0.04526487
+    sampleCount: 20
+    lastUpdatedUtc: 1766680137
+    learningEnabled: true
+  Fader::attack_bite:
+    meanHitOffsetSeconds: 1.557906
+    variance: 0.5974399
+    sampleCount: 53
+    lastUpdatedUtc: 1766680147
+    learningEnabled: true
+  Fader::attack_ClawL:
+    meanHitOffsetSeconds: 1.010864
+    variance: 0.1200821
+    sampleCount: 12
+    lastUpdatedUtc: 1766680142
+    learningEnabled: true
+  Fader::taunt:
+    meanHitOffsetSeconds: 6.34416
+    variance: 0.6917559
+    sampleCount: 24
+    lastUpdatedUtc: 1766680009
+    learningEnabled: true
+  Fader::attack_Spin:
+    meanHitOffsetSeconds: 1.318237
+    variance: 0
+    sampleCount: 1
+    lastUpdatedUtc: 1766680011
+    learningEnabled: true
+lastSavedUtc: 1766680177

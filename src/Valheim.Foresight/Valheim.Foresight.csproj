@@ -447,6 +447,9 @@
       <HintPath>..\packages\YamlDotNet.16.3.0\lib\net47\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Core\StringSimilarity.README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
     <PropertyGroup>
