@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
+/// <summary>
+/// Provides reflection access to private Attack fields using Harmony
+/// </summary>
 public static class AttackFieldRefs
 {
     private const string WeaponFieldName = "m_weapon";

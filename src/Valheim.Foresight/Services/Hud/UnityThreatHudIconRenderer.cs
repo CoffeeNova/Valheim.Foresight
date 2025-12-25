@@ -15,11 +15,15 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
 
     private readonly IThreatIconSpriteProvider _spriteProvider;
 
+    /// <summary>
+    /// Creates a new threat HUD icon renderer
+    /// </summary>
     public UnityThreatHudIconRenderer(IThreatIconSpriteProvider spriteProvider)
     {
         _spriteProvider = spriteProvider;
     }
 
+    /// <inheritdoc/>
     public void RenderIcon(TextMeshProUGUI? nameLabel, ThreatResponseHint hint)
     {
         if (nameLabel is null)
@@ -40,11 +44,6 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         var image = iconObject.GetComponent<Image>() ?? iconObject.AddComponent<Image>();
         var sprite = _spriteProvider.GetIcon(hint);
         var shouldShow = hint is not ThreatResponseHint.None && sprite is not null;
-
-        ValheimForesightPlugin.Log?.LogDebug(
-            $"[{nameof(RenderIcon)}]: enemy='{enemyName}', "
-                + $"hint={hint}, spriteNull={sprite is null}, shouldShow={shouldShow}"
-        );
 
         iconObject.SetActive(shouldShow);
         if (!shouldShow)

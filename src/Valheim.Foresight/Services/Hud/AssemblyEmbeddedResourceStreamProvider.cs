@@ -1,25 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
 using Valheim.Foresight.Models;
 using Valheim.Foresight.Services.Hud.Interfaces;
 using ILogger = Valheim.Foresight.Core.ILogger;
+using Object = UnityEngine.Object;
 
 namespace Valheim.Foresight.Services.Hud;
 
+/// <summary>
+/// Provides access to assembly embedded resources
+/// </summary>
 public sealed class AssemblyEmbeddedResourceStreamProvider : IEmbeddedResourceStreamProvider
 {
     private readonly Assembly _asm;
 
+    /// <summary>
+    /// Creates a new provider for the given assembly
+    /// </summary>
     public AssemblyEmbeddedResourceStreamProvider(Assembly asm) => _asm = asm;
 
+    /// <inheritdoc/>
     public Stream? Open(string resourceName) => _asm.GetManifestResourceStream(resourceName);
 
+    /// <inheritdoc/>
     public string[] GetNames() => _asm.GetManifestResourceNames();
 }
 
-public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
+/// <summary>
+/// Provides threat icons by loading PNG sprites from embedded assembly resources
+/// </summary>
+public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider, IDisposable
 {
     private readonly IEmbeddedResourceStreamProvider _resources;
     private readonly ILogger _log;
@@ -29,6 +42,12 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
     private const string ParryRes = "Valheim.Foresight.Assets.Icons.parry_icon.png";
     private const string DodgeRes = "Valheim.Foresight.Assets.Icons.roll_icon.png";
 
+    private readonly List<Sprite> _createdSprites = new();
+    private readonly List<Texture2D> _createdTextures = new();
+
+    /// <summary>
+    /// Creates a new embedded PNG sprite provider
+    /// </summary>
     public EmbeddedPngSpriteProvider(IEmbeddedResourceStreamProvider resources, ILogger log)
     {
         _resources = resources;
@@ -39,6 +58,7 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
         _cache[ThreatResponseHint.None] = null;
     }
 
+    /// <inheritdoc/>
     public Sprite? GetIcon(ThreatResponseHint hint) =>
         _cache.TryGetValue(hint, out var s) ? s : null;
 
@@ -60,5 +80,23 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider
 
         var rect = new Rect(0, 0, tex.width, tex.height);
         return Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    public void Dispose()
+    {
+        foreach (var sprite in _createdSprites)
+        {
+            if (sprite != null)
+                Object.Destroy(sprite);
+        }
+        _createdSprites.Clear();
+
+        foreach (var texture in _createdTextures)
+        {
+            if (texture != null)
+                Object.Destroy(texture);
+        }
+
+        _createdTextures.Clear();
     }
 }

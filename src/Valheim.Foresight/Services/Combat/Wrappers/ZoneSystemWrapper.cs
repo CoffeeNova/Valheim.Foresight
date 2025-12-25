@@ -8,8 +8,10 @@ namespace Valheim.Foresight.Services.Combat.Wrappers;
 /// </summary>
 public sealed class ZoneSystemWrapper : IZoneSystemWrapper
 {
+    /// <inheritdoc/>
     public bool IsInitialized => ZoneSystem.instance != null;
 
+    /// <inheritdoc/>
     public bool GetGlobalKey(string key, out string value)
     {
         value = string.Empty;
@@ -20,6 +22,7 @@ public sealed class ZoneSystemWrapper : IZoneSystemWrapper
         return ZoneSystem.instance.GetGlobalKey(key, out value);
     }
 
+    /// <inheritdoc/>
     public bool GetGlobalKey(string key)
     {
         if (ZoneSystem.instance == null)
@@ -28,6 +31,7 @@ public sealed class ZoneSystemWrapper : IZoneSystemWrapper
         return ZoneSystem.instance.GetGlobalKey(key);
     }
 
+    /// <inheritdoc/>
     public bool TryGetGlobalKeyValue(string key, out string value)
     {
         value = string.Empty;
@@ -38,6 +42,7 @@ public sealed class ZoneSystemWrapper : IZoneSystemWrapper
         return ZoneSystem.instance.m_globalKeysValues.TryGetValue(key, out value);
     }
 
+    /// <inheritdoc/>
     public List<string> GetGlobalKeys()
     {
         return ZoneSystem.instance?.GetGlobalKeys() ?? new List<string>();

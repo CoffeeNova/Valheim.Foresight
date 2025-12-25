@@ -3,6 +3,9 @@ using HarmonyLib;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
+/// <summary>
+/// Provides reflection access to private Humanoid fields using Harmony
+/// </summary>
 public static class HumanoidFieldRefs
 {
     private const string CurrentAttackFieldName = "m_currentAttack";

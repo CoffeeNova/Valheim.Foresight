@@ -22,6 +22,9 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
     private readonly IZoneSystemWrapper _zoneSystemWrapper;
     private readonly IMathfWrapper _mathfWrapper;
 
+    /// <summary>
+    /// Creates a new difficulty multiplier calculator
+    /// </summary>
     public DifficultyMultiplierCalculator(
         ILogger logger,
         IPlayerWrapper playerWrapper,
@@ -36,6 +39,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         _mathfWrapper = mathfWrapper ?? throw new ArgumentNullException(nameof(mathfWrapper));
     }
 
+    /// <inheritdoc/>
     public float GetDamageMultiplier(Vector3 position)
     {
         var difficultyScale = GetWorldDifficultyMultiplier();
@@ -52,6 +56,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         return totalMultiplier;
     }
 
+    /// <inheritdoc/>
     public float GetWorldDifficultyMultiplier()
     {
         var scale = GetIncomingDamageFactor();
@@ -61,30 +66,23 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         return scale;
     }
 
+    /// <inheritdoc/>
     public float GetPlayerCountMultiplier(Vector3 position)
     {
         var playerCount = GetNearbyPlayerCount(position);
         var multiplier = 1.0f + (_mathfWrapper.Max(0, playerCount - 1) * DamagePerExtraPlayer);
 
-        _logger.LogDebug(
-            $"[{nameof(GetPlayerCountMultiplier)}] "
-                + $"players={playerCount}, multiplier={multiplier:F2}"
-        );
-
         return multiplier;
     }
 
+    /// <inheritdoc/>
     public int GetNearbyPlayerCount(Vector3 position)
     {
         var count = _playerWrapper.GetPlayersInRangeXZ(position, PlayerCountRadius);
-
-        _logger.LogDebug(
-            $"[{nameof(GetNearbyPlayerCount)}] Found {count} players within {PlayerCountRadius}m"
-        );
-
         return count;
     }
 
+    /// <inheritdoc/>
     public float GetIncomingDamageFactor()
     {
         try
@@ -118,6 +116,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         }
     }
 
+    /// <inheritdoc/>
     public float GetEnemyHealthFactor()
     {
         try
@@ -155,11 +154,15 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         }
     }
 
+    /// <summary>
+    /// Checks if a global key exists
+    /// </summary>
     public bool HasGlobalKey(string key)
     {
         return _zoneSystemWrapper.IsInitialized && _zoneSystemWrapper.GetGlobalKey(key);
     }
 
+    /// <inheritdoc/>
     List<string> IDifficultyMultiplierCalculator.GetAllGlobalKeys()
     {
         return _zoneSystemWrapper.GetGlobalKeys();

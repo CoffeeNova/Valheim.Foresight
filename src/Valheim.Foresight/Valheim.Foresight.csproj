@@ -99,6 +99,9 @@
     <Reference Include="gui_framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\gui_framework.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.10.0.1\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\Mono.Security.dll</HintPath>
@@ -127,6 +130,9 @@
     <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.dll</HintPath>
     </Reference>
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.ComponentModel.Composition.dll</HintPath>
     </Reference>
@@ -154,11 +160,20 @@
     <Reference Include="System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.IO.Compression.FileSystem.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Pipelines, Version=10.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Pipelines.10.0.1\lib\net462\System.IO.Pipelines.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\System.Runtime.Serialization.dll</HintPath>
@@ -427,6 +442,9 @@
     <Reference Include="UnityEngine.XRModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CoffeeNova.Valheim.ManagedReferences.1.2214.6\lib\net46\UnityEngine.XRModule.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet, Version=16.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.16.3.0\lib\net47\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
@@ -493,9 +511,27 @@ internal static class PluginInfoGenerated
     Condition="'$(ValheimForesightPublishPath)' != ''"
   >
     <Copy
-      SourceFiles="$(TargetDir)Valheim.Foresight.dll"
-      DestinationFiles="$(ValheimForesightPublishPath)\Valheim.Foresight.dll"
+      SourceFiles="$(TargetPath)"
+      DestinationFiles="$(ValheimForesightPublishPath)\$(TargetName).dll"
       OverwriteReadOnlyFiles="true"
+    />
+    <Copy
+      SourceFiles="$(TargetDir)$(TargetName).pdb"
+      DestinationFiles="$(ValheimForesightPublishPath)\$(TargetName).pdb"
+      OverwriteReadOnlyFiles="true"
+    />
+  </Target>
+  <Import
+    Project="..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets"
+    Condition="Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')"
+  />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error
+      Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')"
+      Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))"
     />
   </Target>
 </Project>

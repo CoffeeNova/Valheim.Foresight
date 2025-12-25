@@ -13,6 +13,7 @@ public sealed class ThreatResponseHintService : IThreatResponseHintService
     // todo: move to config
     private const float HighRiskRatio = 0.7f;
 
+    /// <inheritdoc/>
     public ThreatResponseHint GetHint(ThreatAssessment assessment)
     {
         if (assessment == null)

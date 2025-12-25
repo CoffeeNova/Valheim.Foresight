@@ -1,19 +1,24 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Valheim.Foresight.HarmonyRefs;
 using Valheim.Foresight.Models;
 
 namespace Valheim.Foresight.Patches;
 
-public static class EnemyHudPatch
+/// <summary>
+/// Harmony patch for EnemyHud to display threat information and attack castbars
+/// </summary>
+internal class EnemyHudPatch
 {
     private static readonly Color SafeColor = Color.white;
     private static readonly Color CautionColor = new(1f, 0.75f, 0.25f);
     private static readonly Color BlockLethalColor = new(1f, 0.5f, 0.1f);
     private static readonly Color DangerColor = new(1f, 0.2f, 0.2f);
 
+    /// <summary>
+    /// Postfix patch for EnemyHud.LateUpdate that renders threat indicators and castbars
+    /// </summary>
     internal static void LateUpdatePostfix(EnemyHud __instance)
     {
         var player = Player.m_localPlayer;
@@ -24,11 +29,13 @@ public static class EnemyHudPatch
         if (huds == null || huds.Count == 0)
             return;
 
+        // Clean up expired attacks
+        ValheimForesightPlugin.ActiveAttackTracker?.CleanupExpired();
+
         foreach (DictionaryEntry entry in huds)
         {
             var character = entry.Key as Character;
             var hudObj = entry.Value;
-
             if (character == null || hudObj == null)
                 continue;
 
@@ -62,6 +69,14 @@ public static class EnemyHudPatch
             }
 
             ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
+
+            // === RENDER ATTACK CASTBAR ===
+            var activeAttack = ValheimForesightPlugin.ActiveAttackTracker?.GetActiveAttack(
+                character
+            );
+            var hudParent = nameLabel.transform.parent ?? nameLabel.transform;
+            ValheimForesightPlugin.CastbarRenderer?.RenderCastbar(hudParent, activeAttack);
+            // ==============================
 
             if (ValheimForesightPlugin.InstanceDebugHudEnabled)
                 AppendDebugInfo(nameLabel, holder.originalName, assessment);

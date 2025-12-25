@@ -43,6 +43,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         _mathfWrapper = mathfWrapper ?? throw new ArgumentNullException(nameof(mathfWrapper));
     }
 
+    /// <inheritdoc/>
     public ThreatAssessment? CalculateThreat(Character enemy, Player player, bool detailedMode)
     {
         if (enemy == null || player == null)
@@ -91,6 +92,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         );
     }
 
+    /// <inheritdoc/>
     public ThreatLevel DetermineThreatLevel(float blockRatio, float parryRatio)
     {
         if (parryRatio >= 1.0f)
@@ -271,7 +273,10 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         var totalMult = _difficultyCalculator.GetDamageMultiplier(position);
 
         _logger.LogDebug(
-            $"Threat: {enemy.m_name} lvl{enemy.GetLevel()} dist={distance:F1}m, "
+            $"[{nameof(LogThreatCalculation)}] "
+                + $"name={enemy.m_name}, "
+                + $"lvl={enemy.GetLevel()}, "
+                + $"dist={distance:F1}m, "
                 + $"base={baseDamage:F1}, "
                 + $"worldDiff={worldDiff:F2}x, "
                 + $"players={playerCount} ({playerMult:F2}x), "

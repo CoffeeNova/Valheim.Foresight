@@ -11,9 +11,13 @@ public sealed class ParryDamageEstimator : DamageEstimatorBase
 {
     private const float BlockingSkillPercentPerLevel = 0.005f;
 
+    /// <summary>
+    /// Creates a new parry damage estimator
+    /// </summary>
     public ParryDamageEstimator(ILogger logger)
         : base(logger) { }
 
+    /// <inheritdoc/>
     protected override float ApplyActiveDefense(
         PlayerDefenseStats defenseStats,
         float physicalDamage

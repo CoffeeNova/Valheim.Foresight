@@ -18,6 +18,7 @@ public abstract class DamageEstimatorBase : IDamageEstimator
         Logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
     }
 
+    /// <inheritdoc/>
     public float EstimateEffectiveDamage(Player player, float rawDamage)
     {
         if (player == null || rawDamage <= 0f)
@@ -27,6 +28,7 @@ public abstract class DamageEstimatorBase : IDamageEstimator
         return EstimateEffectiveDamage(defenseStats, rawDamage);
     }
 
+    /// <inheritdoc/>
     public float EstimateEffectiveDamage(PlayerDefenseStats defenseStats, float rawDamage)
     {
         if (rawDamage <= 0f)

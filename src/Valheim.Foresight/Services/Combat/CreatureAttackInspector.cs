@@ -15,6 +15,9 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
     private readonly IZNetSceneWrapper _zNetSceneWrapper;
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Creates a new creature attack inspector
+    /// </summary>
     public CreatureAttackInspector(IZNetSceneWrapper zNetSceneWrapper, ILogger logger)
     {
         _zNetSceneWrapper =
@@ -22,6 +25,7 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <inheritdoc/>
     public float GetMaxAttackByPrefabName(string prefabName)
     {
         if (string.IsNullOrEmpty(prefabName) || _zNetSceneWrapper == null)
@@ -31,6 +35,7 @@ public sealed class CreatureAttackInspector : ICreatureAttackInspector
         return prefab == null ? 0f : InspectPrefabForMaxDamage(prefab);
     }
 
+    /// <inheritdoc/>
     public float GetMaxAttackForCharacter(Character character)
     {
         if (character == null)

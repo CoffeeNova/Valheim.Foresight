@@ -6,6 +6,9 @@ using TMPro;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
+/// <summary>
+/// Provides access to private fields of EnemyHud using Harmony
+/// </summary>
 internal static class EnemyHudPrivateAccess
 {
     private static readonly FieldInfo HudsField =
@@ -19,9 +22,15 @@ internal static class EnemyHudPrivateAccess
     private static readonly AccessTools.FieldRef<object, TextMeshProUGUI> NameRef =
         AccessTools.FieldRefAccess<TextMeshProUGUI>(HudDataType, "m_name");
 
+    /// <summary>
+    /// Gets the m_huds dictionary from EnemyHud instance
+    /// </summary>
     public static IDictionary? GetHudsAsDictionary(EnemyHud instance) =>
         HudsField.GetValue(instance) as IDictionary;
 
+    /// <summary>
+    /// Tries to get the name label from HudData object
+    /// </summary>
     public static TextMeshProUGUI? TryGetNameLabel(object? hudData)
     {
         if (hudData is null || !HudDataType.IsInstanceOfType(hudData))

@@ -8,5 +8,8 @@ namespace Valheim.Foresight.Services.Combat.Interfaces;
 /// </summary>
 public interface IThreatResponseHintService
 {
+    /// <summary>
+    /// Gets the recommended response hint based on threat assessment
+    /// </summary>
     ThreatResponseHint GetHint(ThreatAssessment assessment);
 }

@@ -3,6 +3,9 @@ using HarmonyLib;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
+/// <summary>
+/// Provides reflection access to Humanoid methods using Harmony
+/// </summary>
 public static class HumanoidMethodRefs
 {
     private const string GetRightItemMethodName = "GetRightItem";

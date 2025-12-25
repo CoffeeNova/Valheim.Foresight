@@ -8,6 +8,8 @@ using Valheim.Foresight.Configuration;
 using Valheim.Foresight.Core;
 using Valheim.Foresight.Models;
 using Valheim.Foresight.Patches;
+using Valheim.Foresight.Services.Castbar;
+using Valheim.Foresight.Services.Castbar.Interfaces;
 using Valheim.Foresight.Services.Combat;
 using Valheim.Foresight.Services.Combat.Interfaces;
 using Valheim.Foresight.Services.Combat.Wrappers;
@@ -29,8 +31,14 @@ namespace Valheim.Foresight;
 public sealed class ValheimForesightPlugin : BaseUnityPlugin
 {
     internal static ILogger Log = null!;
-    public static bool InstanceDebugHudEnabled => _instance?._config.DebugHudEnabled.Value ?? false;
-    public static ForesightConfiguration? ForesightConfig => _instance?._config;
+    public static bool InstanceDebugHudEnabled => _instance?._config.DebugEnabled.Value ?? false;
+    public static IForesightConfiguration? ForesightConfig => _instance?._config;
+    public static IAttackOverridesConfig? AttackOverridesConfig => _instance?._attackConfig;
+    public static IActiveAttackTracker? ActiveAttackTracker { get; private set; }
+    public static IUnityCastbarRenderer? CastbarRenderer { get; private set; }
+    public static IAttackTimingService? AttackTimingService { get; private set; }
+
+    private static IThreatIconSpriteProvider? _spriteProvider;
 
     internal static IThreatResponseHintService ThreatResponseHintService =>
         _instance?._threatResponseHintService
@@ -39,10 +47,12 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     internal static IThreatHudIconRenderer? HudIconRenderer => _instance?._hudIconRenderer;
 
     private static ValheimForesightPlugin? _instance;
+    private static Harmony? _harmony;
 
     private readonly Dictionary<Character?, ThreatAssessment?> _threatCache = new();
 
     private ForesightConfiguration _config = null!;
+    private AttackOverridesConfig _attackConfig = null!;
     private IThreatCalculationService _threatService = null!;
     private IDifficultyMultiplierCalculator _difficultyCalculator = null!;
     private IThreatResponseHintService _threatResponseHintService = null!;
@@ -51,6 +61,9 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     private float _playerLogTimer;
     private float _enemyUpdateTimer;
 
+    /// <summary>
+    /// Tries to get the cached threat assessment for a character
+    /// </summary>
     public static bool TryGetThreatAssessment(
         Character? character,
         out ThreatAssessment? assessment
@@ -77,15 +90,42 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         Log.LogInfo($"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} loaded");
     }
 
+    private void OnDestroy()
+    {
+        Log.LogInfo(
+            $"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} unloading..."
+        );
+
+        _harmony?.UnpatchSelf();
+        _config.SettingsChanged -= OnConfigurationChanged;
+        _threatCache?.Clear();
+        CastbarRenderer?.Dispose();
+        CastbarRenderer = null;
+        _spriteProvider?.Dispose();
+        _spriteProvider = null;
+        AttackTimingService?.Dispose();
+        AttackTimingService = null;
+        if (_instance == this)
+        {
+            _instance = null;
+        }
+
+        Log.LogInfo(
+            $"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} unloaded"
+        );
+        Log = null!;
+    }
+
     private void InitializeServices()
     {
         _config = new ForesightConfiguration(Config);
         _config.SettingsChanged += OnConfigurationChanged;
+        _attackConfig = new AttackOverridesConfig(Config);
 
         Log = new ForesightLogger(Logger)
         {
             IsLogsEnabled = _config.IsLogsEnabled.Value,
-            IsDebugLogsEnabled = _config.DebugHudEnabled.Value,
+            IsDebugLogsEnabled = _config.DebugEnabled.Value,
         };
 
         var blockEstimator = new BlockDamageEstimator(Log);
@@ -124,19 +164,21 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         );
 
         _threatResponseHintService = new ThreatResponseHintService();
-        //var resourcesWrapper = new ResourcesWrapper();
-        // var spriteProvider = new UnityResourcesThreatIconSpriteProvider (resourcesWrapper, Log);
         var asm = typeof(ValheimForesightPlugin).Assembly;
         var embedded = new AssemblyEmbeddedResourceStreamProvider(asm);
-        IThreatIconSpriteProvider spriteProvider = new EmbeddedPngSpriteProvider(embedded, Log);
-        _hudIconRenderer = new UnityThreatHudIconRenderer(spriteProvider);
+        _spriteProvider = new EmbeddedPngSpriteProvider(embedded, Log);
+        _hudIconRenderer = new UnityThreatHudIconRenderer(_spriteProvider);
+
+        ActiveAttackTracker = new ActiveAttackTracker();
+        CastbarRenderer = new UnityCastbarRenderer(Log, _config);
+        AttackTimingService = new AttackTimingService(Log, _config, _attackConfig);
     }
 
     private void ApplyHarmonyPatches()
     {
         var harmony = new Harmony(PluginInfoGenerated.PluginGuid);
         harmony.PatchAll();
-
+        _harmony = harmony;
         var target = AccessTools.Method(typeof(EnemyHud), "LateUpdate");
         var postfix = AccessTools.Method(typeof(EnemyHudPatch), "LateUpdatePostfix");
 
@@ -159,6 +201,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     {
         _playerLogTimer += Time.deltaTime;
         _enemyUpdateTimer += Time.deltaTime;
+        _enemyUpdateTimer += Time.deltaTime;
 
         if (_playerLogTimer >= 1f)
         {
@@ -173,6 +216,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         }
 
         CleanupThreatCache();
+        AttackTimingService?.Update();
     }
 
     private void LogPlayerHealth()
@@ -288,6 +332,6 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     private void OnConfigurationChanged(object? sender, EventArgs e)
     {
         Log.IsLogsEnabled = _config.IsLogsEnabled.Value;
-        Log.IsDebugLogsEnabled = _config.DebugHudEnabled.Value;
+        Log.IsDebugLogsEnabled = _config.DebugEnabled.Value;
     }
 }

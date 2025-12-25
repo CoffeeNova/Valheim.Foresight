@@ -3,6 +3,9 @@ using HarmonyLib;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
+/// <summary>
+/// Provides reflection access to Player methods using Harmony
+/// </summary>
 public static class PlayerMethodRefs
 {
     private const string GetCurrentBlockerMethodName = "GetCurrentBlocker";

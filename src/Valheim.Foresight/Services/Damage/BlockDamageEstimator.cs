@@ -12,9 +12,13 @@ public sealed class BlockDamageEstimator : DamageEstimatorBase
 {
     private const float BlockingSkillPercentPerLevel = 0.005f;
 
+    /// <summary>
+    /// Creates a new block damage estimator
+    /// </summary>
     public BlockDamageEstimator(ILogger logger)
         : base(logger) { }
 
+    /// <inheritdoc/>
     protected override float ApplyActiveDefense(
         PlayerDefenseStats defenseStats,
         float physicalDamage

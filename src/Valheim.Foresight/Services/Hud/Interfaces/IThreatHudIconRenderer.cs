@@ -8,5 +8,8 @@ namespace Valheim.Foresight.Services.Hud.Interfaces;
 /// </summary>
 public interface IThreatHudIconRenderer
 {
+    /// <summary>
+    /// Renders the threat response icon on the enemy HUD
+    /// </summary>
     void RenderIcon(TextMeshProUGUI? hud, ThreatResponseHint hint);
 }

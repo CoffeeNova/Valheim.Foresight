@@ -46,6 +46,7 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
         return sprite;
     }
 
+    /// <inheritdoc/>
     public Sprite? GetIcon(ThreatResponseHint hint)
     {
         if (!_cache.TryGetValue(hint, out var sprite))
@@ -59,4 +60,6 @@ public sealed class UnityResourcesThreatIconSpriteProvider : IThreatIconSpritePr
         );
         return sprite;
     }
+
+    public void Dispose() { }
 }
