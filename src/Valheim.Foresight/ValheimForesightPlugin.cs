@@ -34,6 +34,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     public static bool InstanceDebugHudEnabled => _instance?._config.DebugEnabled.Value ?? false;
     public static IForesightConfiguration? ForesightConfig => _instance?._config;
     public static IAttackOverridesConfig? AttackOverridesConfig => _instance?._attackConfig;
+    public static IAttackTimingsConfig? AttackTimingsConfig => _instance?._attackTimingsConfig;
     public static IActiveAttackTracker? ActiveAttackTracker { get; private set; }
     public static IUnityCastbarRenderer? CastbarRenderer { get; private set; }
     public static IAttackTimingService? AttackTimingService { get; private set; }
@@ -53,6 +54,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private ForesightConfiguration _config = null!;
     private AttackOverridesConfig _attackConfig = null!;
+    private AttackTimingsConfig _attackTimingsConfig = null!;
     private IThreatCalculationService _threatService = null!;
     private IDifficultyMultiplierCalculator _difficultyCalculator = null!;
     private IThreatResponseHintService _threatResponseHintService = null!;
@@ -99,6 +101,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         _harmony?.UnpatchSelf();
         _config.SettingsChanged -= OnConfigurationChanged;
         _threatCache?.Clear();
+        _attackTimingsConfig?.SaveToDisk();
         CastbarRenderer?.Dispose();
         CastbarRenderer = null;
         _spriteProvider?.Dispose();
@@ -171,7 +174,15 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         ActiveAttackTracker = new ActiveAttackTracker();
         CastbarRenderer = new UnityCastbarRenderer(Log, _config);
-        AttackTimingService = new AttackTimingService(Log, _config, _attackConfig);
+
+        // Create AttackTimingService first, then AttackTimingsConfig with ConfigFile and callback
+        var attackTimingService = new AttackTimingService(Log, _config, _attackConfig);
+        _attackTimingsConfig = new AttackTimingsConfig(
+            Config,
+            attackTimingService.OnTimingResetRequested
+        );
+        attackTimingService.SetTimingsConfig(_attackTimingsConfig);
+        AttackTimingService = attackTimingService;
     }
 
     private void ApplyHarmonyPatches()
@@ -217,6 +228,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         CleanupThreatCache();
         AttackTimingService?.Update();
+        _attackTimingsConfig?.Update(Time.deltaTime);
     }
 
     private void LogPlayerHealth()

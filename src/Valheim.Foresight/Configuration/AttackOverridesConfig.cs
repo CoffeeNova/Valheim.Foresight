@@ -18,7 +18,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
         "TentaRoot::attack->punch,Dragon::attack_breath->cold breath";
 
     private const string NoParryDefaultValue =
-        "Bonemass::aoe,Bonemass::spawn,Dragon::Taunt,Dragon::attack_breath";
+        "Bonemass::aoe,Bonemass::spawn,Dragon::attack_taunt,Dragon::attack_breath,GoblinKing::nova,GoblinKing::taunt";
 
     private Dictionary<AttackKey, AttackOverrideData>? _cachedOverrides;
     private Dictionary<AttackKey, string>? _cachedMappings;

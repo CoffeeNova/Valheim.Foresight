@@ -14,6 +14,7 @@ internal class EnemyHudPatch
     private static readonly Color SafeColor = Color.white;
     private static readonly Color CautionColor = new(1f, 0.75f, 0.25f);
     private static readonly Color BlockLethalColor = new(1f, 0.5f, 0.1f);
+
     private static readonly Color DangerColor = new(1f, 0.2f, 0.2f);
 
     /// <summary>

@@ -45,6 +45,11 @@ public class AttackTimingStats
     public int SampleCount { get; set; }
     public long LastUpdatedUtc { get; set; }
 
+    /// <summary>
+    /// If true, learning is enabled for this attack - timing will be updated from new samples
+    /// </summary>
+    public bool LearningEnabled { get; set; }
+
     public AttackTimingStats() { }
 
     /// <summary>
@@ -56,6 +61,7 @@ public class AttackTimingStats
         Variance = 0f;
         SampleCount = 1;
         LastUpdatedUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        LearningEnabled = true;
     }
 
     /// <summary>
