@@ -33,7 +33,6 @@ public sealed class AttackTimingService : IAttackTimingService
     private readonly IForesightConfiguration _config;
     private readonly IAttackOverridesConfig _overridesConfig;
 
-    private IAttackTimingsConfig? _timingsConfig;
     private float _timeSinceLastSave;
     private bool _isDirty;
 
@@ -67,28 +66,11 @@ public sealed class AttackTimingService : IAttackTimingService
     }
 
     /// <summary>
-    /// Sets the timings config and initializes the UI
+    /// Resets a timing to its prelearned value
     /// </summary>
-    public void SetTimingsConfig(IAttackTimingsConfig timingsConfig)
+    public void ResetToPrelearned(AttackKey key)
     {
-        _timingsConfig = timingsConfig;
-        InitializeConfigUI();
-    }
-
-    /// <summary>
-    /// Public method that can be passed as a callback for reset requests
-    /// </summary>
-    public void OnTimingResetRequested(AttackKey key)
-    {
-        OnTimingReset(key);
-    }
-
-    /// <summary>
-    /// Handler for when a timing is reset through the Configuration Manager
-    /// </summary>
-    private void OnTimingReset(AttackKey key)
-    {
-        _logger.LogInfo($"[{nameof(OnTimingReset)}] Resetting {key} to prelearned value");
+        _logger.LogInfo($"[{nameof(ResetToPrelearned)}] Resetting {key} to prelearned value");
 
         // Check if we have a prelearned value
         if (_prelearnedTimings.TryGetValue(key, out var prelearnedStats))
@@ -100,27 +82,18 @@ public sealed class AttackTimingService : IAttackTimingService
                 Variance = prelearnedStats.Variance,
                 SampleCount = prelearnedStats.SampleCount,
                 LastUpdatedUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                LearningEnabled = prelearnedStats.LearningEnabled, // Copy LearningEnabled flag from prelearned
+                LearningEnabled = prelearnedStats.LearningEnabled,
             };
-
-            // Update the UI config with prelearned values
-            _timingsConfig?.ResetToPrelearned(key, prelearnedStats.MeanHitOffsetSeconds);
-            _timingsConfig?.UpdateAttackTiming(
-                key,
-                prelearnedStats.MeanHitOffsetSeconds,
-                prelearnedStats.SampleCount,
-                prelearnedStats.LearningEnabled
-            );
 
             _isDirty = true;
             _logger.LogInfo(
-                $"[{nameof(OnTimingReset)}] Reset {key} to prelearned value: {prelearnedStats.MeanHitOffsetSeconds:F3}s, LearningEnabled={prelearnedStats.LearningEnabled}"
+                $"[{nameof(ResetToPrelearned)}] Reset {key} to prelearned value: {prelearnedStats.MeanHitOffsetSeconds:F3}s, LearningEnabled={prelearnedStats.LearningEnabled}"
             );
         }
         else
         {
             _logger.LogWarning(
-                $"[{nameof(OnTimingReset)}] No prelearned value found for {key}, cannot reset"
+                $"[{nameof(ResetToPrelearned)}] No prelearned value found for {key}, cannot reset"
             );
         }
     }
@@ -147,9 +120,6 @@ public sealed class AttackTimingService : IAttackTimingService
             stats = new AttackTimingStats(hitOffset);
             _timings[key] = stats;
             _logger.LogDebug($"[{nameof(RecordHit)}] New timing: {key} -> {hitOffset:F3}s");
-
-            // Register in UI config
-            _timingsConfig?.RegisterAttackTiming(key, hitOffset, 1, true);
         }
         else
         {
@@ -166,14 +136,6 @@ public sealed class AttackTimingService : IAttackTimingService
             _logger.LogDebug(
                 $"[{nameof(RecordHit)}] Updated {key}: mean={stats.MeanHitOffsetSeconds:F3}s, samples={stats.SampleCount}"
             );
-
-            // Update UI config
-            _timingsConfig?.UpdateAttackTiming(
-                key,
-                stats.MeanHitOffsetSeconds,
-                stats.SampleCount,
-                stats.LearningEnabled
-            );
         }
 
         _isDirty = true;
@@ -187,14 +149,7 @@ public sealed class AttackTimingService : IAttackTimingService
 
         var key = CreateKey(attacker, attack);
 
-        // Priority 1: Check UI configuration (user can manually override)
-        var configuredTiming = _timingsConfig?.GetConfiguredTiming(key);
-        if (configuredTiming.HasValue)
-        {
-            return configuredTiming.Value;
-        }
-
-        // Priority 2: Check learned timings
+        // Priority 1: Check learned timings
         if (
             _timings.TryGetValue(key, out var stats)
             && stats.SampleCount >= MinSamplesForPrediction
@@ -203,13 +158,13 @@ public sealed class AttackTimingService : IAttackTimingService
             return stats.MeanHitOffsetSeconds;
         }
 
-        // Priority 3: Check prelearned timings
+        // Priority 2: Check prelearned timings
         if (_prelearnedTimings.TryGetValue(key, out var prelearnedStats))
         {
             return prelearnedStats.MeanHitOffsetSeconds;
         }
 
-        // Priority 4: Fall back to default config value
+        // Priority 3: Fall back to default config value
         return _config.ParryIndicatorStartPosition.Value;
     }
 
@@ -446,33 +401,6 @@ public sealed class AttackTimingService : IAttackTimingService
         {
             _logger.LogError(
                 $"[{nameof(CopyPrelearnedToMain)}] Failed to copy prelearned data: {ex.Message}"
-            );
-        }
-    }
-
-    private void InitializeConfigUI()
-    {
-        if (_timingsConfig == null)
-        {
-            _logger.LogWarning(
-                $"[{nameof(InitializeConfigUI)}] Timings config not set, skipping UI initialization"
-            );
-            return;
-        }
-
-        try
-        {
-            // Load all timings into UI configuration
-            _timingsConfig.LoadExistingTimings(_timings);
-
-            _logger.LogInfo(
-                $"[{nameof(InitializeConfigUI)}] Initialized UI configuration with {_timings.Count} attack timings"
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                $"[{nameof(InitializeConfigUI)}] Failed to initialize UI configuration: {ex.Message}"
             );
         }
     }
