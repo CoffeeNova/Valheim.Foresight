@@ -4,6 +4,7 @@ using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 using Valheim.Foresight.Autogen;
+using Valheim.Foresight.Components;
 using Valheim.Foresight.Configuration;
 using Valheim.Foresight.Core;
 using Valheim.Foresight.Models;
@@ -39,6 +40,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     public static IAttackTimingService? AttackTimingService { get; private set; }
 
     private static IThreatIconSpriteProvider? _spriteProvider;
+    private static AttackTimingEditorManager? _editorManager;
 
     internal static IThreatResponseHintService ThreatResponseHintService =>
         _instance?._threatResponseHintService
@@ -105,6 +107,13 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         _spriteProvider = null;
         AttackTimingService?.Dispose();
         AttackTimingService = null;
+
+        if (_editorManager != null)
+        {
+            Destroy(_editorManager.gameObject);
+            _editorManager = null;
+        }
+
         if (_instance == this)
         {
             _instance = null;
@@ -174,6 +183,41 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         // Create AttackTimingService - no UI config needed
         AttackTimingService = new AttackTimingService(Log, _config, _attackConfig);
+
+        // Create UI manager for attack timing editor
+        InitializeEditorUI();
+    }
+
+    private void InitializeEditorUI()
+    {
+        if (AttackTimingService == null)
+        {
+            Log.LogError("[InitializeEditorUI] AttackTimingService not initialized");
+            return;
+        }
+
+        // Parse the configured key
+        var keyString = _config.TimingEditorToggleKey.Value;
+        if (!System.Enum.TryParse<KeyCode>(keyString, true, out var toggleKey))
+        {
+            Log.LogWarning($"[InitializeEditorUI] Invalid key '{keyString}', using default F7");
+            toggleKey = KeyCode.F7;
+        }
+
+        var go = new GameObject("AttackTimingEditorManager");
+        DontDestroyOnLoad(go);
+        _editorManager = go.AddComponent<AttackTimingEditorManager>();
+        _editorManager.Initialize(
+            Log,
+            AttackTimingService,
+            (IAttackTimingDataProvider)AttackTimingService,
+            _config,
+            toggleKey
+        );
+
+        Log.LogInfo(
+            $"[InitializeEditorUI] Attack Timing Editor UI initialized ({toggleKey} to toggle, Global Learning: {_config.AttackTimingLearningEnabled.Value})"
+        );
     }
 
     private void ApplyHarmonyPatches()

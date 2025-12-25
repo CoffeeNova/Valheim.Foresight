@@ -16,6 +16,7 @@ public interface IActiveAttackTracker
         float duration,
         float startTime,
         float? predictedHitTime,
+        string? animationName,
         bool hideParryIndicator
     );
 

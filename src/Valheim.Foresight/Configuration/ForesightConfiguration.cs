@@ -25,6 +25,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
     public ConfigEntry<float> AttackCastbarOffsetY { get; }
     public ConfigEntry<float> ParryIndicatorStartPosition { get; }
     public ConfigEntry<float> AttackCastbarParryWindow { get; }
+    public ConfigEntry<string> TimingEditorToggleKey { get; }
+    public ConfigEntry<bool> AttackTimingLearningEnabled { get; }
 
     public event EventHandler? SettingsChanged;
 
@@ -154,6 +156,20 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             )
         );
 
+        TimingEditorToggleKey = _configFile.Bind(
+            "UI",
+            "TimingEditorToggleKey",
+            "F7",
+            "Key to toggle the Attack Timing Editor UI. Use Unity KeyCode names (e.g., F7, F8, Insert)."
+        );
+
+        AttackTimingLearningEnabled = _configFile.Bind(
+            "UI",
+            "AttackTimingLearningEnabled",
+            true,
+            "Enable automatic learning of attack timings. When disabled, the mod will not update timings from observed attacks."
+        );
+
         BindConfigChangeHandlers();
     }
 
@@ -175,6 +191,9 @@ public sealed class ForesightConfiguration : IForesightConfiguration
 
         ParryIndicatorStartPosition.SettingChanged += OnSettingChanged;
         AttackCastbarParryWindow.SettingChanged += OnSettingChanged;
+
+        TimingEditorToggleKey.SettingChanged += OnSettingChanged;
+        AttackTimingLearningEnabled.SettingChanged += OnSettingChanged;
     }
 
     private void OnSettingChanged(object? sender, EventArgs e)

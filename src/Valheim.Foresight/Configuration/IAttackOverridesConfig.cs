@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿using System.Collections.Generic;
+using BepInEx.Configuration;
 
 namespace Valheim.Foresight.Configuration;
 
@@ -23,9 +24,10 @@ public interface IAttackOverridesConfig
     bool ShouldIgnoreAttack(string creaturePrefab, string attackAnimation);
 
     /// <summary>
-    /// Gets the mapped animation name for the attack, if it exists
+    /// Gets the mapped animation names for the attack, if they exist.
+    /// Returns an array of possible animation names to check against.
     /// </summary>
-    string? GetMappedAnimationName(string creaturePrefab, string attackAnimation);
+    IReadOnlyList<string>? GetMappedAnimationNames(string creaturePrefab, string attackAnimation);
 
     /// <summary>
     /// Checks if the parry indicator should be hidden for this attack (castbar will be shown)

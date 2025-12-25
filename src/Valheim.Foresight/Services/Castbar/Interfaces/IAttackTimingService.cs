@@ -1,4 +1,5 @@
 ﻿using System;
+using Valheim.Foresight.Models;
 
 namespace Valheim.Foresight.Services.Castbar.Interfaces;
 
@@ -31,6 +32,11 @@ public interface IAttackTimingService : IDisposable
     /// Checks if the parry indicator should be hidden for this attack
     /// </summary>
     bool ShouldHideParryIndicator(Character? attacker, Attack? attack);
+
+    /// <summary>
+    /// Resets a timing to its prelearned value
+    /// </summary>
+    void ResetToPrelearned(AttackKey key);
 
     /// <summary>
     /// Updates every frame for auto-saving

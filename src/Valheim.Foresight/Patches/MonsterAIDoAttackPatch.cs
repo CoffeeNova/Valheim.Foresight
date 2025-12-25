@@ -14,6 +14,18 @@ namespace Valheim.Foresight.Patches;
 [HarmonyPatch(typeof(MonsterAI), "DoAttack")]
 internal class MonsterAIDoAttackPatch
 {
+    private readonly struct AnimationDurationResult
+    {
+        public AnimationDurationResult(float duration, string? animationName)
+        {
+            Duration = duration;
+            AnimationName = animationName;
+        }
+
+        public float Duration { get; }
+        public string? AnimationName { get; }
+    }
+
     /// <summary>
     /// Prefix patch that captures attack start and initiates timing tracking
     /// </summary>
@@ -54,7 +66,14 @@ internal class MonsterAIDoAttackPatch
 
         if (overriddenDuration.HasValue)
         {
-            TriggerParryIndicator(character, attack, overriddenDuration.Value, 0, attackStartTime);
+            TriggerParryIndicator(
+                character,
+                attack,
+                overriddenDuration.Value,
+                0,
+                attackStartTime,
+                attack.m_attackAnimation
+            );
 
             ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(MonsterAIDoAttackPatch)}] Using overridden duration {overriddenDuration.Value:F2}s "
@@ -77,20 +96,20 @@ internal class MonsterAIDoAttackPatch
     )
     {
         const int maxAttempts = 30;
-        float? duration = null;
+        AnimationDurationResult? animationResult = null;
 
         var framesSkipped = 0;
         for (var i = 0; i < maxAttempts; i++)
         {
-            duration = GetNextAttackAnimationDuration(monster, attack);
-            if (duration.HasValue)
+            animationResult = GetNextAttackAnimationDuration(monster, attack);
+            if (animationResult.HasValue)
             {
                 framesSkipped = i;
                 break;
             }
 
-            duration = GetCurrentAttackAnimationDuration(monster, attack);
-            if (duration.HasValue)
+            animationResult = GetCurrentAttackAnimationDuration(monster, attack);
+            if (animationResult.HasValue)
             {
                 framesSkipped = i;
                 break;
@@ -99,12 +118,12 @@ internal class MonsterAIDoAttackPatch
             yield return null;
         }
 
-        if (duration.HasValue)
+        if (animationResult.HasValue)
         {
             var elapsedTime = Time.time - attackStartTime;
-            var adjustedDuration = Mathf.Max(0.01f, duration.Value - elapsedTime);
+            var adjustedDuration = Mathf.Max(0.01f, animationResult.Value.Duration - elapsedTime);
             ValheimForesightPlugin.Log.LogDebug(
-                $"[{nameof(AnimationDurationCoroutine)}] Original duration: {duration.Value:F3}s, "
+                $"[{nameof(AnimationDurationCoroutine)}] Original duration: {animationResult.Value.Duration:F3}s, "
                     + $"elapsed time: {elapsedTime:F3}s ({framesSkipped} frames), "
                     + $"adjusted duration: {adjustedDuration:F3}s"
             );
@@ -113,7 +132,8 @@ internal class MonsterAIDoAttackPatch
                 attack,
                 adjustedDuration,
                 framesSkipped,
-                attackStartTime
+                attackStartTime,
+                animationResult.Value.AnimationName
             );
         }
         else
@@ -124,7 +144,10 @@ internal class MonsterAIDoAttackPatch
         }
     }
 
-    private static float? GetCurrentAttackAnimationDuration(MonsterAI monster, Attack attack)
+    private static AnimationDurationResult? GetCurrentAttackAnimationDuration(
+        MonsterAI monster,
+        Attack attack
+    )
     {
         var character = MonsterAIFieldRefs.CharacterRef?.Invoke(monster);
         if (!character)
@@ -143,7 +166,7 @@ internal class MonsterAIDoAttackPatch
         // comment out
         // var clipInfo = animator.GetCurrentAnimatorClipInfo(0);
         // ValheimForesightPlugin.Log.LogDebug(
-        //     $"[{nameof(GetCurrentAttackAnimationDuration)}] "
+        //     $"[CURRENT CLIPS] "
         //         + $"{string.Join(" |", clipInfo
         //         .Select(x => $"name:{x.clip.name}, length:{x.clip.length}"))}"
         // );
@@ -163,10 +186,13 @@ internal class MonsterAIDoAttackPatch
         var totalSpeed = animator.speed * stateInfo.speed * stateInfo.speedMultiplier;
         var duration = stateInfo.length / Mathf.Max(0.01f, totalSpeed);
 
-        return duration;
+        return new AnimationDurationResult(duration, animationName);
     }
 
-    private static float? GetNextAttackAnimationDuration(MonsterAI monster, Attack attack)
+    private static AnimationDurationResult? GetNextAttackAnimationDuration(
+        MonsterAI monster,
+        Attack attack
+    )
     {
         var character = MonsterAIFieldRefs.CharacterRef?.Invoke(monster);
         if (!character)
@@ -183,11 +209,11 @@ internal class MonsterAIDoAttackPatch
         );
 
         // uncomment out
-        // for (int i = 0; i < animator.layerCount; i++)
+        // for (var i = 0; i < animator.layerCount; i++)
         // {
         //     var clipInfo = animator.GetNextAnimatorClipInfo(i);
         //     ValheimForesightPlugin.Log.LogDebug(
-        //         $"[{nameof(GetNextAttackAnimationDuration)}] layer: {i} "
+        //         $"[NEXT CLIPS] layer: {i} "
         //             + $"{string.Join(" |", clipInfo
         //             .Select(x => $"name:{x.clip.name}, length:{x.clip.length}"))}"
         //     );
@@ -205,10 +231,12 @@ internal class MonsterAIDoAttackPatch
         if (!AlignAndCompareNames(monster, attack, animationName))
             return null;
 
-        var totalSpeed = animator.speed * stateInfo.speed * stateInfo.speedMultiplier;
+        var totalSpeed =
+            animator.speed
+            /** stateInfo.speed*/* stateInfo.speedMultiplier;
         var duration = stateInfo.length / Mathf.Max(0.01f, totalSpeed);
 
-        return duration;
+        return new AnimationDurationResult(duration, animationName);
     }
 
     private static bool AlignAndCompareNames(
@@ -229,25 +257,36 @@ internal class MonsterAIDoAttackPatch
             return false;
 
         var prefabName = character.GetPrefabName();
-        var mappedName = ValheimForesightPlugin.AttackOverridesConfig?.GetMappedAnimationName(
+        var mappedNames = ValheimForesightPlugin.AttackOverridesConfig?.GetMappedAnimationNames(
             prefabName,
             attackAnimationName!
         );
 
-        if (!string.IsNullOrEmpty(mappedName))
+        if (mappedNames is { Count: > 0 })
         {
-            var normalizedMapped = mappedName!
-                .Replace("_", string.Empty)
-                .Replace(" ", string.Empty);
             var normalizedState = stateInfoAnimationName!
                 .Replace("_", string.Empty)
                 .Replace(" ", string.Empty);
 
-            return string.Equals(
-                normalizedMapped,
-                normalizedState,
-                StringComparison.OrdinalIgnoreCase
-            );
+            foreach (var mappedName in mappedNames)
+            {
+                var normalizedMapped = mappedName
+                    .Replace("_", string.Empty)
+                    .Replace(" ", string.Empty);
+
+                if (
+                    string.Equals(
+                        normalizedMapped,
+                        normalizedState,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         var normalizedAttack = attackAnimationName!
@@ -257,7 +296,6 @@ internal class MonsterAIDoAttackPatch
         var normalizedCurrent = stateInfoAnimationName!
             .Replace("_", string.Empty)
             .Replace(" ", string.Empty);
-        ;
 
         var namesAreEqual = string.Equals(
             normalizedAttack,
@@ -312,7 +350,8 @@ internal class MonsterAIDoAttackPatch
         Attack attack,
         float duration,
         int framesSkiped,
-        float attackStartTime
+        float attackStartTime,
+        string? animationName
     )
     {
         var predictedHitTime = ValheimForesightPlugin.AttackTimingService?.GetPredictedHitTime(
@@ -330,12 +369,14 @@ internal class MonsterAIDoAttackPatch
             duration,
             attackStartTime,
             predictedHitTime,
+            animationName,
             hideParryIndicator
         );
 
         ValheimForesightPlugin.Log.LogDebug(
             $"[{nameof(TriggerParryIndicator)}] Enemy {attacker.m_name} started attack, duration: {duration:F2}s, "
-                + $"animation: {attack.m_attackAnimation}, frames skiped: {framesSkiped}, predicted_hit={predictedHitTime}, "
+                + $"animation: {attack.m_attackAnimation}, resolvedAnimation: {animationName ?? "null"}, "
+                + $"frames skiped: {framesSkiped}, predicted_hit={predictedHitTime}, "
                 + $"hide_parry: {hideParryIndicator}"
         );
     }

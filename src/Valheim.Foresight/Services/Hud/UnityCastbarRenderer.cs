@@ -260,7 +260,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             text.font = existingFont;
         }
 
-        text.text = "";
+        text.text = string.Empty;
         text.fontSize = 12; // Base size
         text.fontSizeMin = 6; // Minimum size
         text.fontSizeMax = 14; // Maximum size
@@ -299,7 +299,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             text.font = existingFont;
         }
 
-        text.text = "";
+        text.text = string.Empty;
         text.fontSize = 12; // Base size
         text.fontSizeMin = 6; // Minimum size
         text.fontSizeMax = 14; // Maximum size
@@ -435,14 +435,14 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         {
             fillImage.fillAmount = 0f;
 
-            if (parryIndicator != null)
+            if (parryIndicator is not null)
                 parryIndicator.SetActive(false);
 
-            if (attackNameText != null)
-                attackNameText.text = "";
+            if (attackNameText is not null)
+                attackNameText.text = string.Empty;
 
-            if (timerText != null)
-                timerText.text = "";
+            if (timerText is not null)
+                timerText.text = string.Empty;
 
             return;
         }

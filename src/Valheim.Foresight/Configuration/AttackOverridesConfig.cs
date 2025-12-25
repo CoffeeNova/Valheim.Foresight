@@ -14,14 +14,30 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
     private const string SectionName = "Attack Overrides";
     private const string OverrideDefaultValue = "gd_king::stomp=3.0";
     private const string IgnoreDefaultValue = "gd_king::spawn,gd_king::scream";
+
     private const string MappingDefaultValue =
-        "TentaRoot::attack->punch,Dragon::attack_breath->cold breath";
+        "TentaRoot::attack->punch,Dragon::attack_breath->cold breath,"
+        + "Fenring_Cultist_Hildir::attack_claw_double->attack_doubleclaw,"
+        + "GoblinBruteBros::attack_cast->Fireball,"
+        + "GoblinShaman_Hildir::attack_protect->cast protect,"
+        + "GoblinShaman_Hildir::attack_cast->cast fireball,"
+        + "GoblinShaman_Hildir::attack_poke->staff poke,"
+        + "Boar::base_attack->fangs 1|fangs 2|fangs front|bite,"
+        + "Skeleton::attack_bow->bow_idle";
 
     private const string NoParryDefaultValue =
-        "Bonemass::aoe,Bonemass::spawn,Dragon::attack_taunt,Dragon::attack_breath,GoblinKing::nova,GoblinKing::taunt";
+        "Bonemass::aoe,Bonemass::spawn,"
+        + "Dragon::attack_taunt,"
+        + "Dragon::attack_breath,"
+        + "GoblinKing::nova,"
+        + "GoblinKing::taunt,"
+        + "GoblinBruteBros::attack_protect,"
+        + "GoblinBruteBros::taunt,"
+        + "GoblinBrute_Hildir::taunt,"
+        + "GoblinShaman_Hildir::attack_protect";
 
     private Dictionary<AttackKey, AttackOverrideData>? _cachedOverrides;
-    private Dictionary<AttackKey, string>? _cachedMappings;
+    private Dictionary<AttackKey, IReadOnlyList<string>>? _cachedMappings;
     private HashSet<AttackKey>? _cachedIgnored;
     private HashSet<AttackKey>? _cachedNoParry;
 
@@ -75,11 +91,12 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
             new ConfigDescription(
                 "Manual mapping of attack names to animation names for attacks that don't auto-detect correctly.\n"
                     + "Format (one per line, comma or semicolon separated): CreatureName::AttackName->AnimationName\n"
+                    + "Use pipe (|) to specify multiple possible animations for one attack: AnimName1|AnimName2|AnimName3\n"
                     + "Use this when attack.m_attackAnimation doesn't match the actual animator state name.\n"
                     + "Examples:\n"
                     + "  gd_king::attack_stomp->stomp_aoe\n"
                     + "  Dragon::breath->dragon_breath_attack\n"
-                    + "  Bonemass::vomit->boss_attack3\n"
+                    + "  Boar::base_attack->fangs 1|fangs 2|bite\n"
                     + "Lines starting with # are ignored as comments.",
                 null,
                 new ConfigurationManagerAttributes { Order = 100 }
@@ -130,7 +147,10 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
     }
 
     /// <inheritdoc/>
-    public string? GetMappedAnimationName(string creaturePrefab, string attackAnimation)
+    public IReadOnlyList<string>? GetMappedAnimationNames(
+        string creaturePrefab,
+        string attackAnimation
+    )
     {
         EnsureCacheBuilt();
 
@@ -156,7 +176,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
     /// <inheritdoc/>
     public bool HasMapping(string creaturePrefab, string attackAnimation)
     {
-        return GetMappedAnimationName(creaturePrefab, attackAnimation) != null;
+        return GetMappedAnimationNames(creaturePrefab, attackAnimation) != null;
     }
 
     private void EnsureCacheBuilt()
@@ -171,7 +191,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
 
         var newOverrides = new Dictionary<AttackKey, AttackOverrideData>();
         var newIgnored = new HashSet<AttackKey>();
-        var newMappings = new Dictionary<AttackKey, string>();
+        var newMappings = new Dictionary<AttackKey, IReadOnlyList<string>>();
         var newNoParry = new HashSet<AttackKey>();
 
         var overrideLines = ParseLines(DurationOverrideList);
@@ -195,9 +215,9 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
         var mappingLines = ParseLines(AttackMappingList);
         foreach (var line in mappingLines)
         {
-            if (TryParseMappingLine(line, out var key, out var animationName))
+            if (TryParseMappingLine(line, out var key, out var animationNames))
             {
-                newMappings[key] = animationName;
+                newMappings[key] = animationNames;
             }
         }
 
@@ -266,15 +286,19 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
         return true;
     }
 
-    private bool TryParseMappingLine(string line, out AttackKey key, out string animationName)
+    private bool TryParseMappingLine(
+        string line,
+        out AttackKey key,
+        out IReadOnlyList<string> animationNames
+    )
     {
         key = default;
-        animationName = string.Empty;
+        animationNames = Array.Empty<string>();
 
         if (string.IsNullOrWhiteSpace(line))
             return false;
 
-        // Format: "CreatureName::AttackName->AnimationName"
+        // Format: "CreatureName::AttackName->AnimationName1|AnimationName2|AnimationName3"
         var parts = line.Split(["->"], StringSplitOptions.None);
         if (parts.Length != 2)
             return false;
@@ -285,17 +309,27 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
 
         var creatureName = keyParts[0].Trim();
         var attackName = keyParts[1].Trim();
-        var mappedAnimName = parts[1].Trim();
+        var mappedAnimNamesRaw = parts[1].Trim();
 
         if (
             string.IsNullOrWhiteSpace(creatureName)
             || string.IsNullOrWhiteSpace(attackName)
-            || string.IsNullOrWhiteSpace(mappedAnimName)
+            || string.IsNullOrWhiteSpace(mappedAnimNamesRaw)
         )
             return false;
 
+        // Split by pipe to support multiple animations
+        var animList = mappedAnimNamesRaw
+            .Split('|')
+            .Select(a => a.Trim())
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .ToArray();
+
+        if (animList.Length == 0)
+            return false;
+
         key = new AttackKey(creatureName, attackName);
-        animationName = mappedAnimName;
+        animationNames = animList;
 
         return true;
     }

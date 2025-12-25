@@ -16,7 +16,7 @@ namespace Valheim.Foresight.Services.Castbar;
 /// <summary>
 /// Service for tracking and predicting enemy attack timings
 /// </summary>
-public sealed class AttackTimingService : IAttackTimingService
+public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDataProvider
 {
     private const string DataFileName = "attack_timings.yml";
     private const string PrelearnedDataFileName = "attack_timings_prelearned.yml";
@@ -72,11 +72,9 @@ public sealed class AttackTimingService : IAttackTimingService
     {
         _logger.LogInfo($"[{nameof(ResetToPrelearned)}] Resetting {key} to prelearned value");
 
-        // Check if we have a prelearned value
         if (_prelearnedTimings.TryGetValue(key, out var prelearnedStats))
         {
-            // Replace the current timing with prelearned data (including LearningEnabled flag)
-            _timings[key] = new AttackTimingStats
+            var newStats = new AttackTimingStats
             {
                 MeanHitOffsetSeconds = prelearnedStats.MeanHitOffsetSeconds,
                 Variance = prelearnedStats.Variance,
@@ -85,15 +83,20 @@ public sealed class AttackTimingService : IAttackTimingService
                 LearningEnabled = prelearnedStats.LearningEnabled,
             };
 
+            _timings[key] = newStats;
             _isDirty = true;
+
             _logger.LogInfo(
-                $"[{nameof(ResetToPrelearned)}] Reset {key} to prelearned value: {prelearnedStats.MeanHitOffsetSeconds:F3}s, LearningEnabled={prelearnedStats.LearningEnabled}"
+                $"[{nameof(ResetToPrelearned)}] Reset {key} to prelearned: mean={newStats.MeanHitOffsetSeconds:F3}s, variance={newStats.Variance:F4}, samples={newStats.SampleCount}, learning={newStats.LearningEnabled}"
             );
+
+            SaveToDisk();
+            _logger.LogInfo($"[{nameof(ResetToPrelearned)}] Changes saved to disk immediately");
         }
         else
         {
             _logger.LogWarning(
-                $"[{nameof(ResetToPrelearned)}] No prelearned value found for {key}, cannot reset"
+                $"[{nameof(ResetToPrelearned)}] No prelearned value found for {key}, cannot reset. Available prelearned count: {_prelearnedTimings.Count}"
             );
         }
     }
@@ -103,6 +106,12 @@ public sealed class AttackTimingService : IAttackTimingService
     {
         if (attacker is null || attack is null)
             return;
+
+        if (!_config.AttackTimingLearningEnabled.Value)
+        {
+            _logger.LogDebug($"[{nameof(RecordHit)}] Global learning disabled, skipping recording");
+            return;
+        }
 
         var key = CreateKey(attacker, attack);
         var hitOffset = hitTime - attackStartTime;
@@ -123,7 +132,6 @@ public sealed class AttackTimingService : IAttackTimingService
         }
         else
         {
-            // Skip learning if disabled
             if (!stats.LearningEnabled)
             {
                 _logger.LogDebug(
@@ -433,6 +441,60 @@ public sealed class AttackTimingService : IAttackTimingService
         catch (Exception ex)
         {
             _logger.LogError($"[{nameof(SaveToDisk)}] Failed to save data: {ex.Message}");
+        }
+    }
+
+    public Dictionary<AttackKey, AttackTimingStats> GetAllTimings()
+    {
+        var result = new Dictionary<AttackKey, AttackTimingStats>();
+
+        foreach (var kvp in _prelearnedTimings)
+        {
+            result[kvp.Key] = kvp.Value;
+        }
+
+        foreach (var kvp in _timings)
+        {
+            result[kvp.Key] = kvp.Value;
+        }
+
+        return result;
+    }
+
+    public Dictionary<AttackKey, AttackTimingStats> GetLearnedTimings()
+    {
+        return new Dictionary<AttackKey, AttackTimingStats>(_timings);
+    }
+
+    public Dictionary<AttackKey, AttackTimingStats> GetPrelearnedTimings()
+    {
+        return new Dictionary<AttackKey, AttackTimingStats>(_prelearnedTimings);
+    }
+
+    public void UpdateTiming(AttackKey key, AttackTimingStats stats)
+    {
+        _timings[key] = stats;
+        _isDirty = true;
+        _logger.LogInfo(
+            $"[{nameof(UpdateTiming)}] Updated timing for {key}: mean={stats.MeanHitOffsetSeconds:F3}s"
+        );
+    }
+
+    public void DeleteTiming(AttackKey key)
+    {
+        if (_timings.Remove(key))
+        {
+            _isDirty = true;
+            _logger.LogInfo($"[{nameof(DeleteTiming)}] Deleted timing for {key}");
+        }
+    }
+
+    public void ForceSave()
+    {
+        if (_isDirty)
+        {
+            SaveToDisk();
+            _logger.LogInfo($"[{nameof(ForceSave)}] Force saved timings to disk");
         }
     }
 }

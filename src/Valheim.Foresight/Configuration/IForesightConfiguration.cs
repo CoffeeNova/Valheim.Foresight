@@ -20,4 +20,6 @@ public interface IForesightConfiguration
     ConfigEntry<float> AttackCastbarOffsetY { get; }
     ConfigEntry<float> ParryIndicatorStartPosition { get; }
     ConfigEntry<float> AttackCastbarParryWindow { get; }
+    ConfigEntry<string> TimingEditorToggleKey { get; }
+    ConfigEntry<bool> AttackTimingLearningEnabled { get; }
 }

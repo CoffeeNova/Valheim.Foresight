@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Valheim.Foresight.Models;
 
@@ -24,6 +27,7 @@ public sealed class ActiveAttackInfo
         float duration,
         float startTime,
         float? predictedHitTime,
+        string? animationName,
         bool hideParryIndicator = false
     )
     {
@@ -31,7 +35,7 @@ public sealed class ActiveAttackInfo
         Attack = attack;
         StartTime = startTime;
         Duration = duration;
-        AttackName = GetAttackDisplayName(attack);
+        AttackName = GetAttackDisplayName(attack, animationName);
         PredictedHitTime = predictedHitTime;
         HideParryIndicator = hideParryIndicator;
     }
@@ -79,17 +83,45 @@ public sealed class ActiveAttackInfo
         return Mathf.Clamp01(parryTime / Duration);
     }
 
-    private static string GetAttackDisplayName(Attack? attack)
+    private static string GetAttackDisplayName(Attack? attack, string? animationName)
     {
-        if (attack == null)
-            return "Attack";
-
-        if (!string.IsNullOrEmpty(attack.m_attackAnimation))
-        {
-            var name = attack.m_attackAnimation.Replace("attack", "Attack").Replace("_", " ");
-            return name;
-        }
-
-        return "Attack";
+        return FormatAttackName(animationName)
+            ?? FormatAttackName(attack?.m_attackAnimation)
+            ?? "Attack";
     }
+
+    private static string? FormatAttackName(string? rawName)
+    {
+        if (string.IsNullOrWhiteSpace(rawName))
+            return null;
+
+        var sourceName = rawName!.Trim();
+
+        if (
+            ForbiddenWords.Any(word =>
+                sourceName.Contains(word, StringComparison.OrdinalIgnoreCase)
+            )
+        )
+            return null;
+
+        var normalized = sourceName
+            .Replace("attack", "Attack")
+            .Replace("_", " ")
+            .Trim()
+            .ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(normalized))
+            return null;
+
+        var cleaned = string.Concat(normalized.Where(c => !char.IsDigit(c))).Trim();
+        if (string.IsNullOrEmpty(cleaned))
+            return null;
+
+        return cleaned;
+    }
+
+    private static readonly HashSet<string> ForbiddenWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "idle",
+    };
 }

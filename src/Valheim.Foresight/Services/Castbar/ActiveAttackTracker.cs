@@ -18,6 +18,7 @@ public sealed class ActiveAttackTracker : IActiveAttackTracker
         float duration,
         float startTime,
         float? predictedHitTime,
+        string? animationName,
         bool hideParryIndicator
     )
     {
@@ -27,6 +28,7 @@ public sealed class ActiveAttackTracker : IActiveAttackTracker
             duration,
             startTime,
             predictedHitTime,
+            animationName,
             hideParryIndicator
         );
     }
