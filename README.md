@@ -38,7 +38,11 @@ Foresight now displays visual castbars above enemy nameplates showing when attac
 - **Attack name display** (optional) shows which attack the enemy is performing
 - **Remaining time** (optional) displays countdown until impact
 
-![Castbar example](gallery/screenshots/castbar_example.png)
+![Castbar example](gallery/screenshots/castbar_example.jpg)
+
+---
+
+![Boss Castbar example](gallery/screenshots/boss_castbar_example.png)
 
 The castbar system uses an intelligent learning algorithm that improves its predictions over time by observing actual attack timings.
 

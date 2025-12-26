@@ -76,7 +76,11 @@ internal class EnemyHudPatch
                 character
             );
             var hudParent = nameLabel.transform.parent ?? nameLabel.transform;
-            ValheimForesightPlugin.CastbarRenderer?.RenderCastbar(hudParent, activeAttack);
+            ValheimForesightPlugin.CastbarRenderer?.RenderCastbar(
+                hudParent,
+                activeAttack,
+                character
+            );
             // ==============================
 
             if (ValheimForesightPlugin.InstanceDebugHudEnabled)

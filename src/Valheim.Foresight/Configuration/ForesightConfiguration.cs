@@ -28,6 +28,12 @@ public sealed class ForesightConfiguration : IForesightConfiguration
     public ConfigEntry<float> AttackCastbarOffsetX { get; }
     public ConfigEntry<float> AttackCastbarOffsetY { get; }
     public ConfigEntry<float> AttackCastbarParryWindow { get; }
+
+    public ConfigEntry<float> BossCastbarWidth { get; }
+    public ConfigEntry<float> BossCastbarHeight { get; }
+    public ConfigEntry<float> BossCastbarOffsetX { get; }
+    public ConfigEntry<float> BossCastbarOffsetY { get; }
+
     public ConfigEntry<string> TimingEditorToggleKey { get; }
     public ConfigEntry<bool> AttackTimingLearningEnabled { get; }
 
@@ -102,8 +108,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarEnabled = _configFile.Bind(
-            "Attack Castbar",
-            "Attack castbar enabled",
+            "Castbar",
+            "Mob castbar enabled",
             true,
             new ConfigDescription(
                 "Show attack castbar indicating when enemy is attacking and parry window.",
@@ -112,7 +118,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarTextEnabled = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Show text",
             false,
             new ConfigDescription(
@@ -122,7 +128,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AlwaysDisplayCastbar = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Always display castbar",
             false,
             new ConfigDescription(
@@ -132,8 +138,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarWidth = _configFile.Bind(
-            "Attack Castbar",
-            "Attack castbar width",
+            "Castbar",
+            "Mob castbar width",
             300f,
             new ConfigDescription(
                 "Width of the attack castbar in pixels.",
@@ -143,8 +149,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarHeight = _configFile.Bind(
-            "Attack Castbar",
-            "Attack castbar height",
+            "Castbar",
+            "Mob castbar height",
             16f,
             new ConfigDescription(
                 "Height of the attack castbar in pixels.",
@@ -154,8 +160,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarOffsetX = _configFile.Bind(
-            "Attack Castbar",
-            "Attack castbar offset X",
+            "Castbar",
+            "Mob castbar offset X",
             0f,
             new ConfigDescription(
                 "Horizontal offset of the castbar from center (positive = right, negative = left).",
@@ -165,8 +171,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         AttackCastbarOffsetY = _configFile.Bind(
-            "Attack Castbar",
-            "Attack castbar offset Y",
+            "Castbar",
+            "Mob castbar offset Y",
             23.5f,
             new ConfigDescription(
                 "Vertical offset of the castbar from enemy HUD (positive = up, negative = down). Default -10 places it below HP bar.",
@@ -175,8 +181,52 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             )
         );
 
+        BossCastbarWidth = _configFile.Bind(
+            "Castbar",
+            "Boss castbar width",
+            400f,
+            new ConfigDescription(
+                "Width of the boss attack castbar in pixels. Boss HUD is always at the top of the screen.",
+                new AcceptableValueRange<float>(50f, 800f),
+                tags: new ConfigurationManagerAttributes { Order = 179 }
+            )
+        );
+
+        BossCastbarHeight = _configFile.Bind(
+            "Castbar",
+            "Boss castbar height",
+            20f,
+            new ConfigDescription(
+                "Height of the boss attack castbar in pixels.",
+                new AcceptableValueRange<float>(12f, 48f),
+                tags: new ConfigurationManagerAttributes { Order = 178 }
+            )
+        );
+
+        BossCastbarOffsetX = _configFile.Bind(
+            "Castbar",
+            "Boss castbar offset X",
+            0f,
+            new ConfigDescription(
+                "Horizontal offset of the boss castbar from center (positive = right, negative = left).",
+                new AcceptableValueRange<float>(-400f, 400f),
+                tags: new ConfigurationManagerAttributes { Order = 177 }
+            )
+        );
+
+        BossCastbarOffsetY = _configFile.Bind(
+            "Castbar",
+            "Boss castbar offset Y",
+            0f,
+            new ConfigDescription(
+                "Vertical offset of the boss castbar from boss HUD (positive = up, negative = down). Boss HUD is at the top of screen.",
+                new AcceptableValueRange<float>(-400f, 400f),
+                tags: new ConfigurationManagerAttributes { Order = 176 }
+            )
+        );
+
         AttackCastbarParryWindow = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Parry window size",
             0.25f,
             new ConfigDescription(
@@ -187,7 +237,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarFillColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Fill color",
             new Color(1f, 0.9f, 0.1f, 0.85f),
             new ConfigDescription(
@@ -197,7 +247,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarParryIndicatorColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Parry window color",
             new Color(1f, 0.6f, 0.2f, 0.85f),
             new ConfigDescription(
@@ -207,7 +257,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarParryActiveColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Parry window active color",
             new Color(1f, 0.2f, 0.2f, 0.85f),
             new ConfigDescription(
@@ -217,7 +267,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarBorderColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Border color",
             new Color(0.5f, 0.5f, 0.5f, 0.1f),
             new ConfigDescription(
@@ -227,7 +277,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarBackgroundColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Background color",
             new Color(0f, 0f, 0f, 0.9f),
             new ConfigDescription(
@@ -237,7 +287,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarTextColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Text color",
             new Color(1f, 1f, 1f, 1f),
             new ConfigDescription(
@@ -247,7 +297,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         CastbarTextShadowColor = _configFile.Bind(
-            "Attack Castbar",
+            "Castbar",
             "Text shadow color",
             new Color(0f, 0f, 0f, 0.9f),
             new ConfigDescription(
@@ -319,6 +369,11 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         AttackCastbarOffsetY.SettingChanged += OnSettingChanged;
 
         AttackCastbarParryWindow.SettingChanged += OnSettingChanged;
+
+        BossCastbarWidth.SettingChanged += OnSettingChanged;
+        BossCastbarHeight.SettingChanged += OnSettingChanged;
+        BossCastbarOffsetX.SettingChanged += OnSettingChanged;
+        BossCastbarOffsetY.SettingChanged += OnSettingChanged;
 
         TimingEditorToggleKey.SettingChanged += OnSettingChanged;
         AttackTimingLearningEnabled.SettingChanged += OnSettingChanged;

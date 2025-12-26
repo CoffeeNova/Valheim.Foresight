@@ -12,5 +12,9 @@ public interface IUnityCastbarRenderer : IDisposable
     /// <summary>
     /// Renders or updates the attack castbar on the enemy HUD
     /// </summary>
-    void RenderCastbar(Transform hudParent, ActiveAttackInfo? attackInfo);
+    void RenderCastbar(
+        Transform hudParent,
+        ActiveAttackInfo? attackInfo,
+        Character? character = null
+    );
 }

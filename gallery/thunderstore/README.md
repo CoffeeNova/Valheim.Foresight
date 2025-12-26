@@ -32,6 +32,10 @@ Enemy names change color to show how dangerous their next attack will be:
 
 ![Castbar example](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/castbar_example.jpg)
 
+---
+
+![Boss Castbar example](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/boss_castbar_example.png)
+
 Perfect for beginners learning enemy attack patterns and veterans optimizing their parry timing!
 
 ### Defense Strategy Icons
