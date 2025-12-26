@@ -357,21 +357,6 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
             return;
         }
 
-        var allKeys = _difficultyCalculator.GetAllGlobalKeys();
-        Log.LogInfo($"Global Keys count: {allKeys.Count}");
-
-        foreach (var key in allKeys)
-        {
-            if (ZoneSystem.instance.GetGlobalKey(key, out string value))
-            {
-                Log.LogInfo($"  {key} = {value}");
-            }
-            else
-            {
-                Log.LogInfo($"  {key} (no value)");
-            }
-        }
-
         var enemyDmg = _difficultyCalculator.GetIncomingDamageFactor();
         var enemyHp = _difficultyCalculator.GetEnemyHealthFactor();
 

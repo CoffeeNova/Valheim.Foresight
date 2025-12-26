@@ -111,7 +111,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         }
         catch (Exception ex)
         {
-            _logger.LogError($"[{nameof(GetIncomingDamageFactor)}] Exception: {ex.Message}");
+            _logger.LogError($"Exception: {ex.Message}");
             return 1f;
         }
     }
@@ -149,7 +149,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
         }
         catch (Exception ex)
         {
-            _logger.LogError($"[{nameof(GetEnemyHealthFactor)}] Exception: {ex.Message}");
+            _logger.LogError($"Exception: {ex.Message}");
             return 1f;
         }
     }
@@ -191,9 +191,7 @@ public sealed class DifficultyMultiplierCalculator : IDifficultyMultiplierCalcul
             return multiplier > 0f ? multiplier : 1f;
         }
 
-        _logger.LogWarning(
-            $"[{nameof(ParseDamageMultiplier)}] Failed to parse {keyName}='{value}', using default"
-        );
+        _logger.LogWarning($"Failed to parse {keyName}='{value}', using default");
 
         return 1f;
     }

@@ -65,11 +65,11 @@ public class AttackTimingEditorUI
         if (_isVisible)
         {
             RefreshData();
-            _logger.LogInfo("[AttackTimingEditorUI] UI opened");
+            _logger.LogInfo("UI opened");
         }
         else
         {
-            _logger.LogInfo("[AttackTimingEditorUI] UI closed");
+            _logger.LogInfo("UI closed");
         }
     }
 
@@ -170,9 +170,7 @@ public class AttackTimingEditorUI
         if (newLearningEnabled != _config.AttackTimingLearningEnabled.Value)
         {
             _config.AttackTimingLearningEnabled.Value = newLearningEnabled;
-            _logger.LogInfo(
-                $"[AttackTimingEditorUI] Global learning toggled: {newLearningEnabled}"
-            );
+            _logger.LogInfo($"Global learning toggled: {newLearningEnabled}");
         }
 
         GUILayout.Space(10);
@@ -239,13 +237,34 @@ public class AttackTimingEditorUI
 
         GUILayout.BeginVertical("box");
         GUILayout.BeginHorizontal();
+
+        DrawEntryLabels(entry);
+        DrawMeanHitTimeField(entry, key);
+        DrawSampleCountLabel(entry);
+        DrawLearningToggle(entry, key);
+
+        var shouldBreak = DrawActionButtons(entry, key);
+
+        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+
+        return shouldBreak;
+    }
+
+    private void DrawEntryLabels(AttackTimingEntry entry)
+    {
         GUILayout.Label(entry.Key.CreaturePrefab, _labelStyle, GUILayout.Width(150));
         GUILayout.Label(entry.Key.AttackAnimation, _labelStyle, GUILayout.Width(150));
+    }
 
-        if (_editingValues.ContainsKey(key + "_mean"))
+    private void DrawMeanHitTimeField(AttackTimingEntry entry, string key)
+    {
+        var editKey = key + "_mean";
+
+        if (_editingValues.ContainsKey(editKey))
         {
-            _editingValues[key + "_mean"] = GUILayout.TextField(
-                _editingValues[key + "_mean"],
+            _editingValues[editKey] = GUILayout.TextField(
+                _editingValues[editKey],
                 _textFieldStyle,
                 GUILayout.Width(120)
             );
@@ -258,64 +277,79 @@ public class AttackTimingEditorUI
                 GUILayout.Width(120)
             );
         }
+    }
 
+    private void DrawSampleCountLabel(AttackTimingEntry entry)
+    {
         GUILayout.Label(entry.Stats.SampleCount.ToString(), _labelStyle, GUILayout.Width(80));
+    }
 
+    private void DrawLearningToggle(AttackTimingEntry entry, string key)
+    {
         var newLearning = GUILayout.Toggle(
             entry.Stats.LearningEnabled,
             "",
             _toggleStyle,
             GUILayout.Width(80)
         );
+
         if (newLearning != entry.Stats.LearningEnabled)
         {
             entry.Stats.LearningEnabled = newLearning;
             _dataProvider.UpdateTiming(entry.Key, entry.Stats);
-            _logger.LogInfo($"[AttackTimingEditorUI] Toggled learning for {key}: {newLearning}");
+            _logger.LogInfo($"Toggled learning for {key}: {newLearning}");
         }
+    }
 
-        if (_editingValues.ContainsKey(key + "_mean"))
+    private bool DrawActionButtons(AttackTimingEntry entry, string key)
+    {
+        var editKey = key + "_mean";
+
+        if (_editingValues.ContainsKey(editKey))
         {
-            if (GUILayout.Button("Save", _buttonStyle, GUILayout.Width(70)))
-            {
-                if (float.TryParse(_editingValues[key + "_mean"], out var newMean))
-                {
-                    entry.Stats.MeanHitOffsetSeconds = newMean;
-                    _dataProvider.UpdateTiming(entry.Key, entry.Stats);
-                    _editingValues.Remove(key + "_mean");
-                    _logger.LogInfo($"[AttackTimingEditorUI] Updated mean for {key}: {newMean}");
-                }
-            }
+            return DrawSaveButton(entry, key, editKey);
         }
-        else
+
+        DrawEditButton(entry, editKey);
+        return DrawResetButton(entry, key, editKey);
+    }
+
+    private bool DrawSaveButton(AttackTimingEntry entry, string key, string editKey)
+    {
+        if (!GUILayout.Button("Save", _buttonStyle, GUILayout.Width(70)))
+            return false;
+
+        if (float.TryParse(_editingValues[editKey], out var newMean))
         {
-            if (GUILayout.Button("Edit", _buttonStyle, GUILayout.Width(70)))
-            {
-                _editingValues[key + "_mean"] = entry.Stats.MeanHitOffsetSeconds.ToString("F3");
-            }
+            entry.Stats.MeanHitOffsetSeconds = newMean;
+            _dataProvider.UpdateTiming(entry.Key, entry.Stats);
+            _editingValues.Remove(editKey);
+            _logger.LogInfo($"Updated mean for {key}: {newMean}");
         }
 
-        if (GUILayout.Button("Reset", _buttonStyle, GUILayout.Width(70)))
-        {
-            _logger.LogInfo($"[AttackTimingEditorUI] Reset clicked for {key}");
-
-            _editingValues.Remove(key + "_mean");
-            _timingService.ResetToPrelearned(entry.Key);
-            RefreshData();
-
-            _logger.LogInfo($"[AttackTimingEditorUI] Reset complete for {key}");
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-
-            return true;
-        }
-
-        GUILayout.EndHorizontal();
-        GUILayout.EndVertical();
-
-        // Return false to indicate no data change
         return false;
+    }
+
+    private void DrawEditButton(AttackTimingEntry entry, string editKey)
+    {
+        if (GUILayout.Button("Edit", _buttonStyle, GUILayout.Width(70)))
+        {
+            _editingValues[editKey] = entry.Stats.MeanHitOffsetSeconds.ToString("F3");
+        }
+    }
+
+    private bool DrawResetButton(AttackTimingEntry entry, string key, string editKey)
+    {
+        if (!GUILayout.Button("Reset", _buttonStyle, GUILayout.Width(70)))
+            return false;
+
+        _logger.LogInfo($"Reset clicked for {key}");
+        _editingValues.Remove(editKey);
+        _timingService.ResetToPrelearned(entry.Key);
+        RefreshData();
+        _logger.LogInfo($"Reset complete for {key}");
+
+        return true;
     }
 
     private void DrawFooter()
@@ -343,7 +377,7 @@ public class AttackTimingEditorUI
             .ToList();
 
         FilterEntries();
-        _logger.LogInfo($"[AttackTimingEditorUI] Refreshed {_filteredEntries.Count} entries");
+        _logger.LogInfo($"Refreshed {_filteredEntries.Count} entries");
     }
 
     private void FilterEntries()
@@ -371,7 +405,7 @@ public class AttackTimingEditorUI
 
     private void ExportToLog()
     {
-        _logger.LogInfo("[AttackTimingEditorUI] === Attack Timing Export ===");
+        _logger.LogInfo("=== Attack Timing Export ===");
         foreach (var entry in _filteredEntries)
         {
             _logger.LogInfo(
@@ -379,7 +413,7 @@ public class AttackTimingEditorUI
                     + $"Samples={entry.Stats.SampleCount}, Learning={entry.Stats.LearningEnabled}"
             );
         }
-        _logger.LogInfo($"[AttackTimingEditorUI] Total entries: {_filteredEntries.Count}");
+        _logger.LogInfo($"Total entries: {_filteredEntries.Count}");
     }
 
     private class AttackTimingEntry

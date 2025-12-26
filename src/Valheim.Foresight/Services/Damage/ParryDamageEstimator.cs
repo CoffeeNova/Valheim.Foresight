@@ -28,7 +28,7 @@ public sealed class ParryDamageEstimator : DamageEstimatorBase
 
         if (defenseStats.Shield == null)
         {
-            Logger.LogDebug($"[{nameof(BlockDamageEstimator)}] no shield.");
+            Logger.LogDebug($"[{nameof(ApplyActiveDefense)}] no shield.");
             return physicalDamage;
         }
 

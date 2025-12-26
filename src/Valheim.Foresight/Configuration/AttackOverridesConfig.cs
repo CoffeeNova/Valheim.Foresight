@@ -181,59 +181,95 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
 
     private void EnsureCacheBuilt()
     {
-        if (
-            _cachedOverrides != null
-            && _cachedIgnored != null
-            && _cachedMappings != null
-            && _cachedNoParry != null
-        )
+        if (IsCacheValid())
             return;
 
-        var newOverrides = new Dictionary<AttackKey, AttackOverrideData>();
-        var newIgnored = new HashSet<AttackKey>();
-        var newMappings = new Dictionary<AttackKey, IReadOnlyList<string>>();
-        var newNoParry = new HashSet<AttackKey>();
+        RebuildAllCaches();
+    }
 
-        var overrideLines = ParseLines(DurationOverrideList);
-        foreach (var line in overrideLines)
-        {
-            if (TryParseOverrideLine(line, out var key, out var data))
-            {
-                newOverrides[key] = data;
-            }
-        }
+    private bool IsCacheValid()
+    {
+        return _cachedOverrides != null
+            && _cachedIgnored != null
+            && _cachedMappings != null
+            && _cachedNoParry != null;
+    }
 
-        var ignoreLines = ParseLines(IgnoreList);
-        foreach (var line in ignoreLines)
-        {
-            if (TryParseIgnoreLine(line, out var key))
-            {
-                newIgnored.Add(key);
-            }
-        }
-
-        var mappingLines = ParseLines(AttackMappingList);
-        foreach (var line in mappingLines)
-        {
-            if (TryParseMappingLine(line, out var key, out var animationNames))
-            {
-                newMappings[key] = animationNames;
-            }
-        }
-
-        var noParryLines = ParseLines(NoParryIndicatorList);
-        foreach (var line in noParryLines)
-        {
-            if (TryParseNoParryLine(line, out var key))
-            {
-                newNoParry.Add(key);
-            }
-        }
+    private void RebuildAllCaches()
+    {
+        var newOverrides = BuildOverrideCache();
+        var newIgnored = BuildIgnoreCache();
+        var newMappings = BuildMappingCache();
+        var newNoParry = BuildNoParryCache();
 
         _cachedOverrides = newOverrides;
         _cachedIgnored = newIgnored;
         _cachedMappings = newMappings;
         _cachedNoParry = newNoParry;
+    }
+
+    private Dictionary<AttackKey, AttackOverrideData> BuildOverrideCache()
+    {
+        var cache = new Dictionary<AttackKey, AttackOverrideData>();
+        var overrideLines = ParseLines(DurationOverrideList);
+
+        foreach (var line in overrideLines)
+        {
+            if (TryParseOverrideLine(line, out var key, out var data))
+            {
+                cache[key] = data;
+            }
+        }
+
+        return cache;
+    }
+
+    private HashSet<AttackKey> BuildIgnoreCache()
+    {
+        var cache = new HashSet<AttackKey>();
+        var ignoreLines = ParseLines(IgnoreList);
+
+        foreach (var line in ignoreLines)
+        {
+            if (TryParseIgnoreLine(line, out var key))
+            {
+                cache.Add(key);
+            }
+        }
+
+        return cache;
+    }
+
+    private Dictionary<AttackKey, IReadOnlyList<string>> BuildMappingCache()
+    {
+        var cache = new Dictionary<AttackKey, IReadOnlyList<string>>();
+        var mappingLines = ParseLines(AttackMappingList);
+
+        foreach (var line in mappingLines)
+        {
+            if (TryParseMappingLine(line, out var key, out var animationNames))
+            {
+                cache[key] = animationNames;
+            }
+        }
+
+        return cache;
+    }
+
+    private HashSet<AttackKey> BuildNoParryCache()
+    {
+        var cache = new HashSet<AttackKey>();
+        var noParryLines = ParseLines(NoParryIndicatorList);
+
+        foreach (var line in noParryLines)
+        {
+            if (TryParseNoParryLine(line, out var key))
+            {
+                cache.Add(key);
+            }
+        }
+
+        return cache;
     }
 
     private IEnumerable<string> ParseLines(ConfigEntry<string> config)

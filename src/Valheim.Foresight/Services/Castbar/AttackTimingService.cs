@@ -71,7 +71,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     /// </summary>
     public void ResetToPrelearned(AttackKey key)
     {
-        _logger.LogInfo($"[{nameof(ResetToPrelearned)}] Resetting {key} to prelearned value");
+        _logger.LogInfo($"Resetting {key} to prelearned value");
 
         if (_prelearnedTimings.TryGetValue(key, out var prelearnedStats))
         {
@@ -88,16 +88,16 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
             _isDirty = true;
 
             _logger.LogInfo(
-                $"[{nameof(ResetToPrelearned)}] Reset {key} to prelearned: mean={newStats.MeanHitOffsetSeconds:F3}s, variance={newStats.Variance:F4}, samples={newStats.SampleCount}, learning={newStats.LearningEnabled}"
+                $"Reset {key} to prelearned: mean={newStats.MeanHitOffsetSeconds:F3}s, variance={newStats.Variance:F4}, samples={newStats.SampleCount}, learning={newStats.LearningEnabled}"
             );
 
             SaveToDisk();
-            _logger.LogInfo($"[{nameof(ResetToPrelearned)}] Changes saved to disk immediately");
+            _logger.LogInfo($"Changes saved to disk immediately");
         }
         else
         {
             _logger.LogWarning(
-                $"[{nameof(ResetToPrelearned)}] No prelearned value found for {key}, cannot reset. Available prelearned count: {_prelearnedTimings.Count}"
+                $"No prelearned value found for {key}, cannot reset. Available prelearned count: {_prelearnedTimings.Count}"
             );
         }
     }
@@ -119,9 +119,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
 
         if (hitOffset < 0f || hitOffset > 10f) // sanity check
         {
-            _logger.LogWarning(
-                $"[{nameof(RecordHit)}] Suspicious hit offset {hitOffset:F3}s for {key}, ignoring"
-            );
+            _logger.LogWarning($"Suspicious hit offset {hitOffset:F3}s for {key}, ignoring");
             return;
         }
 
@@ -247,58 +245,62 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
             var assembly = typeof(AttackTimingService).Assembly;
             var resourceName = "Valheim.Foresight.Assets.attack_timings_prelearned.yml";
 
-            // Debug: List all embedded resources
-            var allResources = assembly.GetManifestResourceNames();
-            _logger.LogInfo(
-                $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Found {allResources.Length} embedded resources:"
-            );
-            foreach (var res in allResources)
-            {
-                _logger.LogInfo($"  - {res}");
-            }
+            LogEmbeddedResources(assembly);
 
-            // Skip if file already exists and is not empty
-            if (File.Exists(_prelearnedDataFilePath))
-            {
-                var fileInfo = new FileInfo(_prelearnedDataFilePath);
-                if (fileInfo.Length > 0)
-                {
-                    _logger.LogInfo(
-                        $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Prelearned file already exists ({fileInfo.Length} bytes), skipping extraction"
-                    );
-                    return;
-                }
-                else
-                {
-                    _logger.LogInfo(
-                        $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Prelearned file exists but is empty, re-extracting"
-                    );
-                }
-            }
-
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
-            {
-                _logger.LogWarning(
-                    $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Embedded resource '{resourceName}' not found"
-                );
+            if (ShouldSkipExtraction())
                 return;
-            }
 
-            // Extract to file
-            using var fileStream = File.Create(_prelearnedDataFilePath);
-            stream.CopyTo(fileStream);
-
-            _logger.LogInfo(
-                $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Extracted embedded prelearned file to {_prelearnedDataFilePath}"
-            );
+            ExtractResourceToFile(assembly, resourceName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Failed to extract embedded resource: {ex.Message}"
-            );
+            _logger.LogError($"Failed to extract embedded resource: {ex.Message}");
         }
+    }
+
+    private void LogEmbeddedResources(System.Reflection.Assembly assembly)
+    {
+        var allResources = assembly.GetManifestResourceNames();
+        _logger.LogInfo($"Found {allResources.Length} embedded resources:");
+        foreach (var res in allResources)
+        {
+            _logger.LogInfo($"  - {res}");
+        }
+    }
+
+    private bool ShouldSkipExtraction()
+    {
+        if (!File.Exists(_prelearnedDataFilePath))
+            return false;
+
+        var fileInfo = new FileInfo(_prelearnedDataFilePath);
+        if (fileInfo.Length > 0)
+        {
+            _logger.LogInfo(
+                $"Prelearned file already exists ({fileInfo.Length} bytes), skipping extraction"
+            );
+            return true;
+        }
+
+        _logger.LogInfo(
+            $"[{nameof(ExtractEmbeddedPrelearnedFile)}] Prelearned file exists but is empty, re-extracting"
+        );
+        return false;
+    }
+
+    private void ExtractResourceToFile(System.Reflection.Assembly assembly, string resourceName)
+    {
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            _logger.LogWarning($"Embedded resource '{resourceName}' not found");
+            return;
+        }
+
+        using var fileStream = File.Create(_prelearnedDataFilePath);
+        stream.CopyTo(fileStream);
+
+        _logger.LogInfo($"Extracted embedded prelearned file to {_prelearnedDataFilePath}");
     }
 
     private void LoadFromDisk()
@@ -307,9 +309,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
         {
             if (!File.Exists(_dataFilePath))
             {
-                _logger.LogInfo(
-                    $"[{nameof(LoadFromDisk)}] No existing data file at {_dataFilePath}"
-                );
+                _logger.LogInfo($"No existing data file at {_dataFilePath}");
 
                 // First run: copy prelearned to main database
                 CopyPrelearnedToMain();
@@ -331,13 +331,11 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
                 _timings[key] = kvp.Value;
             }
 
-            _logger.LogInfo(
-                $"[{nameof(LoadFromDisk)}] Loaded {_timings.Count} attack timings from disk"
-            );
+            _logger.LogInfo($"Loaded {_timings.Count} attack timings from disk");
         }
         catch (Exception ex)
         {
-            _logger.LogError($"[{nameof(LoadFromDisk)}]  Failed to load data: {ex.Message}");
+            _logger.LogError($"Failed to load data: {ex.Message}");
         }
     }
 
@@ -347,9 +345,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
         {
             if (!File.Exists(_prelearnedDataFilePath))
             {
-                _logger.LogInfo(
-                    $"[{nameof(LoadPrelearnedFromDisk)}] No prelearned data file at {_prelearnedDataFilePath}"
-                );
+                _logger.LogInfo($"No prelearned data file at {_prelearnedDataFilePath}");
                 return;
             }
 
@@ -368,15 +364,11 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
                 _prelearnedTimings[key] = kvp.Value;
             }
 
-            _logger.LogInfo(
-                $"[{nameof(LoadPrelearnedFromDisk)}] Loaded {_prelearnedTimings.Count} prelearned timings"
-            );
+            _logger.LogInfo($"Loaded {_prelearnedTimings.Count} prelearned timings");
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                $"[{nameof(LoadPrelearnedFromDisk)}] Failed to load prelearned data: {ex.Message}"
-            );
+            _logger.LogError($"Failed to load prelearned data: {ex.Message}");
         }
     }
 
@@ -384,7 +376,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     {
         if (_prelearnedTimings.Count == 0)
         {
-            _logger.LogInfo($"[{nameof(CopyPrelearnedToMain)}] No prelearned data to copy");
+            _logger.LogInfo($"No prelearned data to copy");
             return;
         }
 
@@ -399,14 +391,12 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
             SaveToDisk();
 
             _logger.LogInfo(
-                $"[{nameof(CopyPrelearnedToMain)}] Copied {_prelearnedTimings.Count} prelearned timings to main database"
+                $"Copied {_prelearnedTimings.Count} prelearned timings to main database"
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                $"[{nameof(CopyPrelearnedToMain)}] Failed to copy prelearned data: {ex.Message}"
-            );
+            _logger.LogError($"Failed to copy prelearned data: {ex.Message}");
         }
     }
 
@@ -437,7 +427,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
         }
         catch (Exception ex)
         {
-            _logger.LogError($"[{nameof(SaveToDisk)}] Failed to save data: {ex.Message}");
+            _logger.LogError($"Failed to save data: {ex.Message}");
         }
     }
 
@@ -472,9 +462,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     {
         _timings[key] = stats;
         _isDirty = true;
-        _logger.LogInfo(
-            $"[{nameof(UpdateTiming)}] Updated timing for {key}: mean={stats.MeanHitOffsetSeconds:F3}s"
-        );
+        _logger.LogInfo($"Updated timing for {key}: mean={stats.MeanHitOffsetSeconds:F3}s");
     }
 
     public void DeleteTiming(AttackKey key)
@@ -482,7 +470,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
         if (_timings.Remove(key))
         {
             _isDirty = true;
-            _logger.LogInfo($"[{nameof(DeleteTiming)}] Deleted timing for {key}");
+            _logger.LogInfo($"Deleted timing for {key}");
         }
     }
 
@@ -491,7 +479,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
         if (_isDirty)
         {
             SaveToDisk();
-            _logger.LogInfo($"[{nameof(ForceSave)}] Force saved timings to disk");
+            _logger.LogInfo($"Force saved timings to disk");
         }
     }
 }

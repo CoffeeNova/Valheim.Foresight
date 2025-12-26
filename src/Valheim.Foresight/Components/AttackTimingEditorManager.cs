@@ -17,6 +17,10 @@ public class AttackTimingEditorManager : MonoBehaviour
     private IForesightConfiguration? _config;
     private KeyCode _toggleKey = KeyCode.F7;
 
+    private bool _cursorStateSaved;
+    private bool _prevCursorVisible;
+    private CursorLockMode _prevCursorLock;
+
     public static AttackTimingEditorManager? Instance { get; private set; }
 
     public void Initialize(
@@ -35,7 +39,7 @@ public class AttackTimingEditorManager : MonoBehaviour
 
         _editorUI = new AttackTimingEditorUI(_logger, _timingService, _dataProvider, _config);
 
-        _logger.LogInfo($"[AttackTimingEditorManager] Initialized with toggle key: {_toggleKey}");
+        _logger.LogInfo($"Initialized with toggle key: {_toggleKey}");
     }
 
     private void Awake()
@@ -55,22 +59,71 @@ public class AttackTimingEditorManager : MonoBehaviour
         if (_editorUI == null)
             return;
 
-        // Toggle UI with configured key
         if (Input.GetKeyDown(_toggleKey))
-        {
             _editorUI.Toggle();
-        }
 
-        // Close UI with Escape key
         if (_editorUI.IsVisible && Input.GetKeyDown(KeyCode.Escape))
-        {
-            _editorUI.Hide();
-        }
+            HideUI();
     }
 
     private void OnGUI()
     {
-        _editorUI?.RenderGUI();
+        if (_editorUI?.IsVisible != true)
+        {
+            EnablePlayerInput();
+            return;
+        }
+
+        DisablePlayerInput();
+
+        if (!_cursorStateSaved)
+        {
+            _cursorStateSaved = true;
+            _prevCursorVisible = Cursor.visible;
+            _prevCursorLock = Cursor.lockState;
+            _logger?.LogInfo("Cursor state saved");
+        }
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        GUI.depth = -10000;
+        _editorUI.RenderGUI();
+    }
+
+    private void LateUpdate()
+    {
+        if (_editorUI?.IsVisible == true)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+    }
+
+    private void DisablePlayerInput()
+    {
+        if (Player.m_localPlayer != null)
+        {
+            Player.m_localPlayer.enabled = false;
+        }
+
+        if (GameCamera.instance != null)
+        {
+            GameCamera.instance.enabled = false;
+        }
+    }
+
+    private void EnablePlayerInput()
+    {
+        if (Player.m_localPlayer != null)
+        {
+            Player.m_localPlayer.enabled = true;
+        }
+
+        if (GameCamera.instance != null)
+        {
+            GameCamera.instance.enabled = true;
+        }
     }
 
     private void OnDestroy()
@@ -89,6 +142,16 @@ public class AttackTimingEditorManager : MonoBehaviour
     public void HideUI()
     {
         _editorUI?.Hide();
+
+        EnablePlayerInput();
+
+        if (_cursorStateSaved)
+        {
+            Cursor.visible = _prevCursorVisible;
+            Cursor.lockState = _prevCursorLock;
+            _cursorStateSaved = false;
+            _logger?.LogInfo("Cursor state restored");
+        }
     }
 
     public void ToggleUI()

@@ -488,61 +488,60 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
     private void UpdateCastbarProgress(GameObject castbarObject, ActiveAttackInfo? attackInfo)
     {
+        var components = GetCastbarComponents(castbarObject);
+        if (components.FillImage is null)
+            return;
+
+        if (attackInfo is null || attackInfo.IsExpired)
+        {
+            ResetCastbarDisplay(components);
+            return;
+        }
+
+        UpdateActiveAttackDisplay(components, attackInfo);
+    }
+
+    private CastbarComponents GetCastbarComponents(GameObject castbarObject)
+    {
         var fillTransform = castbarObject.transform.Find(FillName);
         var parryIndicatorTransform = castbarObject.transform.Find(ParryIndicatorName);
         var attackNameTransform = castbarObject.transform.Find(AttackNameTextName);
         var timerTransform = castbarObject.transform.Find(TimerTextName);
 
-        if (fillTransform is null)
-            return;
-
-        var fillImage = fillTransform.GetComponent<Image>();
-        var parryIndicator = parryIndicatorTransform?.gameObject;
-        var parryIndicatorRect = parryIndicatorTransform?.GetComponent<RectTransform>();
-        var parryIndicatorImage = parryIndicatorTransform?.GetComponent<Image>();
-        var attackNameText = attackNameTransform?.GetComponent<TextMeshProUGUI>();
-        var timerText = timerTransform?.GetComponent<TextMeshProUGUI>();
-
-        if (fillImage is null)
-            return;
-
-        // If no active attack - everything is empty
-        if (attackInfo is null || attackInfo.IsExpired)
+        return new CastbarComponents
         {
-            fillImage.fillAmount = 0f;
+            FillImage = fillTransform?.GetComponent<Image>(),
+            ParryIndicator = parryIndicatorTransform?.gameObject,
+            ParryIndicatorRect = parryIndicatorTransform?.GetComponent<RectTransform>(),
+            ParryIndicatorImage = parryIndicatorTransform?.GetComponent<Image>(),
+            AttackNameText = attackNameTransform?.GetComponent<TextMeshProUGUI>(),
+            TimerText = timerTransform?.GetComponent<TextMeshProUGUI>(),
+        };
+    }
 
-            if (parryIndicator is not null)
-                parryIndicator.SetActive(false);
+    private void ResetCastbarDisplay(CastbarComponents components)
+    {
+        if (components.FillImage is not null)
+            components.FillImage.fillAmount = 0f;
 
-            if (attackNameText is not null)
-                attackNameText.text = string.Empty;
+        if (components.ParryIndicator is not null)
+            components.ParryIndicator.SetActive(false);
 
-            if (timerText is not null)
-                timerText.text = string.Empty;
+        if (components.AttackNameText is not null)
+            components.AttackNameText.text = string.Empty;
 
-            return;
-        }
+        if (components.TimerText is not null)
+            components.TimerText.text = string.Empty;
+    }
 
-        // Set fill progress
-        fillImage.fillAmount = attackInfo.Progress;
+    private void UpdateActiveAttackDisplay(
+        CastbarComponents components,
+        ActiveAttackInfo attackInfo
+    )
+    {
+        components.FillImage!.fillAmount = attackInfo.Progress;
 
-        // Update attack text
-        if (attackNameText is not null)
-        {
-            attackNameText.text = _config.AttackCastbarTextEnabled.Value
-                ? attackInfo.AttackName
-                : string.Empty;
-            attackNameText.enabled = _config.AttackCastbarTextEnabled.Value;
-        }
-
-        // Update timer
-        if (timerText is not null)
-        {
-            timerText.text = _config.AttackCastbarTextEnabled.Value
-                ? $"{attackInfo.TimeRemaining:F1}s"
-                : string.Empty;
-            timerText.enabled = _config.AttackCastbarTextEnabled.Value;
-        }
+        UpdateAttackText(components, attackInfo);
 
         var parryWindowInfo = _parryWindowService.GetParryWindowInfo(
             attackInfo,
@@ -551,85 +550,119 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         if (!parryWindowInfo.HasValue)
         {
-            if (parryIndicator is not null)
-            {
-                parryIndicator.SetActive(false);
-            }
-
-            // Normal fill - keep yellow (sprite color)
-            fillImage.color = Color.white;
-
-            var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText is not null)
-                attackNameText.color = textColor;
-            if (timerText is not null)
-                timerText.color = textColor;
-
+            ApplyNoParryWindowStyle(components);
             return;
         }
 
-        // If parry window info exists - update indicator size and position
-        if (parryIndicatorRect is not null)
+        UpdateParryIndicatorPosition(components, parryWindowInfo.Value);
+        ApplyParryWindowStyle(components, attackInfo);
+    }
+
+    private void UpdateAttackText(CastbarComponents components, ActiveAttackInfo attackInfo)
+    {
+        var textEnabled = _config.AttackCastbarTextEnabled.Value;
+
+        if (components.AttackNameText is not null)
         {
-            var (startPos, windowWidth) = parryWindowInfo.Value;
-            parryIndicatorRect.anchorMin = new Vector2(startPos, 0f);
-            parryIndicatorRect.anchorMax = new Vector2(startPos + windowWidth, 1f);
-            parryIndicatorRect.offsetMin = new Vector2(0f, BorderThickness);
-            parryIndicatorRect.offsetMax = new Vector2(0f, -BorderThickness);
+            components.AttackNameText.text = textEnabled ? attackInfo.AttackName : string.Empty;
+            components.AttackNameText.enabled = textEnabled;
         }
 
-        // Visual effects for parry window
-        if (_parryWindowService.IsInParryWindow(attackInfo))
+        if (components.TimerText is not null)
         {
-            fillImage.color = Color.white;
-            var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText is not null)
-                attackNameText.color = textColor;
-            if (timerText is not null)
-                timerText.color = textColor;
+            components.TimerText.text = textEnabled
+                ? $"{attackInfo.TimeRemaining:F1}s"
+                : string.Empty;
+            components.TimerText.enabled = textEnabled;
+        }
+    }
 
-            // During parry window show indicator with red gradient
-            if (parryIndicator is not null)
+    private void ApplyNoParryWindowStyle(CastbarComponents components)
+    {
+        if (components.ParryIndicator is not null)
+            components.ParryIndicator.SetActive(false);
+
+        if (components.FillImage is not null)
+            components.FillImage.color = Color.white;
+
+        var textColor = _config.CastbarTextColor.Value;
+        if (components.AttackNameText is not null)
+            components.AttackNameText.color = textColor;
+        if (components.TimerText is not null)
+            components.TimerText.color = textColor;
+    }
+
+    private void UpdateParryIndicatorPosition(
+        CastbarComponents components,
+        (float startPos, float windowWidth) parryWindowInfo
+    )
+    {
+        if (components.ParryIndicatorRect is null)
+            return;
+
+        var (startPos, windowWidth) = parryWindowInfo;
+        components.ParryIndicatorRect.anchorMin = new Vector2(startPos, 0f);
+        components.ParryIndicatorRect.anchorMax = new Vector2(startPos + windowWidth, 1f);
+        components.ParryIndicatorRect.offsetMin = new Vector2(0f, BorderThickness);
+        components.ParryIndicatorRect.offsetMax = new Vector2(0f, -BorderThickness);
+    }
+
+    private void ApplyParryWindowStyle(CastbarComponents components, ActiveAttackInfo attackInfo)
+    {
+        var isInParryWindow = _parryWindowService.IsInParryWindow(attackInfo);
+
+        if (components.FillImage is not null)
+            components.FillImage.color = Color.white;
+
+        var textColor = _config.CastbarTextColor.Value;
+        if (components.AttackNameText is not null)
+            components.AttackNameText.color = textColor;
+        if (components.TimerText is not null)
+            components.TimerText.color = textColor;
+
+        UpdateParryIndicatorVisual(components, isInParryWindow);
+    }
+
+    private void UpdateParryIndicatorVisual(CastbarComponents components, bool isInParryWindow)
+    {
+        if (components.ParryIndicator is null)
+            return;
+
+        components.ParryIndicator.SetActive(true);
+
+        if (components.ParryIndicatorImage is null)
+            return;
+
+        if (isInParryWindow)
+        {
+            if (_cachedParryActiveSprite is null)
             {
-                parryIndicator.SetActive(true);
-                if (parryIndicatorImage is not null)
-                {
-                    if (_cachedParryActiveSprite is null)
-                    {
-                        var parryActiveColor = _config.CastbarParryActiveColor.Value;
-                        _cachedParryActiveSprite = CreateGradientSprite(parryActiveColor);
-                    }
-                    parryIndicatorImage.sprite = _cachedParryActiveSprite;
-                    parryIndicatorImage.color = Color.white;
-                }
+                var parryActiveColor = _config.CastbarParryActiveColor.Value;
+                _cachedParryActiveSprite = CreateGradientSprite(parryActiveColor);
             }
+            components.ParryIndicatorImage.sprite = _cachedParryActiveSprite;
         }
         else
         {
-            // Show parry indicator with orange gradient
-            if (parryIndicator is not null)
+            if (_cachedParryIndicatorSprite is null)
             {
-                parryIndicator.SetActive(true);
-                if (parryIndicatorImage is not null)
-                {
-                    if (_cachedParryIndicatorSprite is null)
-                    {
-                        var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
-                        _cachedParryIndicatorSprite = CreateGradientSprite(parryIndicatorColor);
-                    }
-                    parryIndicatorImage.sprite = _cachedParryIndicatorSprite;
-                    parryIndicatorImage.color = Color.white;
-                }
+                var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
+                _cachedParryIndicatorSprite = CreateGradientSprite(parryIndicatorColor);
             }
-
-            fillImage.color = Color.white;
-
-            var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText is not null)
-                attackNameText.color = textColor;
-            if (timerText is not null)
-                timerText.color = textColor;
+            components.ParryIndicatorImage.sprite = _cachedParryIndicatorSprite;
         }
+
+        components.ParryIndicatorImage.color = Color.white;
+    }
+
+    private struct CastbarComponents
+    {
+        public Image? FillImage { get; set; }
+        public GameObject? ParryIndicator { get; set; }
+        public RectTransform? ParryIndicatorRect { get; set; }
+        public Image? ParryIndicatorImage { get; set; }
+        public TextMeshProUGUI? AttackNameText { get; set; }
+        public TextMeshProUGUI? TimerText { get; set; }
     }
 
     private TMP_FontAsset? GetValheimFont()
@@ -861,9 +894,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
                 }
             }
 
-            _logger?.LogInfo(
-                $"[{nameof(CleanupCastbars)}] Cleaned up {_createdCastbars.Count} castbar(s)"
-            );
+            _logger?.LogInfo($"Cleaned up {_createdCastbars.Count} castbar(s)");
 
             _createdCastbars.Clear();
         }

@@ -51,7 +51,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
 
         if (enemy is not Humanoid humanoid)
         {
-            _logger.LogDebug($"Enemy {enemy.m_name} is not Humanoid");
+            _logger.LogDebug($"[{nameof(CalculateThreat)}] Enemy {enemy.m_name} is not Humanoid");
             return null;
         }
 
