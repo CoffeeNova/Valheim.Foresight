@@ -291,49 +291,38 @@ internal class MonsterAIDoAttackPatch
 
         var normalizedAttack = attackAnimationName!
             .Replace("_", string.Empty)
-            .Replace(" ", string.Empty);
-        ;
-        var normalizedCurrent = stateInfoAnimationName!
+            .Replace(" ", string.Empty)
+            .ToLowerInvariant();
+
+        var normalizedStateAnimation = stateInfoAnimationName!
             .Replace("_", string.Empty)
-            .Replace(" ", string.Empty);
+            .Replace(" ", string.Empty)
+            .ToLowerInvariant();
 
-        var namesAreEqual = string.Equals(
-            normalizedAttack,
-            normalizedCurrent,
-            StringComparison.OrdinalIgnoreCase
-        );
+        var namesAreEqual = string.Equals(normalizedAttack, normalizedStateAnimation);
 
         if (!namesAreEqual)
         {
-            namesAreEqual = stateInfoAnimationName.StartsWith(
-                attackAnimationName,
-                StringComparison.CurrentCultureIgnoreCase
-            );
+            namesAreEqual = normalizedStateAnimation.StartsWith(normalizedAttack);
         }
 
         if (!namesAreEqual)
         {
-            namesAreEqual = stateInfoAnimationName.Contains(
-                attackAnimationName,
-                StringComparison.CurrentCultureIgnoreCase
-            );
+            namesAreEqual = normalizedStateAnimation.Contains(normalizedAttack);
         }
 
         if (!namesAreEqual)
         {
-            namesAreEqual = attackAnimationName.Contains(
-                stateInfoAnimationName,
-                StringComparison.CurrentCultureIgnoreCase
-            );
+            namesAreEqual = normalizedAttack.Contains(normalizedStateAnimation);
         }
 
         // Final attempt: similarity comparison using Levenshtein distance
         if (!namesAreEqual)
         {
-            namesAreEqual = StringSimilarity.AreSimilar(normalizedAttack, normalizedCurrent);
+            namesAreEqual = StringSimilarity.AreSimilar(normalizedAttack, normalizedStateAnimation);
             ValheimForesightPlugin.Log.LogDebug(
                 $"[StringSimilarity.AreSimilar]: {namesAreEqual}. "
-                    + $"Comparing '{normalizedAttack}' and '{normalizedCurrent}'"
+                    + $"Comparing '{normalizedAttack}' and '{normalizedStateAnimation}'"
             );
         }
 

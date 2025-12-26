@@ -77,16 +77,13 @@ The learning algorithm uses a rolling mean calculation with variance tracking:
 
 The attack timing database is stored at `BepInEx/config/foresight.Database/attack_timings.yml` as human-readable YAML with the following structure:
 
-```text
-
-timings:
-Troll::attack:
-meanHitOffsetSeconds: 1.33
-variance: 0.0001
-sampleCount: 24
-lastUpdatedUtc: 1766696572
-learningEnabled: true
-
+```yml
+Abomination::attack:
+  meanHitOffsetSeconds: 1.041306
+  variance: 2.221748E-05
+  sampleCount: 8
+  lastUpdatedUtc: 1766698684
+  learningEnabled: true
 ```
 
 ### Performance Optimized

@@ -112,11 +112,11 @@ Just play normally! The mod works automatically:
 
 ## Does This Work With...?
 
-- ✅ **Multiplayer**: Yes! Works on any server
-- ✅ **Dedicated servers**: Yes! Client-side only
-- ✅ **Enemy mods**: Yes! Learns new enemy attacks automatically
-- ✅ **HUD mods**: Yes! Compatible with most HUD mods
-- ✅ **Combat mods**: Mostly yes, as long as they don't heavily modify base mechanics
+- **Multiplayer**: Yes! Works on any server
+- **Dedicated servers**: Yes! Client-side only
+- **Enemy mods**: Yes! Learns new enemy attacks automatically
+- **HUD mods**: Yes! Compatible with most HUD mods
+- **Combat mods**: Mostly yes, as long as they don't heavily modify base mechanics
 
 ## FAQ
 

@@ -13,7 +13,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
 {
     private const string SectionName = "Attack Overrides";
     private const string OverrideDefaultValue = "gd_king::stomp=3.0";
-    private const string IgnoreDefaultValue = "gd_king::spawn,gd_king::scream";
+    private const string IgnoreDefaultValue = "gd_king::spawn,gd_king::scream,Serpent::attack";
 
     private const string MappingDefaultValue =
         "TentaRoot::attack->punch,Dragon::attack_breath->cold breath,"
@@ -22,8 +22,34 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
         + "GoblinShaman_Hildir::attack_protect->cast protect,"
         + "GoblinShaman_Hildir::attack_cast->cast fireball,"
         + "GoblinShaman_Hildir::attack_poke->staff poke,"
+        + "GoblinShaman::attack_protect->cast protect,"
+        + "GoblinShaman::attack_cast->cast fireball,"
+        + "GoblinShaman::attack_poke->staff poke"
         + "Boar::base_attack->fangs 1|fangs 2|fangs front|bite,"
-        + "Skeleton::attack_bow->bow_idle";
+        + "Skeleton::attack_bow->bow_idle,"
+        + "Bjorn::attack_swipe_combo->Swipe Combo 0,"
+        + "Unbjorn::attack_swipe_combo->Swipe Combo 0,"
+        + "Draugr::attack_bow->bow_idle,"
+        + "Fenring::attack_claw->attack_bite|attack_claw,"
+        + "Ulv::attack_slash->attack_claw,"
+        + "Fenring_Cultist::attack_claw_double->attack_doubleclaw,"
+        + "Goblin::spear_throw->throw_spear,"
+        + "Seeker::attack_slam->Attack Double Claw slam,"
+        + "Seeker::attack_pincers->Attack Bite,"
+        + "Seeker::attack_claw_right->Attack Pierce Right,"
+        + "Seeker::attack_claw_left->Attack Pierce Left,"
+        + "SeekerBrood::attack_pincers->Attack Bite,"
+        + "Dverger::attack_cast->shoot,"
+        + "Dverger::attack_poke->kolv,"
+        + "DvergerMageFire::attack_poke->magic projectile,"
+        + "DvergerMageFire::attack_cast->cast fireball,"
+        + "DvergerMageIce::attack_poke->magic projectile,"
+        + "DvergerMageIce::attack_icicle->cast icicles,"
+        + "DvergerMageIce::attack_nova->cast ice nova,"
+        + "DvergerMageSupport::attack_protect->cast protect,"
+        + "Charred_Archer::attack_bow->Draw Bow,"
+        + "Morgen::attack_swipe_4->Attack Swipe R Flurry 1,"
+        + "Morgen::attack_swipe_3->Attack Swipe L Flurry 1";
 
     private const string NoParryDefaultValue =
         "Bonemass::aoe,Bonemass::spawn,"
@@ -34,7 +60,11 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
         + "GoblinBruteBros::attack_protect,"
         + "GoblinBruteBros::taunt,"
         + "GoblinBrute_Hildir::taunt,"
-        + "GoblinShaman_Hildir::attack_protect";
+        + "GoblinShaman_Hildir::attack_protect,"
+        + "GoblinShaman::attack_protect,"
+        + "Fenring::taunt,"
+        + "BonemawSerpent::taunt,"
+        + "FallenValkyrie:taunt";
 
     private Dictionary<AttackKey, AttackOverrideData>? _cachedOverrides;
     private Dictionary<AttackKey, IReadOnlyList<string>>? _cachedMappings;
