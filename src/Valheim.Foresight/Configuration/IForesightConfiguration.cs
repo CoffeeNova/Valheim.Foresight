@@ -1,0 +1,44 @@
+﻿using System;
+using BepInEx.Configuration;
+using UnityEngine;
+
+namespace Valheim.Foresight.Configuration;
+
+/// <summary>
+/// Configuration interface for Foresight plugin settings
+/// </summary>
+public interface IForesightConfiguration
+{
+    ConfigEntry<bool> PluginEnabled { get; }
+    ConfigEntry<bool> IsLogsEnabled { get; }
+    ConfigEntry<bool> DebugEnabled { get; }
+    ConfigEntry<bool> ThreatIconEnabled { get; }
+    ConfigEntry<float> ThreatIconSize { get; }
+    ConfigEntry<float> ThreatIconOffsetX { get; }
+    ConfigEntry<float> ThreatIconOffsetY { get; }
+    ConfigEntry<bool> AttackCastbarEnabled { get; }
+    ConfigEntry<bool> AttackCastbarTextEnabled { get; }
+    ConfigEntry<bool> AlwaysDisplayCastbar { get; }
+    ConfigEntry<float> AttackCastbarWidth { get; }
+    ConfigEntry<float> AttackCastbarHeight { get; }
+    ConfigEntry<float> AttackCastbarOffsetX { get; }
+    ConfigEntry<float> AttackCastbarOffsetY { get; }
+    ConfigEntry<float> AttackCastbarParryWindow { get; }
+
+    ConfigEntry<float> BossCastbarWidth { get; }
+    ConfigEntry<float> BossCastbarHeight { get; }
+    ConfigEntry<float> BossCastbarOffsetX { get; }
+    ConfigEntry<float> BossCastbarOffsetY { get; }
+    ConfigEntry<string> TimingEditorToggleKey { get; }
+    ConfigEntry<bool> AttackTimingLearningEnabled { get; }
+
+    ConfigEntry<Color> CastbarFillColor { get; }
+    ConfigEntry<Color> CastbarParryIndicatorColor { get; }
+    ConfigEntry<Color> CastbarParryActiveColor { get; }
+    ConfigEntry<Color> CastbarBorderColor { get; }
+    ConfigEntry<Color> CastbarBackgroundColor { get; }
+    ConfigEntry<Color> CastbarTextColor { get; }
+    ConfigEntry<Color> CastbarTextShadowColor { get; }
+
+    event EventHandler? SettingsChanged;
+}

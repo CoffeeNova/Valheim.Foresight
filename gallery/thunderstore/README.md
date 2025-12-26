@@ -1,108 +1,153 @@
 # Valheim Foresight
 
-A combat threat assessment mod that enhances your situational awareness by displaying color-coded threat indicators on enemy nameplates. Know at a glance whether you can safely block, need to parry, or should avoid direct engagement.
+Master Valheim's combat with real-time threat assessment, attack prediction castbars, and defensive strategy recommendations. See which attacks you can block, when to parry, and when you need to dodge - all displayed clearly above enemy health bars!
 
-![Mod showcase - different threat levels](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/foresight_header.jpg)
+![Mod showcase](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/foresight_header.jpg)
 
-## Features
+## What Does This Mod Do?
 
-### Real-Time Threat Assessment
-Valheim Foresight calculates the effective damage of enemy attacks based on multiple factors:
-- Enemy base damage and level
-- World difficulty multipliers
-- Player count scaling
-- Your current armor and shield stats
-- Block power vs. Parry power
+Valheim Foresight is your personal combat advisor that helps you make split-second defensive decisions. It analyzes enemy attacks, your equipment, and the current difficulty to give you actionable information right when you need it.
 
-### Four Threat Levels
+### Color-Coded Threat Levels
 
-The mod displays threat levels through color-coded enemy names:
+Enemy names change color to show how dangerous their next attack will be:
 
-| Color | Threat Level | Meaning |
-|-------|-------------|---------|
-| **White** | Safe | You can safely block this attack |
-| **Yellow** | Caution | Significant damage but survivable when blocking |
-| **Orange** | Block Lethal | Blocking will kill you, but parrying will save you |
-| **Red** | Danger | Even a perfect parry won't save you - avoid or prepare to dodge |
+| Color      | Threat Level | Meaning                                                         |
+| ---------- | ------------ | --------------------------------------------------------------- |
+| **White**  | Safe         | You can safely block this attack                                |
+| **Yellow** | Caution      | Significant damage but survivable when blocking                 |
+| **Orange** | Block Lethal | Blocking will kill you, but parrying will save you              |
+| **Red**    | Danger       | Even a perfect parry won't save you - avoid or prepare to dodge |
 
 ![Threat level examples](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/threat_examples.png)
 
-### Intelligent Difficulty Scaling
+### Attack Castbars - Time Your Parries Perfectly!
 
-Foresight accounts for Valheim's dynamic difficulty system:
-- World progression modifiers
-- Multiplayer scaling based on nearby players
-- Biome difficulty
-- Enemy star levels
+**NEW!** See exactly when enemy attacks will land with visual castbars:
 
-### Performance Optimized
+- Progress bar fills as the enemy winds up their attack
+- Golden window shows the perfect parry timing
+- Turns red when you're in the parry window - hit that block button!
+- Optional attack names and countdown timers
 
-- Caches threat calculations to minimize performance impact
-- Automatic cleanup of distant/dead enemies
-- Configurable update intervals
+![Castbar example](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/castbar_example.jpg)
+
+---
+
+![Boss Castbar example](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/boss_castbar_example.png)
+
+Perfect for beginners learning enemy attack patterns and veterans optimizing their parry timing!
+
+### Defense Strategy Icons
+
+**NEW!** Icons show your best defensive option at a glance:
+
+- **Shield icon**: Safe to block
+- **Parry icon**: Parry recommended
+- **Dodge icon**: Get out of the way!
+
+![Defense icons](https://raw.githubusercontent.com/CoffeeNova/Valheim.Foresight/main/gallery/screenshots/defense_icons_example.png)
+
+### Smart Learning System
+
+The mod learns enemy attack patterns as you play!
+
+- Starts with pre-loaded timing data for common enemies
+- Automatically improves predictions by watching actual attacks
+- Gets more accurate the more you play
+- Works for modded enemies too!
+
+## Why Use Foresight?
+
+- **Learn faster**: New players can understand combat mechanics visually
+- **React better**: Know your defensive options before attacks land
+- **Survive longer**: Avoid unnecessary deaths from misjudged blocks
+- **Master parrying**: Perfect parry timing with visual indicators
+- **Multiplayer friendly**: Works on any server, no server-side installation needed
 
 ## Installation
 
-### Requirements
-- [BepInEx 5.4.2202+](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
-- Valheim
+### Easy Way (Recommended)
 
-### Using a Mod Manager (Recommended)
-
-1. Install [r2modman](https://thunderstore.io/package/ebkr/r2modman/) or [Thunderstore Mod Manager](https://www.overwolf.com/app/Thunderstore-Thunderstore_Mod_Manager)
+1. Install [r2modman](https://thunderstore.io/package/ebkr/r2modman/) or Thunderstore Mod Manager
 2. Search for "Valheim Foresight"
 3. Click Install
+4. Play!
 
-### Manual Installation
+### Manual Way
 
-1. Download and install [BepInExPack for Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
-2. Download the latest Valheim.Foresight.dll from releases
-3. Extract and place `Valheim.Foresight.dll` into `BepInEx/plugins/` folder
-4. Launch the game
+1. Install [BepInExPack](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
+2. Install [YamlDotNet](https://valheim.thunderstore.io/package/ValheimModding/YamlDotNet/)
+3. Download Foresight from Thunderstore
+4. Extract to `BepInEx/plugins/`
+5. Launch Valheim
 
 ## Configuration
 
-Configuration file is generated at `BepInEx/config/coffeenova.valheim.foresight.cfg` after first launch.
+The mod creates a config file at `BepInEx/config/coffeenova.valheim.foresight.cfg` on first launch.
 
-### Available Settings
+### Quick Settings
 
-- **Enable Logs** - Toggle mod logging (default: true)
-- **Debug HUD** - Show detailed threat calculation info (default: false)
+**Want to customize?** Here are the main settings you might want to adjust:
 
-## Usage
+- **Attack castbar enabled**: Turn castbars on/off (default: ON)
+- **Threat icon enabled**: Show/hide defense recommendation icons (default: OFF)
+- **Show text**: Display attack names on castbars (default: OFF)
+- **Always display castbar**: Keep castbar visible even when idle (default: OFF)
+- **Parry window size**: Adjust how early the parry indicator appears (default: 0.25 seconds)
 
-Simply play the game normally! Foresight works automatically in the background:
+All colors, sizes, and positions are fully customizable!
 
-1. Enemy nameplates will be colored based on threat level
-2. Check the color before engaging
-3. Adjust your combat strategy accordingly
+## How to Use
 
+Just play normally! The mod works automatically:
 
+1. Face an enemy - their name will be colored by threat level
+2. When they attack, a castbar appears showing the windup
+3. Watch for the orange parry indicator
+4. When it turns red, hit block for a perfect parry!
+5. Defense icons show whether to block, parry, or dodge
 
-## How It Works
+**Pro tip**: Press F7 to open the timing editor and see all learned attack patterns!
 
-### Damage Calculation Pipeline
+## Does This Work With...?
 
-1. **Base Damage Detection**: Extracts weapon damage from enemy's equipped items or attacks
-2. **Difficulty Multipliers**: Applies world difficulty and player count scaling
-3. **Defense Simulation**: Calculates effective damage after your block/parry power
-4. **Threat Classification**: Compares effective damage to your current HP
-5. **Visual Feedback**: Updates enemy nameplate color
+- **Multiplayer**: Yes! Works on any server
+- **Dedicated servers**: Yes! Client-side only
+- **Enemy mods**: Yes! Learns new enemy attacks automatically
+- **HUD mods**: Yes! Compatible with most HUD mods
+- **Combat mods**: Mostly yes, as long as they don't heavily modify base mechanics
 
-### Block vs. Parry
+## FAQ
 
-The mod distinguishes between blocking and parrying:
-- **Block**: Uses your shield's base block power
-- **Parry**: Uses 2.5x block power (configurable by shield type)
+**Q: Is this cheating?**
+A: Not at all! It shows information you could learn through experience and provides visual feedback for timing you can already do manually. Think of it as training wheels for Valheim's combat system.
 
-This is why some attacks show orange (Block Lethal) - they exceed your block power but not your parry power.
+**Q: Will I get banned?**
+A: No. This is a client-side mod that doesn't modify game mechanics or give unfair advantages. It's allowed on all servers.
 
+**Q: Does it affect performance?**
+A: Minimal impact. The mod is optimized for performance and shouldn't affect your FPS.
 
-## Compatibility
+**Q: Do I need to enable learning?**
+A: No! The mod ships with pre-learned data for common enemies. Learning is optional but makes predictions more accurate.
 
-### Confirmed Compatible
-- Server-side compatible (clients without the mod won't see threat colors)
-- Works with enemy scaling mods that modify damage
-- Compatible with HUD mods
+**Q: What if the predictions are wrong?**
+A: The mod will automatically correct itself as it observes actual attack timings. You can also manually edit timings in the config or timing editor.
+
+**Q: Can I use this to practice parrying?**
+A: Absolutely! That's one of the best uses. The visual parry window helps you learn the timing for each enemy type.
+
+## Support
+
+- **Issues or bugs?** [Report on GitHub](https://github.com/CoffeeNova/Valheim.Foresight/issues)
+- **Questions?** Ask on Thunderstore or GitHub Discussions
+- **Want to contribute?** Pull requests welcome!
+
+## Changelog
+
+See [CHANGELOG.md](https://github.com/CoffeeNova/Valheim.Foresight/blob/main/gallery/thunderstore/CHANGELOG.md) for version history.
 
 ---
+
+**Created by CoffeeNova** | [GitHub](https://github.com/CoffeeNova/Valheim.Foresight) | [Thunderstore](https://thunderstore.io/c/valheim/p/CoffeeNova/Valheim_Foresight/)

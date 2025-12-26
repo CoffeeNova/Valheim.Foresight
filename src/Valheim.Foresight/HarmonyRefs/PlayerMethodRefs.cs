@@ -3,25 +3,29 @@ using HarmonyLib;
 
 namespace Valheim.Foresight.HarmonyRefs;
 
-public class PlayerMethodRefs
+/// <summary>
+/// Provides reflection access to Player methods using Harmony
+/// </summary>
+public static class PlayerMethodRefs
 {
+    private const string GetCurrentBlockerMethodName = "GetCurrentBlocker";
+
     public static readonly Func<Player, ItemDrop.ItemData?>? GetCurrentBlocker;
 
     static PlayerMethodRefs()
     {
-        try
+        var mi = AccessTools.Method(typeof(Player), GetCurrentBlockerMethodName);
+        if (mi != null)
         {
-            var mi = AccessTools.Method(typeof(Player), nameof(Player.GetCurrentBlocker));
-            if (mi != null)
-            {
-                GetCurrentBlocker =
-                    (Func<Player, ItemDrop.ItemData?>)
-                        Delegate.CreateDelegate(typeof(Func<Player, ItemDrop.ItemData?>), mi);
-            }
+            GetCurrentBlocker =
+                (Func<Player, ItemDrop.ItemData?>)
+                    Delegate.CreateDelegate(typeof(Func<Player, ItemDrop.ItemData?>), mi);
         }
-        catch (Exception ex)
+        else
         {
-            ValheimForesightPlugin.Log?.LogError($"Failed to bind Player.GetCurrentBlocker: {ex}");
+            ValheimForesightPlugin.Log?.LogWarning(
+                $"Method Player.{GetCurrentBlockerMethodName} not found via Harmony reflection"
+            );
             GetCurrentBlocker = null;
         }
     }

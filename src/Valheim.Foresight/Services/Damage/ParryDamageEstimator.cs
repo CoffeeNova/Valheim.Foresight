@@ -11,9 +11,13 @@ public sealed class ParryDamageEstimator : DamageEstimatorBase
 {
     private const float BlockingSkillPercentPerLevel = 0.005f;
 
+    /// <summary>
+    /// Creates a new parry damage estimator
+    /// </summary>
     public ParryDamageEstimator(ILogger logger)
         : base(logger) { }
 
+    /// <inheritdoc/>
     protected override float ApplyActiveDefense(
         PlayerDefenseStats defenseStats,
         float physicalDamage
@@ -23,7 +27,10 @@ public sealed class ParryDamageEstimator : DamageEstimatorBase
             return 0f;
 
         if (defenseStats.Shield == null)
+        {
+            Logger.LogDebug($"[{nameof(ApplyActiveDefense)}] no shield.");
             return physicalDamage;
+        }
 
         var blockPower = CalculateEffectiveParryPower(defenseStats);
         var blocked = Mathf.Min(physicalDamage, blockPower);

@@ -491,3 +491,5 @@ $RECYCLE.BIN/
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+/src/.github/agents/
+

@@ -1,0 +1,890 @@
+﻿timings:
+  Charred_Melee::attack_thrustfeint:
+    meanHitOffsetSeconds: 1.328886
+    variance: 2.977885E-05
+    sampleCount: 19
+    lastUpdatedUtc: 1766765679
+    learningEnabled: true
+  Charred_Melee::attack_swingfeint:
+    meanHitOffsetSeconds: 1.496215
+    variance: 2.75506E-05
+    sampleCount: 10
+    lastUpdatedUtc: 1766765661
+    learningEnabled: true
+  Charred_Melee::attack_thrust:
+    meanHitOffsetSeconds: 0.7074127
+    variance: 0.0001777116
+    sampleCount: 13
+    lastUpdatedUtc: 1766765676
+    learningEnabled: true
+  Charred_Melee::attack_swing:
+    meanHitOffsetSeconds: 0.9386317
+    variance: 8.661782E-05
+    sampleCount: 15
+    lastUpdatedUtc: 1766765674
+    learningEnabled: true
+  Troll::punch:
+    meanHitOffsetSeconds: 1.149811
+    variance: 0.002007378
+    sampleCount: 336
+    lastUpdatedUtc: 1766758535
+    learningEnabled: true
+  Troll::attack:
+    meanHitOffsetSeconds: 1.347124
+    variance: 0.01103527
+    sampleCount: 154
+    lastUpdatedUtc: 1766747833
+    learningEnabled: true
+  Troll::throw:
+    meanHitOffsetSeconds: 1.193339
+    variance: 0.01981944
+    sampleCount: 3
+    lastUpdatedUtc: 1766746904
+    learningEnabled: true
+  Skeleton::attack:
+    meanHitOffsetSeconds: 0.8046591
+    variance: 5.426717E-05
+    sampleCount: 57
+    lastUpdatedUtc: 1766748871
+    learningEnabled: true
+  Eikthyr::attack2:
+    meanHitOffsetSeconds: 1.580002
+    variance: 0
+    sampleCount: 8
+    lastUpdatedUtc: 1766682052
+    learningEnabled: true
+  Eikthyr::attack_stomp:
+    meanHitOffsetSeconds: 2.900004
+    variance: 0
+    sampleCount: 6
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Eikthyr::attack1:
+    meanHitOffsetSeconds: 0.6000027
+    variance: 0
+    sampleCount: 18
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  gd_king::shoot:
+    meanHitOffsetSeconds: 2.524519
+    variance: 0
+    sampleCount: 62
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  gd_king::stomp:
+    meanHitOffsetSeconds: 2.023547
+    variance: 0
+    sampleCount: 24
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  TentaRoot::attack:
+    meanHitOffsetSeconds: 1.382282
+    variance: 0
+    sampleCount: 38
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Bonemass::aoe:
+    meanHitOffsetSeconds: 4.124606
+    variance: 0
+    sampleCount: 13
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Bonemass::punch:
+    meanHitOffsetSeconds: 1.161882
+    variance: 0
+    sampleCount: 32
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Bonemass::spawn:
+    meanHitOffsetSeconds: 2.009478
+    variance: 0
+    sampleCount: 19
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Dragon::attack_iceball:
+    meanHitOffsetSeconds: 2.162012
+    variance: 0
+    sampleCount: 10
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Dragon::attack_claw_right:
+    meanHitOffsetSeconds: 1.613094
+    variance: 0
+    sampleCount: 8
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Dragon::attack_claw_left:
+    meanHitOffsetSeconds: 1.584033
+    variance: 0
+    sampleCount: 8
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Dragon::attack_bite:
+    meanHitOffsetSeconds: 0.9958125
+    variance: 0
+    sampleCount: 7
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  Dragon::attack_breath:
+    meanHitOffsetSeconds: 1.378828
+    variance: 0
+    sampleCount: 7
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  GoblinKing::nova:
+    meanHitOffsetSeconds: 2.686
+    variance: 0
+    sampleCount: 58
+    lastUpdatedUtc: 1766682053
+    learningEnabled: true
+  GoblinKing::taunt:
+    meanHitOffsetSeconds: 2.373337
+    variance: 0
+    sampleCount: 6
+    lastUpdatedUtc: 1766682053
+    learningEnabled: false
+  GoblinKing::cast1:
+    meanHitOffsetSeconds: 4.040294
+    variance: 0
+    sampleCount: 68
+    lastUpdatedUtc: 1766682053
+    learningEnabled: false
+  GoblinKing::beam:
+    meanHitOffsetSeconds: 2.056542
+    variance: 0
+    sampleCount: 107
+    lastUpdatedUtc: 1766682053
+    learningEnabled: false
+  SeekerQueen::attack_pierce:
+    meanHitOffsetSeconds: 0.9199921
+    variance: 0.0008999266
+    sampleCount: 80
+    lastUpdatedUtc: 1766758604
+    learningEnabled: true
+  SeekerQueen::attack_slash:
+    meanHitOffsetSeconds: 1.062852
+    variance: 0.0001058423
+    sampleCount: 28
+    lastUpdatedUtc: 1766758616
+    learningEnabled: true
+  Fader::attack_ClawR:
+    meanHitOffsetSeconds: 1.300955
+    variance: 0.5603361
+    sampleCount: 30
+    lastUpdatedUtc: 1766683505
+    learningEnabled: true
+  Fader::attack_bite:
+    meanHitOffsetSeconds: 1.698655
+    variance: 0.300422
+    sampleCount: 62
+    lastUpdatedUtc: 1766683494
+    learningEnabled: true
+  Fader::attack_ClawL:
+    meanHitOffsetSeconds: 1.486531
+    variance: 0.01625537
+    sampleCount: 32
+    lastUpdatedUtc: 1766684876
+    learningEnabled: true
+  Fader::taunt:
+    meanHitOffsetSeconds: 4.5
+    variance: 0.6917559
+    sampleCount: 24
+    lastUpdatedUtc: 1766688048
+    learningEnabled: false
+  Fader::attack_Spin:
+    meanHitOffsetSeconds: 1.492829
+    variance: 0.1435961
+    sampleCount: 6
+    lastUpdatedUtc: 1766684872
+    learningEnabled: true
+  Skeleton_Hildir::attack:
+    meanHitOffsetSeconds: 0.7978439
+    variance: 1.49875E-05
+    sampleCount: 48
+    lastUpdatedUtc: 1766688415
+    learningEnabled: true
+  Skeleton_Hildir::attack_fire:
+    meanHitOffsetSeconds: 1.504285
+    variance: 0.06348667
+    sampleCount: 14
+    lastUpdatedUtc: 1766688410
+    learningEnabled: true
+  Fenring_Cultist_Hildir::attack_nova:
+    meanHitOffsetSeconds: 1.2
+    variance: 1.505888
+    sampleCount: 4
+    lastUpdatedUtc: 1766688457
+    learningEnabled: false
+  Fenring_Cultist_Hildir::attack_claw:
+    meanHitOffsetSeconds: 1.037648
+    variance: 0.6012735
+    sampleCount: 34
+    lastUpdatedUtc: 1766688989
+    learningEnabled: true
+  Fenring_Cultist_Hildir::attack_flames:
+    meanHitOffsetSeconds: 1.1
+    variance: 0.3251537
+    sampleCount: 9
+    lastUpdatedUtc: 1766688664
+    learningEnabled: false
+  Fenring_Cultist_Hildir::attack_claw_double:
+    meanHitOffsetSeconds: 0.8
+    variance: 0.1643499
+    sampleCount: 3
+    lastUpdatedUtc: 1766688955
+    learningEnabled: false
+  GoblinBruteBros::rageattack:
+    meanHitOffsetSeconds: 1.8
+    variance: 1.087335
+    sampleCount: 4
+    lastUpdatedUtc: 1766689223
+    learningEnabled: false
+  GoblinBruteBros::attack:
+    meanHitOffsetSeconds: 1.243333
+    variance: 0.02589819
+    sampleCount: 18
+    lastUpdatedUtc: 1766753774
+    learningEnabled: true
+  GoblinBruteBros::attack_cast:
+    meanHitOffsetSeconds: 2.022499
+    variance: 0.02674267
+    sampleCount: 8
+    lastUpdatedUtc: 1766753718
+    learningEnabled: true
+  GoblinShaman_Hildir::attack_cast:
+    meanHitOffsetSeconds: 1.807137
+    variance: 0.0286637
+    sampleCount: 14
+    lastUpdatedUtc: 1766695191
+    learningEnabled: true
+  GoblinShaman_Hildir::attack_poke:
+    meanHitOffsetSeconds: 0.7249756
+    variance: 9.126961E-06
+    sampleCount: 3
+    lastUpdatedUtc: 1766690176
+    learningEnabled: true
+  GoblinBrute_Hildir::rageattack:
+    meanHitOffsetSeconds: 1.8
+    variance: 0.2187069
+    sampleCount: 4
+    lastUpdatedUtc: 1766690255
+    learningEnabled: false
+  GoblinBrute_Hildir::attack:
+    meanHitOffsetSeconds: 1.314739
+    variance: 0.02496117
+    sampleCount: 19
+    lastUpdatedUtc: 1766756131
+    learningEnabled: true
+  Boar::base_attack:
+    meanHitOffsetSeconds: 0.4353377
+    variance: 0.009282126
+    sampleCount: 41
+    lastUpdatedUtc: 1766761447
+    learningEnabled: true
+  Neck::attack:
+    meanHitOffsetSeconds: 0.3405151
+    variance: 1.46057E-05
+    sampleCount: 8
+    lastUpdatedUtc: 1766695444
+    learningEnabled: true
+  Greyling::attack:
+    meanHitOffsetSeconds: 0.9015146
+    variance: 5.975173E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766695504
+    learningEnabled: true
+  Greydwarf::attack:
+    meanHitOffsetSeconds: 0.9008789
+    variance: 3.129858E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766695546
+    learningEnabled: true
+  Greydwarf::throw:
+    meanHitOffsetSeconds: 1.430008
+    variance: 0.04929558
+    sampleCount: 4
+    lastUpdatedUtc: 1766695609
+    learningEnabled: true
+  Greydwarf_Elite::attack:
+    meanHitOffsetSeconds: 0.6761152
+    variance: 7.123359E-06
+    sampleCount: 17
+    lastUpdatedUtc: 1766695679
+    learningEnabled: true
+  Greydwarf_Shaman::spray:
+    meanHitOffsetSeconds: 0.9
+    variance: 2.755225E-05
+    sampleCount: 2
+    lastUpdatedUtc: 1766695742
+    learningEnabled: false
+  Greydwarf_Shaman::attack:
+    meanHitOffsetSeconds: 0.9036916
+    variance: 1.302513E-05
+    sampleCount: 12
+    lastUpdatedUtc: 1766695804
+    learningEnabled: true
+  Troll::swing_logv:
+    meanHitOffsetSeconds: 1.489787
+    variance: 1.226802E-05
+    sampleCount: 6
+    lastUpdatedUtc: 1766696543
+    learningEnabled: true
+  Troll::swing_logh:
+    meanHitOffsetSeconds: 1.270874
+    variance: 2.54112E-05
+    sampleCount: 6
+    lastUpdatedUtc: 1766696546
+    learningEnabled: true
+  Skeleton::attack_bow:
+    meanHitOffsetSeconds: 1.147507
+    variance: 0.0001439527
+    sampleCount: 16
+    lastUpdatedUtc: 1766698261
+    learningEnabled: true
+  Skeleton_Poison::attack_mace:
+    meanHitOffsetSeconds: 1.223865
+    variance: 3.01044E-05
+    sampleCount: 15
+    lastUpdatedUtc: 1766698358
+    learningEnabled: true
+  Ghost::attack:
+    meanHitOffsetSeconds: 1.184842
+    variance: 1.182091E-05
+    sampleCount: 9
+    lastUpdatedUtc: 1766698405
+    learningEnabled: true
+  Abomination::attack3:
+    meanHitOffsetSeconds: 1.734985
+    variance: 0.0629549
+    sampleCount: 8
+    lastUpdatedUtc: 1766698567
+    learningEnabled: true
+  Abomination::attack:
+    meanHitOffsetSeconds: 1.041306
+    variance: 2.221748E-05
+    sampleCount: 8
+    lastUpdatedUtc: 1766698684
+    learningEnabled: true
+  Abomination::attack2:
+    meanHitOffsetSeconds: 2.477926
+    variance: 9.702701E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766698680
+    learningEnabled: true
+  Blob::attack:
+    meanHitOffsetSeconds: 1.045917
+    variance: 1.098294E-05
+    sampleCount: 13
+    lastUpdatedUtc: 1766698876
+    learningEnabled: true
+  BlobElite::attack:
+    meanHitOffsetSeconds: 1.04001
+    variance: 2.676432E-09
+    sampleCount: 17
+    lastUpdatedUtc: 1766702505
+    learningEnabled: true
+  Draugr::attack:
+    meanHitOffsetSeconds: 0.7682118
+    variance: 0.007399295
+    sampleCount: 21
+    lastUpdatedUtc: 1766760384
+    learningEnabled: true
+  Bjorn::attack_slam:
+    meanHitOffsetSeconds: 1.373311
+    variance: 0.05331975
+    sampleCount: 6
+    lastUpdatedUtc: 1766760143
+    learningEnabled: true
+  Bjorn::attack_bite:
+    meanHitOffsetSeconds: 0.8490465
+    variance: 0.02494804
+    sampleCount: 9
+    lastUpdatedUtc: 1766760122
+    learningEnabled: true
+  Bjorn::attack_swipe_r:
+    meanHitOffsetSeconds: 0.9088516
+    variance: 0.04272422
+    sampleCount: 8
+    lastUpdatedUtc: 1766760153
+    learningEnabled: true
+  Bjorn::attack_swipe_l:
+    meanHitOffsetSeconds: 0.7931693
+    variance: 0.0001469922
+    sampleCount: 7
+    lastUpdatedUtc: 1766760149
+    learningEnabled: true
+  Bjorn::attack_claws:
+    meanHitOffsetSeconds: 1.077705
+    variance: 0.02736086
+    sampleCount: 8
+    lastUpdatedUtc: 1766760132
+    learningEnabled: true
+  Bjorn::attack_swipe_combo:
+    meanHitOffsetSeconds: 1.303324
+    variance: 0.5345369
+    sampleCount: 3
+    lastUpdatedUtc: 1766760107
+    learningEnabled: true
+  Draugr::attack_bow:
+    meanHitOffsetSeconds: 1.156835
+    variance: 5.304793E-05
+    sampleCount: 19
+    lastUpdatedUtc: 1766760336
+    learningEnabled: true
+  Draugr_Elite::attack:
+    meanHitOffsetSeconds: 0.7494758
+    variance: 9.755458E-05
+    sampleCount: 17
+    lastUpdatedUtc: 1766760458
+    learningEnabled: true
+  Leech::attack:
+    meanHitOffsetSeconds: 0.5597256
+    variance: 4.272816E-06
+    sampleCount: 11
+    lastUpdatedUtc: 1766760520
+    learningEnabled: true
+  Serpent::attack:
+    meanHitOffsetSeconds: 1.142578
+    variance: 0
+    sampleCount: 1
+    lastUpdatedUtc: 1766760622
+    learningEnabled: true
+  Surtling::attack:
+    meanHitOffsetSeconds: 0.9800211
+    variance: 0.04813946
+    sampleCount: 6
+    lastUpdatedUtc: 1766760817
+    learningEnabled: true
+  Wraith::attack:
+    meanHitOffsetSeconds: 0.6400065
+    variance: 9.271349E-10
+    sampleCount: 15
+    lastUpdatedUtc: 1766760872
+    learningEnabled: true
+  BogWitchKvastur::attack:
+    meanHitOffsetSeconds: 0.8702393
+    variance: 5.439861E-06
+    sampleCount: 15
+    lastUpdatedUtc: 1766760974
+    learningEnabled: true
+  Wolf::attack3:
+    meanHitOffsetSeconds: 0.5332947
+    variance: 0.002017628
+    sampleCount: 4
+    lastUpdatedUtc: 1766761006
+    learningEnabled: true
+  Wolf::attack2:
+    meanHitOffsetSeconds: 0.4966125
+    variance: 3.15439E-06
+    sampleCount: 4
+    lastUpdatedUtc: 1766761003
+    learningEnabled: true
+  Wolf::attack1:
+    meanHitOffsetSeconds: 0.4237061
+    variance: 1.437953E-06
+    sampleCount: 4
+    lastUpdatedUtc: 1766761005
+    learningEnabled: true
+  Hatchling::attack:
+    meanHitOffsetSeconds: 2.093329
+    variance: 0.07608486
+    sampleCount: 9
+    lastUpdatedUtc: 1766761186
+    learningEnabled: true
+  Fenring::attack_claw:
+    meanHitOffsetSeconds: 0.6929932
+    variance: 0.0008917182
+    sampleCount: 20
+    lastUpdatedUtc: 1766761535
+    learningEnabled: true
+  StoneGolem::attack:
+    meanHitOffsetSeconds: 1.2694
+    variance: 0.02661207
+    sampleCount: 13
+    lastUpdatedUtc: 1766761716
+    learningEnabled: true
+  StoneGolem::attack3:
+    meanHitOffsetSeconds: 1.690621
+    variance: 0.0367724
+    sampleCount: 7
+    lastUpdatedUtc: 1766761704
+    learningEnabled: true
+  Bat::attack:
+    meanHitOffsetSeconds: 0.2304688
+    variance: 8.652613E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766761702
+    learningEnabled: true
+  Ulv::attack_bite:
+    meanHitOffsetSeconds: 0.8902724
+    variance: 5.52152E-06
+    sampleCount: 9
+    lastUpdatedUtc: 1766761837
+    learningEnabled: true
+  Ulv::attack_slash:
+    meanHitOffsetSeconds: 0.9556885
+    variance: 5.722046E-06
+    sampleCount: 3
+    lastUpdatedUtc: 1766761825
+    learningEnabled: true
+  Fenring_Cultist::attack_claw:
+    meanHitOffsetSeconds: 0.919993
+    variance: 1.024367E-08
+    sampleCount: 36
+    lastUpdatedUtc: 1766761980
+    learningEnabled: true
+  Fenring_Cultist::attack_claw_double:
+    meanHitOffsetSeconds: 0.75
+    variance: 0.1613803
+    sampleCount: 5
+    lastUpdatedUtc: 1766761933
+    learningEnabled: false
+  Deathsquito::attack:
+    meanHitOffsetSeconds: 0.170166
+    variance: 0.004799179
+    sampleCount: 7
+    lastUpdatedUtc: 1766762086
+    learningEnabled: true
+  Lox::attack_stomp:
+    meanHitOffsetSeconds: 1.376245
+    variance: 7.300951E-06
+    sampleCount: 10
+    lastUpdatedUtc: 1766762165
+    learningEnabled: true
+  Lox::attack_bite:
+    meanHitOffsetSeconds: 0.589815
+    variance: 1.412184E-05
+    sampleCount: 17
+    lastUpdatedUtc: 1766762165
+    learningEnabled: true
+  Goblin::swing_longsword:
+    meanHitOffsetSeconds: 0.6825086
+    variance: 0.007726007
+    sampleCount: 27
+    lastUpdatedUtc: 1766762284
+    learningEnabled: true
+  Goblin::spear_throw:
+    meanHitOffsetSeconds: 0.7550049
+    variance: 0.009065882
+    sampleCount: 4
+    lastUpdatedUtc: 1766762382
+    learningEnabled: true
+  GoblinBrute::attack:
+    meanHitOffsetSeconds: 1.405891
+    variance: 0.02125562
+    sampleCount: 17
+    lastUpdatedUtc: 1766762488
+    learningEnabled: true
+  GoblinBrute::rageattack:
+    meanHitOffsetSeconds: 1.8
+    variance: 1.069223
+    sampleCount: 4
+    lastUpdatedUtc: 1766762433
+    learningEnabled: false
+  GoblinShaman::attack_cast:
+    meanHitOffsetSeconds: 1.826701
+    variance: 0.009428149
+    sampleCount: 6
+    lastUpdatedUtc: 1766762702
+    learningEnabled: true
+  BlobTar::attack_shoot:
+    meanHitOffsetSeconds: 0.6
+    variance: 0.08910523
+    sampleCount: 9
+    lastUpdatedUtc: 1766762782
+    learningEnabled: false
+  Unbjorn::attack_slam:
+    meanHitOffsetSeconds: 1.26355
+    variance: 7.881375E-06
+    sampleCount: 2
+    lastUpdatedUtc: 1766763019
+    learningEnabled: true
+  Unbjorn::attack_swipe_r:
+    meanHitOffsetSeconds: 0.7860107
+    variance: 1.206994E-06
+    sampleCount: 2
+    lastUpdatedUtc: 1766763009
+    learningEnabled: true
+  Unbjorn::attack_claws:
+    meanHitOffsetSeconds: 1.018555
+    variance: 4.142468E-06
+    sampleCount: 4
+    lastUpdatedUtc: 1766763021
+    learningEnabled: true
+  Unbjorn::attack_swipe_l:
+    meanHitOffsetSeconds: 0.799886
+    variance: 0.0002013179
+    sampleCount: 3
+    lastUpdatedUtc: 1766763006
+    learningEnabled: true
+  Unbjorn::attack_bite:
+    meanHitOffsetSeconds: 0.7670898
+    variance: 0
+    sampleCount: 1
+    lastUpdatedUtc: 1766762999
+    learningEnabled: true
+  Unbjorn::attack_swipe_combo:
+    meanHitOffsetSeconds: 1.315674
+    variance: 0.5446931
+    sampleCount: 3
+    lastUpdatedUtc: 1766763013
+    learningEnabled: true
+  Seeker::attack_pincers:
+    meanHitOffsetSeconds: 0.8343617
+    variance: 0.1288028
+    sampleCount: 11
+    lastUpdatedUtc: 1766763876
+    learningEnabled: true
+  Seeker::attack_slam:
+    meanHitOffsetSeconds: 1.066437
+    variance: 1.480325E-05
+    sampleCount: 8
+    lastUpdatedUtc: 1766763876
+    learningEnabled: true
+  Seeker::attack_claw_left:
+    meanHitOffsetSeconds: 0.7104899
+    variance: 7.141003E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766763878
+    learningEnabled: true
+  Seeker::attack_claw_right:
+    meanHitOffsetSeconds: 0.7152274
+    variance: 3.918344E-05
+    sampleCount: 7
+    lastUpdatedUtc: 1766763872
+    learningEnabled: true
+  SeekerBrute::attack_slam:
+    meanHitOffsetSeconds: 1.4
+    variance: 0.1314881
+    sampleCount: 4
+    lastUpdatedUtc: 1766763909
+    learningEnabled: false
+  SeekerBrute::attack_ram:
+    meanHitOffsetSeconds: 1.32207
+    variance: 0.03346794
+    sampleCount: 5
+    lastUpdatedUtc: 1766763970
+    learningEnabled: true
+  SeekerBrute::attack_bite:
+    meanHitOffsetSeconds: 0.7301758
+    variance: 0.006359849
+    sampleCount: 5
+    lastUpdatedUtc: 1766763968
+    learningEnabled: true
+  SeekerBrood::attack_pincers:
+    meanHitOffsetSeconds: 0.7226563
+    variance: 1.609328E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766764061
+    learningEnabled: true
+  Gjall::attack_shake:
+    meanHitOffsetSeconds: 1.8
+    variance: 0.02042663
+    sampleCount: 12
+    lastUpdatedUtc: 1766764163
+    learningEnabled: false
+  Gjall::attack_spit:
+    meanHitOffsetSeconds: 1.7
+    variance: 0.2014488
+    sampleCount: 14
+    lastUpdatedUtc: 1766764309
+    learningEnabled: false
+  Tick::attack:
+    meanHitOffsetSeconds: 1.304962
+    variance: 0.1743439
+    sampleCount: 48
+    lastUpdatedUtc: 1766764289
+    learningEnabled: true
+  Dverger::attack_cast:
+    meanHitOffsetSeconds: 0.7700602
+    variance: 0.01275987
+    sampleCount: 6
+    lastUpdatedUtc: 1766764480
+    learningEnabled: true
+  Dverger::attack_poke:
+    meanHitOffsetSeconds: 0.7145508
+    variance: 4.086493E-06
+    sampleCount: 5
+    lastUpdatedUtc: 1766764483
+    learningEnabled: true
+  DvergerMageFire::attack_cast:
+    meanHitOffsetSeconds: 2.519149
+    variance: 1.597043
+    sampleCount: 23
+    lastUpdatedUtc: 1766764689
+    learningEnabled: true
+  DvergerMageFire::attack_poke:
+    meanHitOffsetSeconds: 0.6541016
+    variance: 0.1005218
+    sampleCount: 5
+    lastUpdatedUtc: 1766764685
+    learningEnabled: true
+  DvergerMageIce::attack_nova:
+    meanHitOffsetSeconds: 1.22998
+    variance: 0.0009017584
+    sampleCount: 4
+    lastUpdatedUtc: 1766764861
+    learningEnabled: true
+  DvergerMageIce::attack_icicle:
+    meanHitOffsetSeconds: 1.1
+    variance: 0.134993
+    sampleCount: 3
+    lastUpdatedUtc: 1766764818
+    learningEnabled: false
+  DvergerMageIce::attack_poke:
+    meanHitOffsetSeconds: 0.8120117
+    variance: 1.516934E-05
+    sampleCount: 4
+    lastUpdatedUtc: 1766764867
+    learningEnabled: true
+  Mistile::attack:
+    meanHitOffsetSeconds: 0.1420898
+    variance: 1.392364E-05
+    sampleCount: 5
+    lastUpdatedUtc: 1766765168
+    learningEnabled: true
+  BonemawSerpent::attack_bite:
+    meanHitOffsetSeconds: 0.90625
+    variance: 0
+    sampleCount: 1
+    lastUpdatedUtc: 1766765216
+    learningEnabled: true
+  BlobLava::AttackBlowUp:
+    meanHitOffsetSeconds: 1.256999
+    variance: 1.300696E-05
+    sampleCount: 6
+    lastUpdatedUtc: 1766765323
+    learningEnabled: true
+  FallenValkyrie::attack_wingspin:
+    meanHitOffsetSeconds: 1.68416
+    variance: 0.5955207
+    sampleCount: 25
+    lastUpdatedUtc: 1766765499
+    learningEnabled: true
+  FallenValkyrie::attack_claws:
+    meanHitOffsetSeconds: 1.193078
+    variance: 0.3238344
+    sampleCount: 33
+    lastUpdatedUtc: 1766765531
+    learningEnabled: true
+  FallenValkyrie::attack_poisonbreath:
+    meanHitOffsetSeconds: 1.8
+    variance: 0.5612855
+    sampleCount: 4
+    lastUpdatedUtc: 1766765389
+    learningEnabled: false
+  Charred_Mage::attack_bolt:
+    meanHitOffsetSeconds: 2.5
+    variance: 0.2532629
+    sampleCount: 15
+    lastUpdatedUtc: 1766765600
+    learningEnabled: false
+  Charred_Twitcher_Summoned::attack_scratch_l:
+    meanHitOffsetSeconds: 0.7055664
+    variance: 5.021095E-05
+    sampleCount: 10
+    lastUpdatedUtc: 1766765637
+    learningEnabled: true
+  Charred_Mage::attack_fireaoe:
+    meanHitOffsetSeconds: 1.108678
+    variance: 0.2314373
+    sampleCount: 7
+    lastUpdatedUtc: 1766765627
+    learningEnabled: true
+  Charred_Twitcher_Summoned::attack_scratch_r:
+    meanHitOffsetSeconds: 0.7040128
+    variance: 2.695521E-05
+    sampleCount: 11
+    lastUpdatedUtc: 1766765640
+    learningEnabled: true
+  Charred_Twitcher_Summoned::attack_throw:
+    meanHitOffsetSeconds: 1.360352
+    variance: 0
+    sampleCount: 1
+    lastUpdatedUtc: 1766765636
+    learningEnabled: true
+  Charred_Archer::attack_bow:
+    meanHitOffsetSeconds: 1.319964
+    variance: 0.0005725934
+    sampleCount: 7
+    lastUpdatedUtc: 1766765834
+    learningEnabled: true
+  Charred_Twitcher::attack_scratch_r:
+    meanHitOffsetSeconds: 0.7043457
+    variance: 2.920628E-06
+    sampleCount: 2
+    lastUpdatedUtc: 1766765858
+    learningEnabled: true
+  Charred_Twitcher::attack_scratch_l:
+    meanHitOffsetSeconds: 0.7021484
+    variance: 4.291534E-06
+    sampleCount: 3
+    lastUpdatedUtc: 1766765860
+    learningEnabled: true
+  Volture::attack_talons:
+    meanHitOffsetSeconds: 0.9439942
+    variance: 9.014596E-06
+    sampleCount: 10
+    lastUpdatedUtc: 1766765904
+    learningEnabled: true
+  Morgen::attack_swipe_2:
+    meanHitOffsetSeconds: 1.059082
+    variance: 1.728543E-05
+    sampleCount: 4
+    lastUpdatedUtc: 1766766267
+    learningEnabled: true
+  Morgen::attack_swipe_1:
+    meanHitOffsetSeconds: 1.057129
+    variance: 2.574895E-06
+    sampleCount: 5
+    lastUpdatedUtc: 1766766265
+    learningEnabled: true
+  Morgen::roll_left:
+    meanHitOffsetSeconds: 0.8393555
+    variance: 4.959114E-06
+    sampleCount: 5
+    lastUpdatedUtc: 1766766270
+    learningEnabled: true
+  Morgen::attack_bite:
+    meanHitOffsetSeconds: 1.00472
+    variance: 2.023923E-05
+    sampleCount: 6
+    lastUpdatedUtc: 1766766261
+    learningEnabled: true
+  Morgen::attack_swipe_4:
+    meanHitOffsetSeconds: 1.05
+    variance: 0.3533242
+    sampleCount: 8
+    lastUpdatedUtc: 1766766189
+    learningEnabled: false
+  Morgen::roll_right:
+    meanHitOffsetSeconds: 0.8670247
+    variance: 4.821341E-06
+    sampleCount: 3
+    lastUpdatedUtc: 1766766236
+    learningEnabled: true
+  Morgen::attack_swipe_3:
+    meanHitOffsetSeconds: 1.05
+    variance: 0.3575706
+    sampleCount: 8
+    lastUpdatedUtc: 1766766185
+    learningEnabled: false
+  Asksvin::attack_headbutt:
+    meanHitOffsetSeconds: 1.046387
+    variance: 9.406697E-06
+    sampleCount: 11
+    lastUpdatedUtc: 1766766429
+    learningEnabled: true
+  Asksvin::attack_bite:
+    meanHitOffsetSeconds: 0.7850749
+    variance: 4.086243E-06
+    sampleCount: 6
+    lastUpdatedUtc: 1766766407
+    learningEnabled: true
+  Asksvin::attack_pounce:
+    meanHitOffsetSeconds: 1.621908
+    variance: 2.119341E-07
+    sampleCount: 3
+    lastUpdatedUtc: 1766766434
+    learningEnabled: true
+lastSavedUtc: 1766766459

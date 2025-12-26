@@ -43,6 +43,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         _mathfWrapper = mathfWrapper ?? throw new ArgumentNullException(nameof(mathfWrapper));
     }
 
+    /// <inheritdoc/>
     public ThreatAssessment? CalculateThreat(Character enemy, Player player, bool detailedMode)
     {
         if (enemy == null || player == null)
@@ -50,7 +51,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
 
         if (enemy is not Humanoid humanoid)
         {
-            _logger.LogDebug($"Enemy {enemy.m_name} is not Humanoid");
+            _logger.LogDebug($"[{nameof(CalculateThreat)}] Enemy {enemy.m_name} is not Humanoid");
             return null;
         }
 
@@ -60,8 +61,8 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         );
 
         var (baseDamage, maxMelee, maxRanged, usedRanged) = detailedMode
-            ? CalculateDetailedThreat(humanoid, distance)
-            : (CalculateSimpleThreat(humanoid), 0f, 0f, false);
+            ? CalculateMaxAttackDetailed(humanoid, distance)
+            : (CalculateMaxAttackSimple(humanoid), 0f, 0f, false);
 
         var rawDamage = ApplyDifficultyMultipliers(enemy, baseDamage);
         var damageInfo = CalculateDamageInfo(player, rawDamage);
@@ -91,6 +92,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         );
     }
 
+    /// <inheritdoc/>
     public ThreatLevel DetermineThreatLevel(float blockRatio, float parryRatio)
     {
         if (parryRatio >= 1.0f)
@@ -105,14 +107,14 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         return ThreatLevel.Safe;
     }
 
-    private float CalculateSimpleThreat(Humanoid humanoid)
+    private float CalculateMaxAttackSimple(Humanoid humanoid)
     {
         if (_attackInspector.Value == null)
             return 0f;
 
         var maxAttack = _attackInspector.Value.GetMaxAttackForCharacter(humanoid);
         _logger.LogDebug(
-            $"[{nameof(CalculateSimpleThreat)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
+            $"[{nameof(CalculateMaxAttackSimple)}] {humanoid.m_name}: maxAttack={maxAttack:F1}"
         );
 
         return maxAttack;
@@ -123,7 +125,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         float maxMelee,
         float maxRanged,
         bool usedRanged
-    ) CalculateDetailedThreat(Humanoid humanoid, float distance)
+    ) CalculateMaxAttackDetailed(Humanoid humanoid, float distance)
     {
         var (maxMelee, maxRanged) = GetWeaponDamages(humanoid);
         var (currentAttackDamage, isRangedAttack) = GetCurrentAttackInfo(humanoid);
@@ -132,7 +134,7 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         var baseDamage = SelectBaseDamage(maxMelee, maxRanged, useRanged);
 
         _logger.LogDebug(
-            $"[{nameof(CalculateDetailedThreat)}] {humanoid.m_name}: "
+            $"[{nameof(CalculateMaxAttackDetailed)}] {humanoid.m_name}: "
                 + $"melee={maxMelee:F1}, ranged={maxRanged:F1}, "
                 + $"currentAttack={currentAttackDamage:F1}, useRanged={useRanged}, "
                 + $"dist={distance:F1}, baseDamage={baseDamage:F1}"
@@ -271,11 +273,18 @@ public sealed class ThreatCalculationService : IThreatCalculationService
         var totalMult = _difficultyCalculator.GetDamageMultiplier(position);
 
         _logger.LogDebug(
-            $"Threat: {enemy.m_name} lvl{enemy.GetLevel()} dist={distance:F1}m, "
-                + $"base={baseDamage:F1}, worldDiff={worldDiff:F2}x, "
-                + $"players={playerCount} ({playerMult:F2}x), totalMult={totalMult:F2}x, "
-                + $"raw={rawDamage:F1}, effBlock={damageInfo.EffectiveDamageWithBlock:F1}, "
-                + $"effParry={damageInfo.EffectiveDamageWithParry:F1}, ratio={ratio:F2}, "
+            $"[{nameof(LogThreatCalculation)}] "
+                + $"name={enemy.m_name}, "
+                + $"lvl={enemy.GetLevel()}, "
+                + $"dist={distance:F1}m, "
+                + $"base={baseDamage:F1}, "
+                + $"worldDiff={worldDiff:F2}x, "
+                + $"players={playerCount} ({playerMult:F2}x), "
+                + $"totalMult={totalMult:F2}x, "
+                + $"raw={rawDamage:F1},"
+                + $"effBlock={damageInfo.EffectiveDamageWithBlock:F1}, "
+                + $"effParry={damageInfo.EffectiveDamageWithParry:F1}, "
+                + $"ratio={ratio:F2}, "
                 + $"threat={threatLevel}"
         );
     }

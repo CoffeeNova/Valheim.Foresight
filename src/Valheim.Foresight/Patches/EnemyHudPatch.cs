@@ -1,3 +1,5 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using Valheim.Foresight.HarmonyRefs;
 using Valheim.Foresight.Models;
@@ -5,32 +7,49 @@ using Valheim.Foresight.Models;
 namespace Valheim.Foresight.Patches;
 
 /// <summary>
-/// Harmony patch for colorizing and annotating enemy HUD elements
+/// Harmony patch for EnemyHud to display threat information and attack castbars
 /// </summary>
-public static class EnemyHudPatch
+internal class EnemyHudPatch
 {
     private static readonly Color SafeColor = Color.white;
     private static readonly Color CautionColor = new(1f, 0.75f, 0.25f);
     private static readonly Color BlockLethalColor = new(1f, 0.5f, 0.1f);
+
     private static readonly Color DangerColor = new(1f, 0.2f, 0.2f);
 
+    /// <summary>
+    /// Postfix patch for EnemyHud.LateUpdate that renders threat indicators and castbars
+    /// </summary>
     internal static void LateUpdatePostfix(EnemyHud __instance)
     {
         var player = Player.m_localPlayer;
         if (player == null)
             return;
 
-        var huds = EnemyHudFieldRefs.HudsRef?.Invoke(__instance);
+        var huds = EnemyHudPrivateAccess.GetHudsAsDictionary(__instance);
         if (huds == null || huds.Count == 0)
             return;
 
-        foreach (var kvp in huds)
-        {
-            var character = kvp.Key;
-            var hud = kvp.Value;
+        // Clean up expired attacks
+        ValheimForesightPlugin.ActiveAttackTracker?.CleanupExpired();
 
-            if (!IsValidHud(character, hud))
+        foreach (DictionaryEntry entry in huds)
+        {
+            var character = entry.Key as Character;
+            var hudObj = entry.Value;
+            if (character == null || hudObj == null)
                 continue;
+
+            var nameLabel = EnemyHudPrivateAccess.TryGetNameLabel(hudObj);
+            if (nameLabel == null)
+                continue;
+
+            var holder = nameLabel.GetComponent<OriginalNameHolder>();
+            if (holder is null)
+            {
+                holder = nameLabel.gameObject.AddComponent<OriginalNameHolder>();
+                holder.originalName = nameLabel.text;
+            }
 
             if (
                 !ValheimForesightPlugin.TryGetThreatAssessment(character, out var assessment)
@@ -38,31 +57,42 @@ public static class EnemyHudPatch
             )
                 continue;
 
-            ApplyThreatVisualization(hud, assessment);
+            ColorizeByThreatLevel(nameLabel, assessment.Level);
+
+            ThreatResponseHint hint;
+            try
+            {
+                hint = ValheimForesightPlugin.ThreatResponseHintService.GetHint(assessment);
+            }
+            catch
+            {
+                hint = ThreatResponseHint.None;
+            }
+
+            ValheimForesightPlugin.HudIconRenderer?.RenderIcon(nameLabel, hint);
+
+            // === RENDER ATTACK CASTBAR ===
+            var activeAttack = ValheimForesightPlugin.ActiveAttackTracker?.GetActiveAttack(
+                character
+            );
+            var hudParent = nameLabel.transform.parent ?? nameLabel.transform;
+            ValheimForesightPlugin.CastbarRenderer?.RenderCastbar(
+                hudParent,
+                activeAttack,
+                character
+            );
+            // ==============================
+
+            if (ValheimForesightPlugin.InstanceDebugHudEnabled)
+                AppendDebugInfo(nameLabel, holder.originalName, assessment);
+            else
+                nameLabel.text = holder.originalName;
         }
     }
 
-    private static bool IsValidHud(Character? character, EnemyHud.HudData? hud)
+    private static void ColorizeByThreatLevel(TextMeshProUGUI nameLabel, ThreatLevel level)
     {
-        return character != null && hud != null && hud.m_name != null;
-    }
-
-    private static void ApplyThreatVisualization(EnemyHud.HudData hud, ThreatAssessment assessment)
-    {
-        ColorizeByThreatLevel(hud, assessment.Level);
-
-        if (ValheimForesightPlugin.InstanceDebugHudEnabled)
-        {
-            AppendDebugInfo(hud, assessment);
-        }
-    }
-
-    private static void ColorizeByThreatLevel(EnemyHud.HudData hud, ThreatLevel level)
-    {
-        if (hud?.m_name == null)
-            return;
-
-        hud.m_name.color = level switch
+        nameLabel.color = level switch
         {
             ThreatLevel.Safe => SafeColor,
             ThreatLevel.Caution => CautionColor,
@@ -72,22 +102,14 @@ public static class EnemyHudPatch
         };
     }
 
-    private static void AppendDebugInfo(EnemyHud.HudData hud, ThreatAssessment assessment)
+    private static void AppendDebugInfo(
+        TextMeshProUGUI nameLabel,
+        string originalName,
+        ThreatAssessment assessment
+    )
     {
         var mode = assessment.UsedRangedAttack ? "R" : "M";
-        var levelCode = GetThreatLevelCode(assessment.Level);
-
-        var debugSuffix =
-            $" [{levelCode}-{mode} "
-            + $"r={assessment.DamageToHealthRatio:F2} "
-            + $"raw={assessment.DamageInfo.RawDamage:F1} "
-            + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
-
-        hud.m_name.text += debugSuffix;
-    }
-
-    private static string GetThreatLevelCode(ThreatLevel level) =>
-        level switch
+        var levelCode = assessment.Level switch
         {
             ThreatLevel.Safe => "SAFE",
             ThreatLevel.Caution => "CAUT",
@@ -95,4 +117,17 @@ public static class EnemyHudPatch
             ThreatLevel.Danger => "DNG",
             _ => "UNK",
         };
+
+        nameLabel.text =
+            originalName
+            + $" [{levelCode}-{mode} "
+            + $"r={assessment.DamageToHealthRatio:F2} "
+            + $"raw={assessment.DamageInfo.RawDamage:F1} "
+            + $"eff={assessment.DamageInfo.EffectiveDamageWithBlock:F1}]";
+    }
+
+    private sealed class OriginalNameHolder : MonoBehaviour
+    {
+        public string originalName = string.Empty;
+    }
 }
