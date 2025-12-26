@@ -67,6 +67,45 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     }
 
     /// <summary>
+    /// Resets all timings to their prelearned values
+    /// </summary>
+    public void ResetAllToPrelearned()
+    {
+        _logger.LogInfo("Resetting all timings to prelearned values");
+
+        if (_prelearnedTimings.Count == 0)
+        {
+            _logger.LogWarning("No prelearned timings available to reset");
+            return;
+        }
+
+        var resetCount = 0;
+        foreach (var kvp in _prelearnedTimings)
+        {
+            var key = kvp.Key;
+            var prelearnedStats = kvp.Value;
+
+            var newStats = new AttackTimingStats
+            {
+                MeanHitOffsetSeconds = prelearnedStats.MeanHitOffsetSeconds,
+                Variance = prelearnedStats.Variance,
+                SampleCount = prelearnedStats.SampleCount,
+                LastUpdatedUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                LearningEnabled = prelearnedStats.LearningEnabled,
+            };
+
+            _timings[key] = newStats;
+            resetCount++;
+        }
+
+        _isDirty = true;
+        _logger.LogInfo($"Reset {resetCount} timings to prelearned values");
+
+        SaveToDisk();
+        _logger.LogInfo("Changes saved to disk immediately");
+    }
+
+    /// <summary>
     /// Resets a timing to its prelearned value
     /// </summary>
     public void ResetToPrelearned(AttackKey key)

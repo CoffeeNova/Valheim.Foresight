@@ -37,4 +37,9 @@ public interface IAttackTimingDataProvider
     /// Forces a save to disk
     /// </summary>
     void ForceSave();
+
+    /// <summary>
+    /// Resets all timings to their prelearned values
+    /// </summary>
+    void ResetAllToPrelearned();
 }

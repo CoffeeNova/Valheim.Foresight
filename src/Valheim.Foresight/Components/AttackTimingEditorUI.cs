@@ -36,6 +36,7 @@ public class AttackTimingEditorUI
     private GUIStyle? _buttonStyle;
     private GUIStyle? _textFieldStyle;
     private GUIStyle? _toggleStyle;
+    private bool _hasInitializedPosition;
 
     public AttackTimingEditorUI(
         ILogger logger,
@@ -49,12 +50,9 @@ public class AttackTimingEditorUI
         _dataProvider = dataProvider;
         _config = config;
 
-        _windowRect = new Rect(
-            (Screen.width - WindowWidth) / 2,
-            (Screen.height - WindowHeight) / 2,
-            WindowWidth,
-            WindowHeight
-        );
+        // Initialize with default position, will be recentered on first show
+        _windowRect = new Rect(0, 0, WindowWidth, WindowHeight);
+        _hasInitializedPosition = false;
     }
 
     public bool IsVisible => _isVisible;
@@ -64,6 +62,7 @@ public class AttackTimingEditorUI
         _isVisible = !_isVisible;
         if (_isVisible)
         {
+            CenterWindowOnScreen();
             RefreshData();
             _logger.LogInfo("UI opened");
         }
@@ -86,6 +85,20 @@ public class AttackTimingEditorUI
         if (_isVisible)
         {
             Toggle();
+        }
+    }
+
+    private void CenterWindowOnScreen()
+    {
+        if (!_hasInitializedPosition && Screen.width > 0 && Screen.height > 0)
+        {
+            _windowRect = new Rect(
+                (Screen.width - WindowWidth) / 2,
+                (Screen.height - WindowHeight) / 2,
+                WindowWidth,
+                WindowHeight
+            );
+            _hasInitializedPosition = true;
         }
     }
 
@@ -359,6 +372,11 @@ public class AttackTimingEditorUI
         GUILayout.Label($"Total Entries: {_filteredEntries.Count}", _labelStyle);
         GUILayout.FlexibleSpace();
 
+        if (GUILayout.Button("Reset All to Prelearned", _buttonStyle, GUILayout.Width(180)))
+        {
+            ResetAllToPrelearned();
+        }
+
         if (GUILayout.Button("Export to Log", _buttonStyle, GUILayout.Width(120)))
         {
             ExportToLog();
@@ -414,6 +432,14 @@ public class AttackTimingEditorUI
             );
         }
         _logger.LogInfo($"Total entries: {_filteredEntries.Count}");
+    }
+
+    private void ResetAllToPrelearned()
+    {
+        _logger.LogInfo("Resetting all timings to prelearned values via UI");
+        _dataProvider.ResetAllToPrelearned();
+        RefreshData();
+        _logger.LogInfo("UI refreshed after reset");
     }
 
     private class AttackTimingEntry
