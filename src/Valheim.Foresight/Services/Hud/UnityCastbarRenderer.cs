@@ -19,16 +19,12 @@ namespace Valheim.Foresight.Services.Hud;
 public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 {
     private const string CastbarObjectName = "Foresight_Castbar";
-    private const string BorderTopName = "Castbar_Border_Top";
-    private const string BorderBottomName = "Castbar_Border_Bottom";
-    private const string BorderLeftName = "Castbar_Border_Left";
-    private const string BorderRightName = "Castbar_Border_Right";
     private const string FillName = "Castbar_Fill";
     private const string ParryIndicatorName = "Castbar_ParryIndicator";
     private const string AttackNameTextName = "Castbar_AttackName";
     private const string TimerTextName = "Castbar_Timer";
 
-    private const float BorderThickness = 1f;
+    private const float BorderThickness = 3f;
 
     private TMP_FontAsset? _cachedFont;
 
@@ -112,8 +108,8 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             rect.sizeDelta = new Vector2(100f, 16f);
         }
 
-        // Create border frame
-        CreateBorderLines(castbar.transform);
+        // Create background with border (black bar with outline)
+        CreateBackground(castbar.transform);
 
         // Create fill (separately, inside the frame)
         CreateFill(castbar.transform);
@@ -126,63 +122,6 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         CreateTimerText(castbar.transform);
 
         return castbar;
-    }
-
-    private void CreateBorderLines(Transform parent)
-    {
-        var borderColor = new Color(0.3f, 0.3f, 0.3f, 0.9f);
-
-        // Top border
-        var top = new GameObject(BorderTopName);
-        top.transform.SetParent(parent, false);
-        var topRect = top.AddComponent<RectTransform>();
-        topRect.anchorMin = new Vector2(0f, 1f);
-        topRect.anchorMax = new Vector2(1f, 1f);
-        topRect.pivot = new Vector2(0.5f, 1f);
-        topRect.anchoredPosition = Vector2.zero;
-        topRect.sizeDelta = new Vector2(0f, BorderThickness);
-        var topImg = top.AddComponent<Image>();
-        topImg.color = borderColor;
-        topImg.raycastTarget = false;
-
-        // Bottom border
-        var bottom = new GameObject(BorderBottomName);
-        bottom.transform.SetParent(parent, false);
-        var bottomRect = bottom.AddComponent<RectTransform>();
-        bottomRect.anchorMin = new Vector2(0f, 0f);
-        bottomRect.anchorMax = new Vector2(1f, 0f);
-        bottomRect.pivot = new Vector2(0.5f, 0f);
-        bottomRect.anchoredPosition = Vector2.zero;
-        bottomRect.sizeDelta = new Vector2(0f, BorderThickness);
-        var bottomImg = bottom.AddComponent<Image>();
-        bottomImg.color = borderColor;
-        bottomImg.raycastTarget = false;
-
-        // Left border
-        var left = new GameObject(BorderLeftName);
-        left.transform.SetParent(parent, false);
-        var leftRect = left.AddComponent<RectTransform>();
-        leftRect.anchorMin = new Vector2(0f, 0f);
-        leftRect.anchorMax = new Vector2(0f, 1f);
-        leftRect.pivot = new Vector2(0f, 0.5f);
-        leftRect.anchoredPosition = Vector2.zero;
-        leftRect.sizeDelta = new Vector2(BorderThickness, 0f);
-        var leftImg = left.AddComponent<Image>();
-        leftImg.color = borderColor;
-        leftImg.raycastTarget = false;
-
-        // Right border
-        var right = new GameObject(BorderRightName);
-        right.transform.SetParent(parent, false);
-        var rightRect = right.AddComponent<RectTransform>();
-        rightRect.anchorMin = new Vector2(1f, 0f);
-        rightRect.anchorMax = new Vector2(1f, 1f);
-        rightRect.pivot = new Vector2(1f, 0.5f);
-        rightRect.anchoredPosition = Vector2.zero;
-        rightRect.sizeDelta = new Vector2(BorderThickness, 0f);
-        var rightImg = right.AddComponent<Image>();
-        rightImg.color = borderColor;
-        rightImg.raycastTarget = false;
     }
 
     private void CreateFill(Transform parent)
@@ -203,9 +142,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         var fillImage = fill.AddComponent<Image>();
 
-        // IMPORTANT: Create white sprite for fillAmount to work
-        fillImage.sprite = CreateWhiteSprite();
-        fillImage.color = new Color(1f, 0.5f, 0.2f, 0.85f);
+        // IMPORTANT: Create gradient sprite for fillAmount to work
+        var fillColor = _config.CastbarFillColor.Value;
+        fillImage.sprite = CreateGradientSprite(fillColor);
+        fillImage.color = Color.white; // Sprite already has the color
         fillImage.type = Image.Type.Filled;
         fillImage.fillMethod = Image.FillMethod.Horizontal;
         fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -228,6 +168,109 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         return sprite;
     }
 
+    private Sprite CreateGradientSprite(Color baseColor)
+    {
+        // Create gradient texture (lighter at top, darker at bottom)
+        var texture = new Texture2D(1, 16, TextureFormat.RGBA32, false);
+
+        for (int y = 0; y < 16; y++)
+        {
+            // Gradient from darker (bottom) to brighter (top)
+            float t = y / 15f; // 0 at bottom, 1 at top
+            float brightness = Mathf.Lerp(0.65f, 1f, t); // Lighter at top
+
+            var color = new Color(
+                baseColor.r * brightness,
+                baseColor.g * brightness,
+                baseColor.b * brightness,
+                baseColor.a
+            );
+            texture.SetPixel(0, y, color);
+        }
+
+        texture.Apply();
+        _createdTextures.Add(texture);
+
+        // Create sprite from texture
+        var sprite = Sprite.Create(texture, new Rect(0, 0, 1, 16), new Vector2(0.5f, 0.5f), 1f);
+
+        _createdSprites.Add(sprite);
+        return sprite;
+    }
+
+    private Sprite CreateHollowBorderSprite()
+    {
+        // Create hollow border texture
+        int size = 16;
+        int borderPx = 1; // 1px border in texture
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+
+        var borderColor = _config.CastbarBorderColor.Value;
+        var transparent = new Color(0f, 0f, 0f, 0f);
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                // Border only on edges
+                bool isEdge =
+                    x < borderPx || x >= size - borderPx || y < borderPx || y >= size - borderPx;
+                texture.SetPixel(x, y, isEdge ? borderColor : transparent);
+            }
+        }
+
+        texture.Apply();
+        _createdTextures.Add(texture);
+
+        // Create 9-sliced sprite for proper scaling
+        var sprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, size, size),
+            new Vector2(0.5f, 0.5f),
+            1f,
+            0,
+            SpriteMeshType.FullRect,
+            new Vector4(borderPx, borderPx, borderPx, borderPx) // Border for 9-slice
+        );
+
+        _createdSprites.Add(sprite);
+        return sprite;
+    }
+
+    private void CreateBackground(Transform parent)
+    {
+        // Border frame (single hollow rectangle with transparent border)
+        var border = new GameObject("Castbar_Border");
+        border.transform.SetParent(parent, false);
+
+        var borderRect = border.AddComponent<RectTransform>();
+        borderRect.anchorMin = Vector2.zero;
+        borderRect.anchorMax = Vector2.one;
+        borderRect.sizeDelta = Vector2.zero;
+
+        var borderImage = border.AddComponent<Image>();
+        borderImage.sprite = CreateHollowBorderSprite();
+        borderImage.color = Color.white; // Color is in the sprite
+        borderImage.raycastTarget = false;
+        borderImage.type = Image.Type.Sliced; // Important for proper border scaling
+
+        // Black background (inside the border)
+        var background = new GameObject("Castbar_Background");
+        background.transform.SetParent(parent, false);
+
+        var bgRect = background.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = new Vector2(BorderThickness, BorderThickness);
+        bgRect.offsetMax = new Vector2(-BorderThickness, -BorderThickness);
+
+        var bgImage = background.AddComponent<Image>();
+        bgImage.sprite = CreateWhiteSprite();
+        var bgColor = _config.CastbarBackgroundColor.Value;
+        bgImage.color = bgColor;
+        bgImage.raycastTarget = false;
+    }
+
     private void CreateParryIndicator(Transform parent)
     {
         // Visual indicator showing the parry window on the castbar
@@ -242,7 +285,9 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         indicatorRect.sizeDelta = Vector2.zero;
 
         var indicatorImage = indicator.AddComponent<Image>();
-        indicatorImage.color = new Color(0.3f, 1f, 0.3f, 0.4f);
+        var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
+        indicatorImage.sprite = CreateGradientSprite(parryIndicatorColor);
+        indicatorImage.color = Color.white; // Sprite already has the color
         indicatorImage.raycastTarget = false;
 
         indicator.SetActive(false);
@@ -273,7 +318,8 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.fontSizeMin = 6; // Minimum size
         text.fontSizeMax = 14; // Maximum size
         text.enableAutoSizing = true; // Automatic scaling
-        text.color = Color.white;
+        var textColor = _config.CastbarTextColor.Value;
+        text.color = textColor;
         text.alignment = TextAlignmentOptions.MidlineLeft;
         text.margin = new Vector4(4f, 0f, 2f, 0f);
         text.fontStyle = FontStyles.Normal;
@@ -283,7 +329,8 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.enabled = true;
 
         var shadow = textObj.AddComponent<Shadow>();
-        shadow.effectColor = new Color(0f, 0f, 0f, 0.9f);
+        var shadowColor = _config.CastbarTextShadowColor.Value;
+        shadow.effectColor = shadowColor;
         shadow.effectDistance = new Vector2(1f, -1f);
     }
 
@@ -312,7 +359,8 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.fontSizeMin = 6; // Minimum size
         text.fontSizeMax = 14; // Maximum size
         text.enableAutoSizing = true; // Automatic scaling
-        text.color = Color.white;
+        var textColor = _config.CastbarTextColor.Value;
+        text.color = textColor;
         text.alignment = TextAlignmentOptions.MidlineRight;
         text.margin = new Vector4(2f, 0f, 4f, 0f);
         text.fontStyle = FontStyles.Normal;
@@ -320,7 +368,8 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.enabled = true;
 
         var shadow = textObj.AddComponent<Shadow>();
-        shadow.effectColor = new Color(0f, 0f, 0f, 0.9f);
+        var shadowColor = _config.CastbarTextShadowColor.Value;
+        shadow.effectColor = shadowColor;
         shadow.effectDistance = new Vector2(1f, -1f);
     }
 
@@ -478,13 +527,14 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
                 parryIndicator.SetActive(false);
             }
 
-            // Normal fill color (no effects)
-            fillImage.color = new Color(1f, 0.5f, 0.2f, 0.85f);
+            // Normal fill - keep yellow (sprite color)
+            fillImage.color = Color.white;
 
+            var textColor = _config.CastbarTextColor.Value;
             if (attackNameText != null)
-                attackNameText.color = Color.white;
+                attackNameText.color = textColor;
             if (timerText != null)
-                timerText.color = Color.white;
+                timerText.color = textColor;
 
             return;
         }
@@ -495,52 +545,57 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             var (startPos, windowWidth) = parryWindowInfo.Value;
             parryIndicatorRect.anchorMin = new Vector2(startPos, 0f);
             parryIndicatorRect.anchorMax = new Vector2(startPos + windowWidth, 1f);
-            parryIndicatorRect.offsetMin = Vector2.zero;
-            parryIndicatorRect.offsetMax = Vector2.zero;
+            parryIndicatorRect.offsetMin = new Vector2(0f, BorderThickness);
+            parryIndicatorRect.offsetMax = new Vector2(0f, -BorderThickness);
         }
 
         // Visual effects for parry window
         if (_parryWindowService.IsInParryWindow(attackInfo))
         {
-            float pulse = Mathf.PingPong(Time.time * 6f, 1f);
-            fillImage.color = Color.Lerp(
-                new Color(1f, 0.8f, 0.2f, 0.85f),
-                new Color(0.3f, 1f, 0.3f, 0.9f),
-                pulse
-            );
+            // Keep fill bar yellow (no change)
+            fillImage.color = Color.white;
 
+            var textColor = _config.CastbarTextColor.Value;
             if (attackNameText != null)
-                attackNameText.color = Color.Lerp(Color.white, Color.green, pulse);
+                attackNameText.color = textColor;
             if (timerText != null)
-                timerText.color = Color.Lerp(Color.white, Color.green, pulse);
+                timerText.color = textColor;
 
-            // During parry window show indicator with highlight
-            if (parryIndicator != null)
-                parryIndicator.SetActive(true);
-        }
-        else
-        {
-            // Show parry indicator
+            // During parry window show indicator with red gradient
             if (parryIndicator != null)
             {
                 parryIndicator.SetActive(true);
                 if (parryIndicatorImage != null)
                 {
-                    float blink = Mathf.PingPong(Time.time * 10f, 1f);
-                    parryIndicatorImage.color = Color.Lerp(
-                        new Color(0.3f, 1f, 0.3f, 0.5f),
-                        new Color(0.3f, 1f, 0.3f, 1f),
-                        blink
-                    );
+                    // Change to red gradient sprite when in parry window
+                    var parryActiveColor = _config.CastbarParryActiveColor.Value;
+                    parryIndicatorImage.sprite = CreateGradientSprite(parryActiveColor);
+                    parryIndicatorImage.color = Color.white;
+                }
+            }
+        }
+        else
+        {
+            // Show parry indicator with orange gradient
+            if (parryIndicator != null)
+            {
+                parryIndicator.SetActive(true);
+                if (parryIndicatorImage != null)
+                {
+                    // Orange gradient when not in parry window
+                    var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
+                    parryIndicatorImage.sprite = CreateGradientSprite(parryIndicatorColor);
+                    parryIndicatorImage.color = Color.white;
                 }
             }
 
-            fillImage.color = new Color(1f, 0.5f, 0.2f, 0.85f);
+            fillImage.color = Color.white;
 
+            var textColor = _config.CastbarTextColor.Value;
             if (attackNameText != null)
-                attackNameText.color = Color.white;
+                attackNameText.color = textColor;
             if (timerText != null)
-                timerText.color = Color.white;
+                timerText.color = textColor;
         }
     }
 

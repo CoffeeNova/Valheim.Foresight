@@ -6,4 +6,9 @@
 internal class ConfigurationManagerAttributes
 {
     public int Order { get; set; }
+
+    /// <summary>
+    /// Custom drawer for rendering config UI in ConfigurationManager
+    /// </summary>
+    public System.Action<BepInEx.Configuration.ConfigEntryBase>? CustomDrawer { get; set; }
 }

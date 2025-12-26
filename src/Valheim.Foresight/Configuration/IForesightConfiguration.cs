@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using UnityEngine;
 
 namespace Valheim.Foresight.Configuration;
 
@@ -22,4 +23,12 @@ public interface IForesightConfiguration
     ConfigEntry<float> AttackCastbarParryWindow { get; }
     ConfigEntry<string> TimingEditorToggleKey { get; }
     ConfigEntry<bool> AttackTimingLearningEnabled { get; }
+
+    ConfigEntry<Color> CastbarFillColor { get; }
+    ConfigEntry<Color> CastbarParryIndicatorColor { get; }
+    ConfigEntry<Color> CastbarParryActiveColor { get; }
+    ConfigEntry<Color> CastbarBorderColor { get; }
+    ConfigEntry<Color> CastbarBackgroundColor { get; }
+    ConfigEntry<Color> CastbarTextColor { get; }
+    ConfigEntry<Color> CastbarTextShadowColor { get; }
 }

@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace Valheim.Foresight.Configuration;
 
@@ -27,6 +28,14 @@ public sealed class ForesightConfiguration : IForesightConfiguration
     public ConfigEntry<float> AttackCastbarParryWindow { get; }
     public ConfigEntry<string> TimingEditorToggleKey { get; }
     public ConfigEntry<bool> AttackTimingLearningEnabled { get; }
+
+    public ConfigEntry<Color> CastbarFillColor { get; }
+    public ConfigEntry<Color> CastbarParryIndicatorColor { get; }
+    public ConfigEntry<Color> CastbarParryActiveColor { get; }
+    public ConfigEntry<Color> CastbarBorderColor { get; }
+    public ConfigEntry<Color> CastbarBackgroundColor { get; }
+    public ConfigEntry<Color> CastbarTextColor { get; }
+    public ConfigEntry<Color> CastbarTextShadowColor { get; }
 
     public event EventHandler? SettingsChanged;
 
@@ -101,7 +110,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             100f,
             new ConfigDescription(
                 "Width of the attack castbar in pixels.",
-                new AcceptableValueRange<float>(50f, 300f)
+                new AcceptableValueRange<float>(50f, 300f),
+                new ConfigurationManagerAttributes { Order = 12 }
             )
         );
 
@@ -111,7 +121,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             16f,
             new ConfigDescription(
                 "Height of the attack castbar in pixels.",
-                new AcceptableValueRange<float>(12f, 32f)
+                new AcceptableValueRange<float>(12f, 32f),
+                new ConfigurationManagerAttributes { Order = 13 }
             )
         );
 
@@ -156,6 +167,63 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             )
         );
 
+        CastbarFillColor = _configFile.Bind(
+            "Attack Castbar",
+            "FillColor",
+            new Color(1f, 0.9f, 0.1f, 0.85f),
+            new ConfigDescription(
+                "Color of the castbar fill. Default: bright yellow with transparency."
+            )
+        );
+
+        CastbarParryIndicatorColor = _configFile.Bind(
+            "Attack Castbar",
+            "ParryIndicatorColor",
+            new Color(1f, 0.6f, 0.2f, 0.85f),
+            new ConfigDescription("Color of the parry window indicator. Default: orange.")
+        );
+
+        CastbarParryActiveColor = _configFile.Bind(
+            "Attack Castbar",
+            "ParryActiveColor",
+            new Color(1f, 0.2f, 0.2f, 0.85f),
+            new ConfigDescription(
+                "Color of the parry indicator when parry window is active. Default: red."
+            )
+        );
+
+        CastbarBorderColor = _configFile.Bind(
+            "Attack Castbar",
+            "BorderColor",
+            new Color(0.5f, 0.5f, 0.5f, 0.2f),
+            new ConfigDescription(
+                "Color of the castbar border. Default: light gray with transparency."
+            )
+        );
+
+        CastbarBackgroundColor = _configFile.Bind(
+            "Attack Castbar",
+            "BackgroundColor",
+            new Color(0f, 0f, 0f, 0.9f),
+            new ConfigDescription(
+                "Color of the castbar background. Default: black with high opacity."
+            )
+        );
+
+        CastbarTextColor = _configFile.Bind(
+            "Attack Castbar",
+            "TextColor",
+            new Color(1f, 1f, 1f, 1f),
+            new ConfigDescription("Color of the castbar text. Default: white.")
+        );
+
+        CastbarTextShadowColor = _configFile.Bind(
+            "Attack Castbar",
+            "TextShadowColor",
+            new Color(0f, 0f, 0f, 0.9f),
+            new ConfigDescription("Color of the text shadow. Default: black with transparency.")
+        );
+
         TimingEditorToggleKey = _configFile.Bind(
             "UI",
             "TimingEditorToggleKey",
@@ -194,6 +262,14 @@ public sealed class ForesightConfiguration : IForesightConfiguration
 
         TimingEditorToggleKey.SettingChanged += OnSettingChanged;
         AttackTimingLearningEnabled.SettingChanged += OnSettingChanged;
+
+        CastbarFillColor.SettingChanged += OnSettingChanged;
+        CastbarParryIndicatorColor.SettingChanged += OnSettingChanged;
+        CastbarParryActiveColor.SettingChanged += OnSettingChanged;
+        CastbarBorderColor.SettingChanged += OnSettingChanged;
+        CastbarBackgroundColor.SettingChanged += OnSettingChanged;
+        CastbarTextColor.SettingChanged += OnSettingChanged;
+        CastbarTextShadowColor.SettingChanged += OnSettingChanged;
     }
 
     private void OnSettingChanged(object? sender, EventArgs e)
