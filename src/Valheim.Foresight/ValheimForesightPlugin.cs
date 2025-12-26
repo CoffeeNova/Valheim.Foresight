@@ -73,7 +73,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     )
     {
         assessment = null;
-        if (_instance == null || character == null)
+        if (_instance is null || character is null)
             return false;
 
         return _instance._threatCache.TryGetValue(character, out assessment);
@@ -102,7 +102,6 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
         _config.SettingsChanged -= OnConfigurationChanged;
 
-        // Reuse DisablePlugin to avoid code duplication
         DisablePlugin();
 
         if (_instance == this)

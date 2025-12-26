@@ -11,12 +11,13 @@ namespace Valheim.Foresight.Services.Hud;
 /// <summary>
 /// Unity-specific implementation that adds a small sprite next to the enemy name.
 /// </summary>
-public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
+public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer, IDisposable
 {
     private const string IconObjectName = "Foresight_ThreatIcon";
 
     private readonly IThreatIconSpriteProvider _spriteProvider;
     private readonly List<GameObject> _createdIcons = new();
+    private bool _disposed;
 
     /// <summary>
     /// Creates a new threat HUD icon renderer
@@ -122,11 +123,32 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
     /// </summary>
     public void Dispose()
     {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            _spriteProvider?.Dispose();
+        }
+
         foreach (var icon in _createdIcons)
         {
             if (icon != null)
                 UnityEngine.Object.Destroy(icon);
         }
         _createdIcons.Clear();
+
+        _disposed = true;
+    }
+
+    ~UnityThreatHudIconRenderer()
+    {
+        Dispose(false);
     }
 }

@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿using System;
+using BepInEx.Configuration;
 using UnityEngine;
 
 namespace Valheim.Foresight.Configuration;
@@ -16,6 +17,8 @@ public interface IForesightConfiguration
     ConfigEntry<float> ThreatIconOffsetX { get; }
     ConfigEntry<float> ThreatIconOffsetY { get; }
     ConfigEntry<bool> AttackCastbarEnabled { get; }
+    ConfigEntry<bool> AttackCastbarTextEnabled { get; }
+    ConfigEntry<bool> AlwaysDisplayCastbar { get; }
     ConfigEntry<float> AttackCastbarWidth { get; }
     ConfigEntry<float> AttackCastbarHeight { get; }
     ConfigEntry<float> AttackCastbarOffsetX { get; }
@@ -31,4 +34,6 @@ public interface IForesightConfiguration
     ConfigEntry<Color> CastbarBackgroundColor { get; }
     ConfigEntry<Color> CastbarTextColor { get; }
     ConfigEntry<Color> CastbarTextShadowColor { get; }
+
+    event EventHandler? SettingsChanged;
 }

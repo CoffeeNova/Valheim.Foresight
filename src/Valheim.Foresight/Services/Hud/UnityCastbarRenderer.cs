@@ -49,9 +49,11 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
     )
     {
         _logger = logger;
-        _config = config;
+        _config = config ?? throw new ArgumentNullException(nameof(config));
         _parryWindowService =
             parryWindowService ?? throw new ArgumentNullException(nameof(parryWindowService));
+
+        _config.SettingsChanged += OnConfigurationChanged;
     }
 
     /// <inheritdoc/>
@@ -66,11 +68,21 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             return;
         }
 
-        var castbarObject = GetOrCreateCastbarObject(hudParent);
-        castbarObject.SetActive(true);
+        // Determine if castbar should be visible
+        // Always show if: DebugEnabled is on, OR AlwaysDisplayCastbar is on, OR there's an active attack
+        bool shouldShow =
+            config.DebugEnabled.Value
+            || config.AlwaysDisplayCastbar.Value
+            || (attackInfo is not null && !attackInfo.IsExpired);
 
-        UpdateCastbarSize(castbarObject);
-        UpdateCastbarProgress(castbarObject, attackInfo);
+        var castbarObject = GetOrCreateCastbarObject(hudParent);
+        castbarObject.SetActive(shouldShow);
+
+        if (shouldShow)
+        {
+            UpdateCastbarSize(castbarObject);
+            UpdateCastbarProgress(castbarObject, attackInfo);
+        }
     }
 
     private GameObject GetOrCreateCastbarObject(Transform hudParent)
@@ -333,7 +345,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.textWrappingMode = TextWrappingModes.NoWrap;
         text.overflowMode = TextOverflowModes.Ellipsis; // Truncate with ...
         text.raycastTarget = false;
-        text.enabled = true;
+        text.enabled = _config.AttackCastbarTextEnabled.Value;
 
         var shadow = textObj.AddComponent<Shadow>();
         var shadowColor = _config.CastbarTextShadowColor.Value;
@@ -372,7 +384,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         text.margin = new Vector4(2f, 0f, 4f, 0f);
         text.fontStyle = FontStyles.Normal;
         text.raycastTarget = false;
-        text.enabled = true;
+        text.enabled = _config.AttackCastbarTextEnabled.Value;
 
         var shadow = textObj.AddComponent<Shadow>();
         var shadowColor = _config.CastbarTextShadowColor.Value;
@@ -516,11 +528,21 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         // Update attack text
         if (attackNameText is not null)
-            attackNameText.text = attackInfo.AttackName;
+        {
+            attackNameText.text = _config.AttackCastbarTextEnabled.Value
+                ? attackInfo.AttackName
+                : string.Empty;
+            attackNameText.enabled = _config.AttackCastbarTextEnabled.Value;
+        }
 
         // Update timer
         if (timerText is not null)
-            timerText.text = $"{attackInfo.TimeRemaining:F1}s";
+        {
+            timerText.text = _config.AttackCastbarTextEnabled.Value
+                ? $"{attackInfo.TimeRemaining:F1}s"
+                : string.Empty;
+            timerText.enabled = _config.AttackCastbarTextEnabled.Value;
+        }
 
         var parryWindowInfo = _parryWindowService.GetParryWindowInfo(
             attackInfo,
@@ -653,8 +675,155 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         return null;
     }
 
+    private void OnConfigurationChanged(object? sender, EventArgs e)
+    {
+        // Invalidate cached color sprites
+        InvalidateColorCache();
+
+        // Update existing castbars with new colors
+        UpdateExistingCastbarColors();
+    }
+
+    private void InvalidateColorCache()
+    {
+        // Destroy and clear cached color sprites
+        if (_cachedParryActiveSprite is not null)
+        {
+            _createdSprites.Remove(_cachedParryActiveSprite);
+            Object.Destroy(_cachedParryActiveSprite);
+            _cachedParryActiveSprite = null;
+        }
+
+        if (_cachedParryIndicatorSprite is not null)
+        {
+            _createdSprites.Remove(_cachedParryIndicatorSprite);
+            Object.Destroy(_cachedParryIndicatorSprite);
+            _cachedParryIndicatorSprite = null;
+        }
+    }
+
+    private void UpdateExistingCastbarColors()
+    {
+        foreach (var castbar in _createdCastbars)
+        {
+            if (castbar is null)
+                continue;
+
+            // Update fill color
+            var fillTransform = castbar.transform.Find(FillName);
+            if (fillTransform is not null)
+            {
+                var fillImage = fillTransform.GetComponent<Image>();
+                if (fillImage is not null)
+                {
+                    // Destroy old sprite
+                    if (fillImage.sprite is not null)
+                    {
+                        _createdSprites.Remove(fillImage.sprite);
+                        Object.Destroy(fillImage.sprite);
+                    }
+                    // Create and assign new sprite with updated color
+                    var fillColor = _config.CastbarFillColor.Value;
+                    fillImage.sprite = CreateGradientSprite(fillColor);
+                    fillImage.color = Color.white;
+                }
+            }
+
+            // Update border color
+            var borderTransform = castbar.transform.Find("Castbar_Border");
+            if (borderTransform is not null)
+            {
+                var borderImage = borderTransform.GetComponent<Image>();
+                if (borderImage is not null)
+                {
+                    // Destroy old sprite
+                    if (borderImage.sprite is not null)
+                    {
+                        _createdSprites.Remove(borderImage.sprite);
+                        Object.Destroy(borderImage.sprite);
+                    }
+                    // Create and assign new sprite with updated color
+                    borderImage.sprite = CreateHollowBorderSprite();
+                    borderImage.color = Color.white;
+                }
+            }
+
+            // Update background color
+            var backgroundTransform = castbar.transform.Find("Castbar_Background");
+            if (backgroundTransform is not null)
+            {
+                var bgImage = backgroundTransform.GetComponent<Image>();
+                if (bgImage is not null)
+                {
+                    var bgColor = _config.CastbarBackgroundColor.Value;
+                    bgImage.color = bgColor;
+                }
+            }
+
+            // Update parry indicator color (will be updated on next render with cached sprites)
+            var parryIndicatorTransform = castbar.transform.Find(ParryIndicatorName);
+            if (parryIndicatorTransform is not null)
+            {
+                var parryImage = parryIndicatorTransform.GetComponent<Image>();
+                if (parryImage is not null)
+                {
+                    // Destroy old sprite
+                    if (parryImage.sprite is not null)
+                    {
+                        _createdSprites.Remove(parryImage.sprite);
+                        Object.Destroy(parryImage.sprite);
+                    }
+                    // Create and assign new sprite with updated color
+                    var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
+                    parryImage.sprite = CreateGradientSprite(parryIndicatorColor);
+                    parryImage.color = Color.white;
+                }
+            }
+
+            // Update text colors
+            var attackNameTransform = castbar.transform.Find(AttackNameTextName);
+            if (attackNameTransform is not null)
+            {
+                var attackNameText = attackNameTransform.GetComponent<TextMeshProUGUI>();
+                if (attackNameText is not null)
+                {
+                    var textColor = _config.CastbarTextColor.Value;
+                    attackNameText.color = textColor;
+                }
+
+                var shadow = attackNameTransform.GetComponent<Shadow>();
+                if (shadow is not null)
+                {
+                    var shadowColor = _config.CastbarTextShadowColor.Value;
+                    shadow.effectColor = shadowColor;
+                }
+            }
+
+            var timerTransform = castbar.transform.Find(TimerTextName);
+            if (timerTransform is not null)
+            {
+                var timerText = timerTransform.GetComponent<TextMeshProUGUI>();
+                if (timerText is not null)
+                {
+                    var textColor = _config.CastbarTextColor.Value;
+                    timerText.color = textColor;
+                }
+
+                var shadow = timerTransform.GetComponent<Shadow>();
+                if (shadow is not null)
+                {
+                    var shadowColor = _config.CastbarTextShadowColor.Value;
+                    shadow.effectColor = shadowColor;
+                }
+            }
+        }
+    }
+
     public void Dispose()
     {
+        // Unsubscribe from configuration changes
+        _config.SettingsChanged -= OnConfigurationChanged;
+
         CleanupCastbars();
 
         foreach (var sprite in _createdSprites)

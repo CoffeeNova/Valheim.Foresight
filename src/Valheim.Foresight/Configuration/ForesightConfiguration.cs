@@ -21,6 +21,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
     public ConfigEntry<float> ThreatIconOffsetY { get; }
 
     public ConfigEntry<bool> AttackCastbarEnabled { get; }
+    public ConfigEntry<bool> AttackCastbarTextEnabled { get; }
+    public ConfigEntry<bool> AlwaysDisplayCastbar { get; }
     public ConfigEntry<float> AttackCastbarWidth { get; }
     public ConfigEntry<float> AttackCastbarHeight { get; }
     public ConfigEntry<float> AttackCastbarOffsetX { get; }
@@ -57,9 +59,9 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         ThreatIconEnabled = _configFile.Bind(
-            "HUD",
+            "Treat icon",
             "Threat icon enabled",
-            true,
+            false,
             new ConfigDescription(
                 "Show threat response hint icon next to enemy name.",
                 tags: new ConfigurationManagerAttributes { Order = 190 }
@@ -67,7 +69,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         ThreatIconSize = _configFile.Bind(
-            "HUD",
+            "Treat icon",
             "Threat icon size",
             36f,
             new ConfigDescription(
@@ -78,23 +80,23 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         );
 
         ThreatIconOffsetX = _configFile.Bind(
-            "HUD",
+            "Treat icon",
             "Threat icon offset X",
-            180f,
+            181f,
             new ConfigDescription(
                 "Horizontal offset of the threat icon from enemy name (positive = right, negative = left).",
-                new AcceptableValueRange<float>(-200f, 200f),
+                new AcceptableValueRange<float>(-40f, 400f),
                 tags: new ConfigurationManagerAttributes { Order = 180 }
             )
         );
 
         ThreatIconOffsetY = _configFile.Bind(
-            "HUD",
+            "Treat icon",
             "Threat icon offset Y",
-            54f,
+            100f,
             new ConfigDescription(
                 "Vertical offset of the threat icon from enemy name (positive = up, negative = down).",
-                new AcceptableValueRange<float>(-100f, 100f),
+                new AcceptableValueRange<float>(-200f, 200f),
                 tags: new ConfigurationManagerAttributes { Order = 175 }
             )
         );
@@ -106,6 +108,26 @@ public sealed class ForesightConfiguration : IForesightConfiguration
             new ConfigDescription(
                 "Show attack castbar indicating when enemy is attacking and parry window.",
                 tags: new ConfigurationManagerAttributes { Order = 200 }
+            )
+        );
+
+        AttackCastbarTextEnabled = _configFile.Bind(
+            "Attack Castbar",
+            "Show text",
+            false,
+            new ConfigDescription(
+                "Display attack name and remaining time on the castbar.",
+                tags: new ConfigurationManagerAttributes { Order = 197 }
+            )
+        );
+
+        AlwaysDisplayCastbar = _configFile.Bind(
+            "Attack Castbar",
+            "Always display castbar",
+            false,
+            new ConfigDescription(
+                "Show the castbar at all times. When disabled, castbar appears only during attacks.",
+                tags: new ConfigurationManagerAttributes { Order = 196 }
             )
         );
 
@@ -197,7 +219,7 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         CastbarBorderColor = _configFile.Bind(
             "Attack Castbar",
             "Border color",
-            new Color(0.5f, 0.5f, 0.5f, 0.2f),
+            new Color(0.5f, 0.5f, 0.5f, 0.1f),
             new ConfigDescription(
                 "Color of the castbar border. Default: light gray with transparency.",
                 tags: new ConfigurationManagerAttributes { Order = 155 }
@@ -289,6 +311,8 @@ public sealed class ForesightConfiguration : IForesightConfiguration
         ThreatIconOffsetY.SettingChanged += OnSettingChanged;
 
         AttackCastbarEnabled.SettingChanged += OnSettingChanged;
+        AttackCastbarTextEnabled.SettingChanged += OnSettingChanged;
+        AlwaysDisplayCastbar.SettingChanged += OnSettingChanged;
         AttackCastbarWidth.SettingChanged += OnSettingChanged;
         AttackCastbarHeight.SettingChanged += OnSettingChanged;
         AttackCastbarOffsetX.SettingChanged += OnSettingChanged;
