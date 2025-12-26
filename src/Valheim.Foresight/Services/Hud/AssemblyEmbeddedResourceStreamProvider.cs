@@ -77,9 +77,12 @@ public sealed class EmbeddedPngSpriteProvider : IThreatIconSpriteProvider, IDisp
         var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
         // var tex = new Texture2D(2, 2, TextureFormat.ARGB32, false);
         tex.LoadImage(bytes);
+        _createdTextures.Add(tex);
 
         var rect = new Rect(0, 0, tex.width, tex.height);
-        return Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 100f);
+        var createdSprite = Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 100f);
+        _createdSprites.Add(createdSprite);
+        return createdSprite;
     }
 
     public void Dispose()

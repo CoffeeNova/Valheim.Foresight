@@ -8,6 +8,7 @@ namespace Valheim.Foresight.Configuration;
 /// </summary>
 public interface IForesightConfiguration
 {
+    ConfigEntry<bool> PluginEnabled { get; }
     ConfigEntry<bool> IsLogsEnabled { get; }
     ConfigEntry<bool> DebugEnabled { get; }
     ConfigEntry<bool> ThreatIconEnabled { get; }
@@ -19,7 +20,6 @@ public interface IForesightConfiguration
     ConfigEntry<float> AttackCastbarHeight { get; }
     ConfigEntry<float> AttackCastbarOffsetX { get; }
     ConfigEntry<float> AttackCastbarOffsetY { get; }
-    ConfigEntry<float> ParryIndicatorStartPosition { get; }
     ConfigEntry<float> AttackCastbarParryWindow { get; }
     ConfigEntry<string> TimingEditorToggleKey { get; }
     ConfigEntry<bool> AttackTimingLearningEnabled { get; }

@@ -63,7 +63,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
                     + "  Eikthyr::stomp=1.8\n"
                     + "Lines starting with # are ignored as comments.",
                 null,
-                new ConfigurationManagerAttributes { Order = 98 }
+                new ConfigurationManagerAttributes { Order = 98, IsAdvanced = true }
             )
         );
 
@@ -80,7 +80,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
                     + "  Dragon::attack_groundfire\n"
                     + "Lines starting with # are ignored as comments.",
                 null,
-                new ConfigurationManagerAttributes { Order = 99 }
+                new ConfigurationManagerAttributes { Order = 99, IsAdvanced = true }
             )
         );
 
@@ -99,7 +99,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
                     + "  Boar::base_attack->fangs 1|fangs 2|bite\n"
                     + "Lines starting with # are ignored as comments.",
                 null,
-                new ConfigurationManagerAttributes { Order = 100 }
+                new ConfigurationManagerAttributes { Order = 100, IsAdvanced = true }
             )
         );
 
@@ -117,7 +117,7 @@ public sealed class AttackOverridesConfig : IAttackOverridesConfig
                     + "  Fuling_Shaman::fireball\n"
                     + "Lines starting with # are ignored as comments.",
                 null,
-                new ConfigurationManagerAttributes { Order = 101 }
+                new ConfigurationManagerAttributes { Order = 101, IsAdvanced = true }
             )
         );
 

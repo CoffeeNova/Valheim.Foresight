@@ -62,6 +62,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private float _playerLogTimer;
     private float _enemyUpdateTimer;
+    private bool _isPluginActive;
 
     /// <summary>
     /// Tries to get the cached threat assessment for a character
@@ -81,6 +82,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     private void Awake()
     {
         _instance = this;
+        _isPluginActive = true;
         InitializeServices();
         ApplyHarmonyPatches();
         LogDifficultySettings();
@@ -98,21 +100,10 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
             $"{PluginInfoGenerated.PluginName} {PluginInfoGenerated.PluginVersion} unloading..."
         );
 
-        _harmony?.UnpatchSelf();
         _config.SettingsChanged -= OnConfigurationChanged;
-        _threatCache?.Clear();
-        CastbarRenderer?.Dispose();
-        CastbarRenderer = null;
-        _spriteProvider?.Dispose();
-        _spriteProvider = null;
-        AttackTimingService?.Dispose();
-        AttackTimingService = null;
 
-        if (_editorManager != null)
-        {
-            Destroy(_editorManager.gameObject);
-            _editorManager = null;
-        }
+        // Reuse DisablePlugin to avoid code duplication
+        DisablePlugin();
 
         if (_instance == this)
         {
@@ -181,11 +172,8 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         ActiveAttackTracker = new ActiveAttackTracker();
         var parryWindowService = new ParryWindowService(_config);
         CastbarRenderer = new UnityCastbarRenderer(Log, _config, parryWindowService);
-
-        // Create AttackTimingService - no UI config needed
         AttackTimingService = new AttackTimingService(Log, _config, _attackConfig);
 
-        // Create UI manager for attack timing editor
         InitializeEditorUI();
     }
 
@@ -193,15 +181,14 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     {
         if (AttackTimingService == null)
         {
-            Log.LogError("[InitializeEditorUI] AttackTimingService not initialized");
+            Log.LogError("AttackTimingService not initialized");
             return;
         }
 
-        // Parse the configured key
         var keyString = _config.TimingEditorToggleKey.Value;
-        if (!System.Enum.TryParse<KeyCode>(keyString, true, out var toggleKey))
+        if (!Enum.TryParse<KeyCode>(keyString, true, out var toggleKey))
         {
-            Log.LogWarning($"[InitializeEditorUI] Invalid key '{keyString}', using default F7");
+            Log.LogWarning($"Invalid key '{keyString}', using default F7");
             toggleKey = KeyCode.F7;
         }
 
@@ -217,7 +204,7 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         );
 
         Log.LogInfo(
-            $"[InitializeEditorUI] Attack Timing Editor UI initialized ({toggleKey} to toggle, Global Learning: {_config.AttackTimingLearningEnabled.Value})"
+            $"Attack Timing Editor UI initialized ({toggleKey} to toggle, Global Learning: {_config.AttackTimingLearningEnabled.Value})"
         );
     }
 
@@ -246,6 +233,22 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
 
     private void Update()
     {
+        if (_config.PluginEnabled.Value != _isPluginActive)
+        {
+            _isPluginActive = _config.PluginEnabled.Value;
+            if (_isPluginActive)
+            {
+                EnablePlugin();
+            }
+            else
+            {
+                DisablePlugin();
+            }
+        }
+
+        if (!_isPluginActive)
+            return;
+
         _playerLogTimer += Time.deltaTime;
         _enemyUpdateTimer += Time.deltaTime;
         _enemyUpdateTimer += Time.deltaTime;
@@ -380,5 +383,45 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
     {
         Log.IsLogsEnabled = _config.IsLogsEnabled.Value;
         Log.IsDebugLogsEnabled = _config.DebugEnabled.Value;
+    }
+
+    private void DisablePlugin()
+    {
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} disabling...");
+
+        _threatCache.Clear();
+
+        CastbarRenderer?.Dispose();
+        CastbarRenderer = null;
+
+        _hudIconRenderer?.Dispose();
+        _hudIconRenderer = null;
+
+        _spriteProvider?.Dispose();
+        _spriteProvider = null;
+
+        AttackTimingService?.Dispose();
+        AttackTimingService = null;
+
+        if (_editorManager != null)
+        {
+            Destroy(_editorManager.gameObject);
+            _editorManager = null;
+        }
+
+        _harmony?.UnpatchSelf();
+        _harmony = null;
+
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} disabled");
+    }
+
+    private void EnablePlugin()
+    {
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} enabling...");
+
+        InitializeServices();
+        ApplyHarmonyPatches();
+
+        Log.LogInfo($"{PluginInfoGenerated.PluginName} enabled");
     }
 }

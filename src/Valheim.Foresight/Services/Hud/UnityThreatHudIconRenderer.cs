@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Valheim.Foresight.Models;
@@ -14,6 +16,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
     private const string IconObjectName = "Foresight_ThreatIcon";
 
     private readonly IThreatIconSpriteProvider _spriteProvider;
+    private readonly List<GameObject> _createdIcons = new();
 
     /// <summary>
     /// Creates a new threat HUD icon renderer
@@ -94,6 +97,7 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
 
         var go = new GameObject(IconObjectName);
         go.transform.SetParent(parent, false);
+        _createdIcons.Add(go);
 
         var rect = go.AddComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 0.5f);
@@ -111,5 +115,18 @@ public sealed class UnityThreatHudIconRenderer : IThreatHudIconRenderer
         }
 
         return go;
+    }
+
+    /// <summary>
+    /// Cleans up all created threat icons
+    /// </summary>
+    public void Dispose()
+    {
+        foreach (var icon in _createdIcons)
+        {
+            if (icon != null)
+                UnityEngine.Object.Destroy(icon);
+        }
+        _createdIcons.Clear();
     }
 }

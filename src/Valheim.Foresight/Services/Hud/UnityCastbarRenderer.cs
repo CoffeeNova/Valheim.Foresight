@@ -30,6 +30,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
     private readonly List<Texture2D> _createdTextures = new();
     private readonly List<Sprite> _createdSprites = new();
+    private readonly List<GameObject> _createdCastbars = new();
+
+    private Sprite? _cachedParryActiveSprite;
+    private Sprite? _cachedParryIndicatorSprite;
 
     private readonly ILogger _logger;
     private readonly IForesightConfiguration _config;
@@ -54,10 +58,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
     public void RenderCastbar(Transform hudParent, ActiveAttackInfo? attackInfo)
     {
         var config = ValheimForesightPlugin.ForesightConfig;
-        if (config == null || !config.AttackCastbarEnabled.Value)
+        if (config is null || !config.AttackCastbarEnabled.Value)
         {
             var existingCastbar = hudParent.Find(CastbarObjectName);
-            if (existingCastbar != null)
+            if (existingCastbar is not null)
                 existingCastbar.gameObject.SetActive(false);
             return;
         }
@@ -72,7 +76,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
     private GameObject GetOrCreateCastbarObject(Transform hudParent)
     {
         var existing = hudParent.Find(CastbarObjectName);
-        if (existing != null)
+        if (existing is not null)
             return existing.gameObject;
 
         return CreateCastbarObject(hudParent);
@@ -91,7 +95,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 1f);
 
-        if (config != null)
+        if (config is not null)
         {
             rect.anchoredPosition = new Vector2(
                 config.AttackCastbarOffsetX.Value,
@@ -120,6 +124,9 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         // Text overlay
         CreateAttackNameText(castbar.transform);
         CreateTimerText(castbar.transform);
+
+        // Track created GameObject for proper cleanup
+        _createdCastbars.Add(castbar);
 
         return castbar;
     }
@@ -308,7 +315,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         // Get font from existing Valheim UI
         var existingFont = GetValheimFont();
-        if (existingFont != null)
+        if (existingFont is not null)
         {
             text.font = existingFont;
         }
@@ -349,7 +356,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         // Get font from existing Valheim UI
         var existingFont = GetValheimFont();
-        if (existingFont != null)
+        if (existingFont is not null)
         {
             text.font = existingFont;
         }
@@ -379,7 +386,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         var height = _config.AttackCastbarHeight.Value;
 
         var rect = castbarObject.GetComponent<RectTransform>();
-        if (rect != null)
+        if (rect is not null)
         {
             rect.anchoredPosition = new Vector2(
                 _config.AttackCastbarOffsetX.Value,
@@ -390,10 +397,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         // Update Fill width
         var fillTransform = castbarObject.transform.Find(FillName);
-        if (fillTransform != null)
+        if (fillTransform is not null)
         {
             var fillRect = fillTransform.GetComponent<RectTransform>();
-            if (fillRect != null)
+            if (fillRect is not null)
             {
                 var fillWidth = width - BorderThickness * 2;
                 fillRect.sizeDelta = new Vector2(fillWidth, -BorderThickness * 2);
@@ -423,10 +430,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         }
 
         // Update sizes for attackNameText
-        if (attackNameTransform != null)
+        if (attackNameTransform is not null)
         {
             var attackNameText = attackNameTransform.GetComponent<TextMeshProUGUI>();
-            if (attackNameText != null)
+            if (attackNameText is not null)
             {
                 attackNameText.fontSize = baseFontSize;
                 attackNameText.fontSizeMin = minFontSize;
@@ -445,25 +452,25 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         }
 
         // Update sizes for timerText
-        if (timerTransform != null)
-        {
-            var timerText = timerTransform.GetComponent<TextMeshProUGUI>();
-            if (timerText != null)
-            {
-                timerText.fontSize = baseFontSize;
-                timerText.fontSizeMin = minFontSize;
-                timerText.fontSizeMax = maxFontSize;
+        if (timerTransform is null)
+            return;
 
-                // For very narrow castbars - hide timer
-                if (castbarWidth < 30f)
-                {
-                    timerText.enabled = false;
-                }
-                else
-                {
-                    timerText.enabled = true;
-                }
-            }
+        var timerText = timerTransform.GetComponent<TextMeshProUGUI>();
+        if (timerText is null)
+            return;
+
+        timerText.fontSize = baseFontSize;
+        timerText.fontSizeMin = minFontSize;
+        timerText.fontSizeMax = maxFontSize;
+
+        // For very narrow castbars - hide timer
+        if (castbarWidth < 30f)
+        {
+            timerText.enabled = false;
+        }
+        else
+        {
+            timerText.enabled = true;
         }
     }
 
@@ -474,7 +481,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         var attackNameTransform = castbarObject.transform.Find(AttackNameTextName);
         var timerTransform = castbarObject.transform.Find(TimerTextName);
 
-        if (fillTransform == null)
+        if (fillTransform is null)
             return;
 
         var fillImage = fillTransform.GetComponent<Image>();
@@ -484,11 +491,11 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         var attackNameText = attackNameTransform?.GetComponent<TextMeshProUGUI>();
         var timerText = timerTransform?.GetComponent<TextMeshProUGUI>();
 
-        if (fillImage == null)
+        if (fillImage is null)
             return;
 
         // If no active attack - everything is empty
-        if (attackInfo == null || attackInfo.IsExpired)
+        if (attackInfo is null || attackInfo.IsExpired)
         {
             fillImage.fillAmount = 0f;
 
@@ -508,11 +515,11 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         fillImage.fillAmount = attackInfo.Progress;
 
         // Update attack text
-        if (attackNameText != null)
+        if (attackNameText is not null)
             attackNameText.text = attackInfo.AttackName;
 
         // Update timer
-        if (timerText != null)
+        if (timerText is not null)
             timerText.text = $"{attackInfo.TimeRemaining:F1}s";
 
         var parryWindowInfo = _parryWindowService.GetParryWindowInfo(
@@ -522,7 +529,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         if (!parryWindowInfo.HasValue)
         {
-            if (parryIndicator != null)
+            if (parryIndicator is not null)
             {
                 parryIndicator.SetActive(false);
             }
@@ -531,16 +538,16 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             fillImage.color = Color.white;
 
             var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText != null)
+            if (attackNameText is not null)
                 attackNameText.color = textColor;
-            if (timerText != null)
+            if (timerText is not null)
                 timerText.color = textColor;
 
             return;
         }
 
         // If parry window info exists - update indicator size and position
-        if (parryIndicatorRect != null)
+        if (parryIndicatorRect is not null)
         {
             var (startPos, windowWidth) = parryWindowInfo.Value;
             parryIndicatorRect.anchorMin = new Vector2(startPos, 0f);
@@ -552,24 +559,25 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         // Visual effects for parry window
         if (_parryWindowService.IsInParryWindow(attackInfo))
         {
-            // Keep fill bar yellow (no change)
             fillImage.color = Color.white;
-
             var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText != null)
+            if (attackNameText is not null)
                 attackNameText.color = textColor;
-            if (timerText != null)
+            if (timerText is not null)
                 timerText.color = textColor;
 
             // During parry window show indicator with red gradient
-            if (parryIndicator != null)
+            if (parryIndicator is not null)
             {
                 parryIndicator.SetActive(true);
-                if (parryIndicatorImage != null)
+                if (parryIndicatorImage is not null)
                 {
-                    // Change to red gradient sprite when in parry window
-                    var parryActiveColor = _config.CastbarParryActiveColor.Value;
-                    parryIndicatorImage.sprite = CreateGradientSprite(parryActiveColor);
+                    if (_cachedParryActiveSprite is null)
+                    {
+                        var parryActiveColor = _config.CastbarParryActiveColor.Value;
+                        _cachedParryActiveSprite = CreateGradientSprite(parryActiveColor);
+                    }
+                    parryIndicatorImage.sprite = _cachedParryActiveSprite;
                     parryIndicatorImage.color = Color.white;
                 }
             }
@@ -577,14 +585,17 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         else
         {
             // Show parry indicator with orange gradient
-            if (parryIndicator != null)
+            if (parryIndicator is not null)
             {
                 parryIndicator.SetActive(true);
-                if (parryIndicatorImage != null)
+                if (parryIndicatorImage is not null)
                 {
-                    // Orange gradient when not in parry window
-                    var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
-                    parryIndicatorImage.sprite = CreateGradientSprite(parryIndicatorColor);
+                    if (_cachedParryIndicatorSprite is null)
+                    {
+                        var parryIndicatorColor = _config.CastbarParryIndicatorColor.Value;
+                        _cachedParryIndicatorSprite = CreateGradientSprite(parryIndicatorColor);
+                    }
+                    parryIndicatorImage.sprite = _cachedParryIndicatorSprite;
                     parryIndicatorImage.color = Color.white;
                 }
             }
@@ -592,23 +603,23 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             fillImage.color = Color.white;
 
             var textColor = _config.CastbarTextColor.Value;
-            if (attackNameText != null)
+            if (attackNameText is not null)
                 attackNameText.color = textColor;
-            if (timerText != null)
+            if (timerText is not null)
                 timerText.color = textColor;
         }
     }
 
     private TMP_FontAsset? GetValheimFont()
     {
-        if (_cachedFont != null)
+        if (_cachedFont is not null)
             return _cachedFont;
 
         try
         {
             // Try to find font from EnemyHud
             var enemyHud = EnemyHud.instance;
-            if (enemyHud != null)
+            if (enemyHud is not null)
             {
                 var hudElements = enemyHud.GetComponentsInChildren<TextMeshProUGUI>(true);
                 if (hudElements.Length > 0)
@@ -648,33 +659,31 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
         foreach (var sprite in _createdSprites)
         {
-            if (sprite != null)
+            if (sprite is not null)
                 Object.Destroy(sprite);
         }
         _createdSprites.Clear();
 
         foreach (var texture in _createdTextures)
         {
-            if (texture != null)
+            if (texture is not null)
                 Object.Destroy(texture);
         }
         _createdTextures.Clear();
 
         _cachedFont = null;
+        _cachedParryActiveSprite = null;
+        _cachedParryIndicatorSprite = null;
     }
 
     private void CleanupCastbars()
     {
         try
         {
-            var allCastbars = Object
-                .FindObjectsByType<GameObject>(FindObjectsSortMode.None)
-                .Where(go => go.name == "Foresight_Castbar")
-                .ToArray();
-
-            foreach (var castbar in allCastbars)
+            // Use tracked list instead of FindObjectsByType
+            foreach (var castbar in _createdCastbars)
             {
-                if (castbar != null)
+                if (castbar is not null)
                 {
                     _logger?.LogDebug(
                         $"[{nameof(CleanupCastbars)}] Destroying castbar: {castbar.name}"
@@ -684,8 +693,10 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             }
 
             _logger?.LogInfo(
-                $"[{nameof(CleanupCastbars)}] Cleaned up {allCastbars.Length} castbar(s)"
+                $"[{nameof(CleanupCastbars)}] Cleaned up {_createdCastbars.Count} castbar(s)"
             );
+
+            _createdCastbars.Clear();
         }
         catch (Exception ex)
         {

@@ -11,4 +11,6 @@ internal class ConfigurationManagerAttributes
     /// Custom drawer for rendering config UI in ConfigurationManager
     /// </summary>
     public System.Action<BepInEx.Configuration.ConfigEntryBase>? CustomDrawer { get; set; }
+
+    public bool IsAdvanced { get; set; }
 }

@@ -24,6 +24,7 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     private const int MinSamplesForPrediction = 2;
     private const string UnknownKeyName = "unknown";
     private const string TimingsDbDirectoryName = "foresight.Database";
+    private const float ParryIndicatorStartPosition = 0.7f;
 
     private readonly string _dataFilePath;
     private readonly string _prelearnedDataFilePath;
@@ -157,7 +158,6 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
 
         var key = CreateKey(attacker, attack);
 
-        // Priority 1: Check learned timings
         if (
             _timings.TryGetValue(key, out var stats)
             && stats.SampleCount >= MinSamplesForPrediction
@@ -166,14 +166,12 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
             return stats.MeanHitOffsetSeconds;
         }
 
-        // Priority 2: Check prelearned timings
         if (_prelearnedTimings.TryGetValue(key, out var prelearnedStats))
         {
             return prelearnedStats.MeanHitOffsetSeconds;
         }
 
-        // Priority 3: Fall back to default config value
-        return _config.ParryIndicatorStartPosition.Value;
+        return ParryIndicatorStartPosition;
     }
 
     /// <inheritdoc/>
@@ -246,7 +244,6 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     {
         try
         {
-            // Get embedded resource
             var assembly = typeof(AttackTimingService).Assembly;
             var resourceName = "Valheim.Foresight.Assets.attack_timings_prelearned.yml";
 

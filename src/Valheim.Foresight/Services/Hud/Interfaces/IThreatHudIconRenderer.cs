@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using Valheim.Foresight.Models;
 
 namespace Valheim.Foresight.Services.Hud.Interfaces;
@@ -6,7 +7,7 @@ namespace Valheim.Foresight.Services.Hud.Interfaces;
 /// <summary>
 /// Draws/updates the threat response icon on a specific enemy HUD.
 /// </summary>
-public interface IThreatHudIconRenderer
+public interface IThreatHudIconRenderer : IDisposable
 {
     /// <summary>
     /// Renders the threat response icon on the enemy HUD
