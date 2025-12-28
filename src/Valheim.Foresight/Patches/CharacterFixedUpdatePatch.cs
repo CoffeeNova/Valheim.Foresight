@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Valheim.Foresight.Core;
 using Valheim.Foresight.HarmonyRefs;
 
 namespace Valheim.Foresight.Patches;
@@ -12,7 +11,7 @@ namespace Valheim.Foresight.Patches;
 internal class CharacterFixedUpdatePatch
 {
     private const int MaxAttackFindAttempts = 30;
-    
+
     private static readonly Dictionary<int, AnimatorStateInfo> LastStates = new();
     private static Dictionary<int, string?> _animationTagDictionary = new();
 
@@ -67,7 +66,7 @@ internal class CharacterFixedUpdatePatch
             for (var attempt = 0; attempt < MaxAttackFindAttempts; attempt++)
             {
                 attack = TryFindAttack(humanoid);
-                
+
                 if (attack != null)
                 {
                     framesSkipped = attempt;
@@ -80,11 +79,13 @@ internal class CharacterFixedUpdatePatch
 
         if (attack == null)
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(CharacterFixedUpdatePatch)}] No attack object found for {character.m_name}, using basic tracking"
             );
         }
-        else if (ShouldIgnoreOrOverrideAttack(character, attack, attackStartTime, out var shouldBreak))
+        else if (
+            ShouldIgnoreOrOverrideAttack(character, attack, attackStartTime, out var shouldBreak)
+        )
         {
             if (shouldBreak)
                 yield break;
@@ -92,14 +93,14 @@ internal class CharacterFixedUpdatePatch
 
         var animationResult = AnimationHelper.GetCurrentAttackAnimationDuration(animator);
 
-        ValheimForesightPlugin.Log.LogInfo(
+        ValheimForesightPlugin.Log.LogDebug(
             $"[{nameof(TryDetectAndRegisterAttack)}] detected CURRENT attack animation "
                 + $"{animationResult?.AnimationName} for {character.m_name}"
         );
 
         if (!animationResult.HasValue)
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Failed to get animation duration for {character.m_name}"
             );
             yield break;
@@ -108,9 +109,19 @@ internal class CharacterFixedUpdatePatch
         if (ShouldIgnoreAnimation(character, animationResult.Value.AnimationName))
             yield break;
 
-        var adjustedDuration = CalculateAdjustedDuration(attackStartTime, animationResult.Value.Duration);
-        
-        RegisterAttack(character, attack, adjustedDuration, framesSkipped, attackStartTime, animationResult.Value);
+        var adjustedDuration = CalculateAdjustedDuration(
+            attackStartTime,
+            animationResult.Value.Duration
+        );
+
+        RegisterAttack(
+            character,
+            attack,
+            adjustedDuration,
+            framesSkipped,
+            attackStartTime,
+            animationResult.Value
+        );
     }
 
     private static Attack? TryFindAttack(Humanoid humanoid)
@@ -120,7 +131,8 @@ internal class CharacterFixedUpdatePatch
 
         if (attack == null)
         {
-            attack = TryGetUnarmedWeaponAttack(humanoid)
+            attack =
+                TryGetUnarmedWeaponAttack(humanoid)
                 ?? TryGetAttackFromDefaultItems(humanoid)
                 ?? TryGetAttackFromRandomSets(humanoid);
         }
@@ -147,7 +159,7 @@ internal class CharacterFixedUpdatePatch
 
             var itemDrop = itemPrefab.GetComponent<ItemDrop>();
             var attack = itemDrop?.m_itemData?.m_shared?.m_attack;
-            
+
             if (attack != null)
                 return attack;
         }
@@ -161,7 +173,7 @@ internal class CharacterFixedUpdatePatch
         if (randomSets is not { Length: > 0 })
             return null;
 
-        ValheimForesightPlugin.Log.LogInfo($"Length: {randomSets.Length}");
+        ValheimForesightPlugin.Log.LogDebug($"Length: {randomSets.Length}");
 
         foreach (var set in randomSets)
         {
@@ -189,7 +201,7 @@ internal class CharacterFixedUpdatePatch
 
             var itemDrop = itemPrefab.GetComponent<ItemDrop>();
             var attack = itemDrop?.m_itemData?.m_shared?.m_attack;
-            
+
             if (attack != null)
                 return attack;
         }
@@ -213,7 +225,7 @@ internal class CharacterFixedUpdatePatch
 
         if (shouldIgnoreAttack == true)
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring attack "
                     + $"{character.m_name}::{attack?.m_attackAnimation} (in ignore list)"
             );
@@ -237,7 +249,7 @@ internal class CharacterFixedUpdatePatch
                 attack.m_attackAnimation
             );
 
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(MonsterAIDoAttackPatch)}] Using overridden duration {overriddenDuration.Value:F2}s "
                     + $"for {character.m_name}::{attack.m_attackAnimation}"
             );
@@ -258,7 +270,7 @@ internal class CharacterFixedUpdatePatch
 
         if (shouldIgnore == true)
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring animation "
                     + $"{character.m_name}::{animationName} (in ignore list)"
             );
@@ -287,7 +299,7 @@ internal class CharacterFixedUpdatePatch
 
         if (attack != null)
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Attack detected: "
                     + $"char_name:{character.m_name}, attack_name: {attack.m_attackAnimation}, duration: {adjustedDuration:F3}s, "
                     + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.AnimationName}"
@@ -304,7 +316,7 @@ internal class CharacterFixedUpdatePatch
         }
         else
         {
-            ValheimForesightPlugin.Log.LogInfo(
+            ValheimForesightPlugin.Log.LogDebug(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Basic attack detected (no weapon): "
                     + $"{character.m_name}, duration: {adjustedDuration:F3}s, "
                     + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.AnimationName}"
