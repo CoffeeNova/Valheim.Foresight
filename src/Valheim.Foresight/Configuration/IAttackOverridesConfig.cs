@@ -10,7 +10,6 @@ public interface IAttackOverridesConfig
 {
     ConfigEntry<string> DurationOverrideList { get; }
     ConfigEntry<string> IgnoreList { get; }
-    ConfigEntry<string> AttackMappingList { get; }
     ConfigEntry<string> NoParryIndicatorList { get; }
 
     /// <summary>
@@ -24,12 +23,6 @@ public interface IAttackOverridesConfig
     bool ShouldIgnoreAttack(string creaturePrefab, string attackAnimation);
 
     /// <summary>
-    /// Gets the mapped animation names for the attack, if they exist.
-    /// Returns an array of possible animation names to check against.
-    /// </summary>
-    IReadOnlyList<string>? GetMappedAnimationNames(string creaturePrefab, string attackAnimation);
-
-    /// <summary>
     /// Checks if the parry indicator should be hidden for this attack (castbar will be shown)
     /// </summary>
     bool ShouldHideParryIndicator(string creaturePrefab, string attackAnimation);
@@ -38,9 +31,4 @@ public interface IAttackOverridesConfig
     /// Checks if there is an override for the attack
     /// </summary>
     bool HasOverride(string creaturePrefab, string attackAnimation);
-
-    /// <summary>
-    /// Checks if there is a mapping for the attack
-    /// </summary>
-    bool HasMapping(string creaturePrefab, string attackAnimation);
 }

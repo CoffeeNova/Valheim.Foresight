@@ -17,7 +17,7 @@ namespace Valheim.Foresight.Patches
             if (__instance != Player.m_localPlayer)
                 return;
 
-            var attacker = hit.GetAttacker() as Character;
+            var attacker = hit.GetAttacker();
             if (attacker == null)
                 return;
 
@@ -28,7 +28,7 @@ namespace Valheim.Foresight.Patches
                 attacker
             );
 
-            if (activeAttack != null)
+            if (activeAttack != null && hit.GetTotalDamage() > 0f)
             {
                 // Record the timing
                 ValheimForesightPlugin.AttackTimingService?.RecordHit(
