@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using HarmonyLib;
 using UnityEngine;
+using Valheim.Foresight.Core;
 using Valheim.Foresight.HarmonyRefs;
 
 namespace Valheim.Foresight.Patches;
@@ -11,6 +11,8 @@ namespace Valheim.Foresight.Patches;
 /// </summary>
 internal class CharacterFixedUpdatePatch
 {
+    private const int MaxAttackFindAttempts = 30;
+    
     private static readonly Dictionary<int, AnimatorStateInfo> LastStates = new();
     private static Dictionary<int, string?> _animationTagDictionary = new();
 
@@ -57,140 +59,238 @@ internal class CharacterFixedUpdatePatch
         float attackStartTime
     )
     {
-        const int maxAttempts = 30;
         Attack? attack = null;
-
         var framesSkipped = 0;
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
+
+        if (character is Humanoid humanoid)
         {
-            framesSkipped = attempt;
-            if (character is Humanoid humanoid)
+            for (var attempt = 0; attempt < MaxAttackFindAttempts; attempt++)
             {
-                var weapon = humanoid.GetCurrentWeapon();
-                attack = weapon?.m_shared.m_attack;
-
-                if (attack == null)
+                attack = TryFindAttack(humanoid);
+                
+                if (attack != null)
                 {
-                    var randomSets = humanoid.m_randomSets;
-                    if (randomSets is { Length: > 0 })
-                    {
-                        foreach (var set in randomSets)
-                        {
-                            if (set == null)
-                                continue;
-
-                            var itemsField = AccessTools.Field(set.GetType(), "m_items");
-                            var items = itemsField?.GetValue(set) as GameObject[];
-
-                            if (items == null || items.Length == 0)
-                                continue;
-
-                            foreach (var itemPrefab in items)
-                            {
-                                var itemDrop = itemPrefab.GetComponent<ItemDrop>();
-                                if (itemDrop?.m_itemData?.m_shared?.m_attack != null)
-                                    attack = itemDrop.m_itemData.m_shared.m_attack;
-                            }
-                        }
-                    }
+                    framesSkipped = attempt;
+                    break;
                 }
 
-                if (attack != null)
-                    break;
+                yield return null;
             }
-
-            yield return null;
         }
 
         if (attack == null)
         {
-            ValheimForesightPlugin.Log.LogDebug(
+            ValheimForesightPlugin.Log.LogInfo(
                 $"[{nameof(CharacterFixedUpdatePatch)}] No attack object found for {character.m_name}, using basic tracking"
             );
         }
-        else
+        else if (ShouldIgnoreOrOverrideAttack(character, attack, attackStartTime, out var shouldBreak))
         {
-            var shouldIgnoreAttack = ValheimForesightPlugin.AttackTimingService?.ShouldIgnoreAttack(
-                character,
-                attack
-            );
-
-            if (shouldIgnoreAttack == true)
-            {
-                ValheimForesightPlugin.Log.LogDebug(
-                    $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring attack "
-                        + $"{character.m_name}::{attack?.m_attackAnimation} (in ignore list)"
-                );
+            if (shouldBreak)
                 yield break;
-            }
-
-            var overriddenDuration =
-                ValheimForesightPlugin.AttackTimingService?.GetOverriddenDuration(
-                    character,
-                    attack
-                );
-
-            if (overriddenDuration.HasValue)
-            {
-                AnimationHelper.TriggerParryIndicator(
-                    character,
-                    attack,
-                    overriddenDuration.Value,
-                    0,
-                    attackStartTime,
-                    attack.m_attackAnimation
-                );
-
-                ValheimForesightPlugin.Log.LogDebug(
-                    $"[{nameof(MonsterAIDoAttackPatch)}] Using overridden duration {overriddenDuration.Value:F2}s "
-                        + $"for {character.m_name}::{attack.m_attackAnimation}"
-                );
-
-                yield break;
-            }
         }
 
-        var animationStateTag = "CURRENT";
         var animationResult = AnimationHelper.GetCurrentAttackAnimationDuration(animator);
 
-        ValheimForesightPlugin.Log.LogDebug(
-            $"[{nameof(TryDetectAndRegisterAttack)}] detected {animationStateTag} attack animation "
+        ValheimForesightPlugin.Log.LogInfo(
+            $"[{nameof(TryDetectAndRegisterAttack)}] detected CURRENT attack animation "
                 + $"{animationResult?.AnimationName} for {character.m_name}"
         );
 
         if (!animationResult.HasValue)
         {
-            ValheimForesightPlugin.Log.LogDebug(
+            ValheimForesightPlugin.Log.LogInfo(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Failed to get animation duration for {character.m_name}"
             );
             yield break;
         }
 
-        var shouldIgnoreAnimation =
-            ValheimForesightPlugin.AttackTimingService?.ShouldIgnoreAnimation(
-                character,
-                animationResult.Value.AnimationName
-            );
-
-        if (shouldIgnoreAnimation == true)
-        {
-            ValheimForesightPlugin.Log.LogDebug(
-                $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring animation "
-                    + $"{character.m_name}::{animationResult?.AnimationName} (in ignore list)"
-            );
-
+        if (ShouldIgnoreAnimation(character, animationResult.Value.AnimationName))
             yield break;
+
+        var adjustedDuration = CalculateAdjustedDuration(attackStartTime, animationResult.Value.Duration);
+        
+        RegisterAttack(character, attack, adjustedDuration, framesSkipped, attackStartTime, animationResult.Value);
+    }
+
+    private static Attack? TryFindAttack(Humanoid humanoid)
+    {
+        var weapon = humanoid.GetCurrentWeapon();
+        var attack = weapon?.m_shared.m_attack;
+
+        if (attack == null)
+        {
+            attack = TryGetUnarmedWeaponAttack(humanoid)
+                ?? TryGetAttackFromDefaultItems(humanoid)
+                ?? TryGetAttackFromRandomSets(humanoid);
         }
 
+        return attack;
+    }
+
+    private static Attack? TryGetUnarmedWeaponAttack(Humanoid humanoid)
+    {
+        var unarmedWeapon = HumanoidFieldRefs.UnarmedWeaponRef?.Invoke(humanoid);
+        return unarmedWeapon?.m_itemData?.m_shared?.m_attack;
+    }
+
+    private static Attack? TryGetAttackFromDefaultItems(Humanoid humanoid)
+    {
+        var defaultItems = HumanoidFieldRefs.DefaultItemsRef?.Invoke(humanoid);
+        if (defaultItems is not { Length: > 0 })
+            return null;
+
+        foreach (var itemPrefab in defaultItems)
+        {
+            if (itemPrefab == null)
+                continue;
+
+            var itemDrop = itemPrefab.GetComponent<ItemDrop>();
+            var attack = itemDrop?.m_itemData?.m_shared?.m_attack;
+            
+            if (attack != null)
+                return attack;
+        }
+
+        return null;
+    }
+
+    private static Attack? TryGetAttackFromRandomSets(Humanoid humanoid)
+    {
+        var randomSets = HumanoidFieldRefs.RandomSetsRef?.Invoke(humanoid);
+        if (randomSets is not { Length: > 0 })
+            return null;
+
+        ValheimForesightPlugin.Log.LogInfo($"Length: {randomSets.Length}");
+
+        foreach (var set in randomSets)
+        {
+            if (set == null)
+                continue;
+
+            var attack = TryGetAttackFromItemSet(set);
+            if (attack != null)
+                return attack;
+        }
+
+        return null;
+    }
+
+    private static Attack? TryGetAttackFromItemSet(Humanoid.ItemSet set)
+    {
+        var items = ItemSetFieldRefs.ItemsRef?.Invoke(set);
+        if (items is not { Length: > 0 })
+            return null;
+
+        foreach (var itemPrefab in items)
+        {
+            if (itemPrefab == null)
+                continue;
+
+            var itemDrop = itemPrefab.GetComponent<ItemDrop>();
+            var attack = itemDrop?.m_itemData?.m_shared?.m_attack;
+            
+            if (attack != null)
+                return attack;
+        }
+
+        return null;
+    }
+
+    private static bool ShouldIgnoreOrOverrideAttack(
+        Character character,
+        Attack attack,
+        float attackStartTime,
+        out bool shouldBreak
+    )
+    {
+        shouldBreak = false;
+
+        var shouldIgnoreAttack = ValheimForesightPlugin.AttackTimingService?.ShouldIgnoreAttack(
+            character,
+            attack
+        );
+
+        if (shouldIgnoreAttack == true)
+        {
+            ValheimForesightPlugin.Log.LogInfo(
+                $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring attack "
+                    + $"{character.m_name}::{attack?.m_attackAnimation} (in ignore list)"
+            );
+            shouldBreak = true;
+            return true;
+        }
+
+        var overriddenDuration = ValheimForesightPlugin.AttackTimingService?.GetOverriddenDuration(
+            character,
+            attack
+        );
+
+        if (overriddenDuration.HasValue)
+        {
+            AnimationHelper.TriggerParryIndicator(
+                character,
+                attack,
+                overriddenDuration.Value,
+                0,
+                attackStartTime,
+                attack.m_attackAnimation
+            );
+
+            ValheimForesightPlugin.Log.LogInfo(
+                $"[{nameof(MonsterAIDoAttackPatch)}] Using overridden duration {overriddenDuration.Value:F2}s "
+                    + $"for {character.m_name}::{attack.m_attackAnimation}"
+            );
+
+            shouldBreak = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool ShouldIgnoreAnimation(Character character, string? animationName)
+    {
+        var shouldIgnore = ValheimForesightPlugin.AttackTimingService?.ShouldIgnoreAnimation(
+            character,
+            animationName
+        );
+
+        if (shouldIgnore == true)
+        {
+            ValheimForesightPlugin.Log.LogInfo(
+                $"[{nameof(MonsterAIDoAttackPatch)}] Ignoring animation "
+                    + $"{character.m_name}::{animationName} (in ignore list)"
+            );
+            return true;
+        }
+
+        return false;
+    }
+
+    private static float CalculateAdjustedDuration(float attackStartTime, float animationDuration)
+    {
         var elapsedTime = Time.time - attackStartTime;
-        var adjustedDuration = Mathf.Max(0.01f, animationResult.Value.Duration - elapsedTime);
+        return Mathf.Max(0.01f, animationDuration - elapsedTime);
+    }
+
+    private static void RegisterAttack(
+        Character character,
+        Attack? attack,
+        float adjustedDuration,
+        int framesSkipped,
+        float attackStartTime,
+        AnimationHelper.AnimationDurationResult animationResult
+    )
+    {
+        var elapsedTime = Time.time - attackStartTime;
 
         if (attack != null)
         {
-            ValheimForesightPlugin.Log.LogDebug(
+            ValheimForesightPlugin.Log.LogInfo(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Attack detected: "
                     + $"char_name:{character.m_name}, attack_name: {attack.m_attackAnimation}, duration: {adjustedDuration:F3}s, "
-                    + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.Value.AnimationName}"
+                    + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.AnimationName}"
             );
 
             AnimationHelper.TriggerParryIndicator(
@@ -199,22 +299,22 @@ internal class CharacterFixedUpdatePatch
                 adjustedDuration,
                 framesSkipped,
                 attackStartTime,
-                animationResult.Value.AnimationName
+                animationResult.AnimationName
             );
         }
         else
         {
-            ValheimForesightPlugin.Log.LogDebug(
+            ValheimForesightPlugin.Log.LogInfo(
                 $"[{nameof(CharacterFixedUpdatePatch)}] Basic attack detected (no weapon): "
                     + $"{character.m_name}, duration: {adjustedDuration:F3}s, "
-                    + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.Value.AnimationName}"
+                    + $"elapsed: {elapsedTime:F3}s, animation: {animationResult.AnimationName}"
             );
 
             RegisterBasicAttack(
                 character,
                 adjustedDuration,
                 attackStartTime,
-                animationResult.Value.AnimationName
+                animationResult.AnimationName
             );
         }
     }
