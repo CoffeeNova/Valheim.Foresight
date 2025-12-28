@@ -26,7 +26,12 @@ public interface IAttackTimingService : IDisposable
     /// <summary>
     /// Checks if the attack should be ignored
     /// </summary>
-    bool ShouldIgnoreAttack(Character? attacker, Attack? attack);
+    bool ShouldIgnoreAttack(Character? attacker, Attack attack);
+    
+    /// <summary>
+    /// Checks if the animation should be ignored
+    /// </summary>
+    bool ShouldIgnoreAnimation(Character attacker, string? animationName);
 
     /// <summary>
     /// Checks if the parry indicator should be hidden for this attack

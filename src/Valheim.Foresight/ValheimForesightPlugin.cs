@@ -212,9 +212,9 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         var harmony = new Harmony(PluginInfoGenerated.PluginGuid);
         harmony.PatchAll();
         _harmony = harmony;
+
         var target = AccessTools.Method(typeof(EnemyHud), "LateUpdate");
         var postfix = AccessTools.Method(typeof(EnemyHudPatch), "LateUpdatePostfix");
-
         if (target == null)
         {
             Log.LogError("Failed to find EnemyHud.LateUpdate");
@@ -227,6 +227,28 @@ public sealed class ValheimForesightPlugin : BaseUnityPlugin
         {
             harmony.Patch(target, postfix: new HarmonyMethod(postfix));
             Log.LogInfo("Patched EnemyHud.LateUpdate");
+        }
+
+        var targetCustomFixedUpdate = AccessTools.Method(typeof(Character), "CustomFixedUpdate");
+        var postfixCustomFixedUpdate = AccessTools.Method(
+            typeof(CharacterFixedUpdatePatch),
+            "Postfix"
+        );
+        if (targetCustomFixedUpdate == null)
+        {
+            Log.LogError("Failed to find Character.CustomFixedUpdate");
+        }
+        else if (postfixCustomFixedUpdate == null)
+        {
+            Log.LogError("Failed to find CharacterFixedUpdatePatch.Postfix");
+        }
+        else
+        {
+            harmony.Patch(
+                targetCustomFixedUpdate,
+                postfix: new HarmonyMethod(postfixCustomFixedUpdate)
+            );
+            Log.LogInfo("Patched Character.CustomFixedUpdate");
         }
     }
 

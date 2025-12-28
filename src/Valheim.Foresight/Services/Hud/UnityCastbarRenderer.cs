@@ -24,12 +24,13 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
     private const string TimerTextName = "Castbar_Timer";
 
     private const float BorderThickness = 3f;
+    const float OffestLevelFactorY = -11.0f;
 
     private TMP_FontAsset? _cachedFont;
 
     private readonly List<Texture2D> _createdTextures = new();
     private readonly List<Sprite> _createdSprites = new();
-    private readonly List<GameObject> _createdCastbars = new();
+    private readonly List<GameObject>? _createdCastbars = new();
 
     private Sprite? _cachedParryActiveSprite;
     private Sprite? _cachedParryIndicatorSprite;
@@ -77,26 +78,34 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             || (attackInfo is not null && !attackInfo.IsExpired);
 
         var isBoss = character != null && character.IsBoss();
-        var castbarObject = GetOrCreateCastbarObject(hudParent, isBoss);
+        var castbarObject = GetOrCreateCastbarObject(hudParent, isBoss, character);
         castbarObject.SetActive(shouldShow);
 
         if (shouldShow)
         {
-            UpdateCastbarSize(castbarObject, isBoss);
+            UpdateCastbarSize(castbarObject, isBoss, character);
             UpdateCastbarProgress(castbarObject, attackInfo);
         }
     }
 
-    private GameObject GetOrCreateCastbarObject(Transform hudParent, bool isBoss)
+    private GameObject GetOrCreateCastbarObject(
+        Transform hudParent,
+        bool isBoss,
+        Character? character = null
+    )
     {
         var existing = hudParent.Find(CastbarObjectName);
         if (existing is not null)
             return existing.gameObject;
 
-        return CreateCastbarObject(hudParent, isBoss);
+        return CreateCastbarObject(hudParent, isBoss, character);
     }
 
-    private GameObject CreateCastbarObject(Transform hudParent, bool isBoss)
+    private GameObject CreateCastbarObject(
+        Transform hudParent,
+        bool isBoss,
+        Character? character = null
+    )
     {
         var config = ValheimForesightPlugin.ForesightConfig;
 
@@ -124,10 +133,13 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             }
             else
             {
-                rect.anchoredPosition = new Vector2(
-                    config.AttackCastbarOffsetX.Value,
-                    config.AttackCastbarOffsetY.Value
-                );
+                var offsetY = config.AttackCastbarOffsetY.Value;
+                if (character != null && character.GetLevel() > 1)
+                {
+                    offsetY += OffestLevelFactorY;
+                }
+
+                rect.anchoredPosition = new Vector2(config.AttackCastbarOffsetX.Value, offsetY);
                 rect.sizeDelta = new Vector2(
                     config.AttackCastbarWidth.Value,
                     config.AttackCastbarHeight.Value
@@ -146,7 +158,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         CreateAttackNameText(castbar.transform);
         CreateTimerText(castbar.transform);
 
-        _createdCastbars.Add(castbar);
+        _createdCastbars!.Add(castbar);
 
         return castbar;
     }
@@ -392,7 +404,11 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
         shadow.effectDistance = new Vector2(1f, -1f);
     }
 
-    private void UpdateCastbarSize(GameObject castbarObject, bool isBoss)
+    private void UpdateCastbarSize(
+        GameObject castbarObject,
+        bool isBoss,
+        Character? character = null
+    )
     {
         var width = isBoss ? _config.BossCastbarWidth.Value : _config.AttackCastbarWidth.Value;
         var height = isBoss ? _config.BossCastbarHeight.Value : _config.AttackCastbarHeight.Value;
@@ -406,6 +422,11 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
             var offsetY = isBoss
                 ? _config.BossCastbarOffsetY.Value
                 : _config.AttackCastbarOffsetY.Value;
+
+            if (!isBoss && character != null && character.GetLevel() > 1)
+            {
+                offsetY += OffestLevelFactorY;
+            }
 
             rect.anchoredPosition = new Vector2(offsetX, offsetY);
             rect.sizeDelta = new Vector2(width, height);
@@ -732,9 +753,12 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
     private void UpdateExistingCastbarColors()
     {
+        if (_createdCastbars is null)
+            return;
+
         foreach (var castbar in _createdCastbars)
         {
-            if (castbar is null)
+            if (castbar is null || castbar == null)
                 continue;
 
             var fillTransform = castbar.transform.Find(FillName);
@@ -867,9 +891,12 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
     {
         try
         {
+            if (_createdCastbars is null)
+                return;
+
             foreach (var castbar in _createdCastbars)
             {
-                if (castbar is not null)
+                if (castbar != null && !castbar.Equals(null))
                 {
                     _logger?.LogDebug(
                         $"[{nameof(CleanupCastbars)}] Destroying castbar: {castbar.name}"
@@ -880,7 +907,7 @@ public sealed class UnityCastbarRenderer : IUnityCastbarRenderer
 
             _logger?.LogInfo($"Cleaned up {_createdCastbars.Count} castbar(s)");
 
-            _createdCastbars.Clear();
+            _createdCastbars?.Clear();
         }
         catch (Exception ex)
         {

@@ -224,15 +224,29 @@ public sealed class AttackTimingService : IAttackTimingService, IAttackTimingDat
     }
 
     /// <inheritdoc/>
-    public bool ShouldIgnoreAttack(Character? attacker, Attack? attack)
+    public bool ShouldIgnoreAttack(Character? attacker, Attack attack)
     {
-        if (attacker is null || attack is null)
+        if (attacker is null)
             return false;
 
         var prefab = attacker.GetPrefabName();
         var anim = attack.m_attackAnimation ?? UnknownKeyName;
-
+        
         return _overridesConfig.ShouldIgnoreAttack(prefab, anim);
+    }
+
+    public bool ShouldIgnoreAnimation(Character attacker, string? animationName)
+    {
+        if (animationName == null)
+            return true;
+        
+        var prefab = attacker.GetPrefabName();
+        animationName += "(anim)";
+        var es =  _overridesConfig.ShouldIgnoreAttack(prefab, animationName);
+        
+        _logger.LogWarning($"ShouldIgnoreAnimation: {prefab}::{animationName} - {es}");
+
+        return es;
     }
 
     /// <inheritdoc/>
