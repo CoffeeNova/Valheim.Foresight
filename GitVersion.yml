@@ -21,7 +21,7 @@ strategies:
 branches:
   main:
     label: ''
-    increment: Minor
+    increment: Patch
     prevent-increment:
       of-merged-branch: false
     track-merge-target: true
