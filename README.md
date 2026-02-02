@@ -6,6 +6,7 @@ A combat threat assessment mod that enhances your situational awareness by displ
 
 ## Features
 
+
 ### Real-Time Threat Assessment
 
 Valheim Foresight calculates the effective damage of enemy attacks based on multiple factors:
